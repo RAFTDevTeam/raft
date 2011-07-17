@@ -1,0 +1,5 @@
+#summary Getting Started with RAFT
+
+= Getting Started =
+
+Here is information on getting started with RAFT.
