@@ -8,9 +8,9 @@ The rest of this page discusses using analyzers in RAFT.  To learn more about wr
 
 == Using an existing analyzer ==
 Analysis consists of three steps:
-#Choose and configure the analyzers to use (optional)
-#Run the analysis
-#View the results
+  #Choose and configure the analyzers to use (optional)
+  #Run the analysis
+  #View the results
 
 ===Configuration===
 Use the "Configuration -> Analysis Configuration" menu to open the configuration dialog.
