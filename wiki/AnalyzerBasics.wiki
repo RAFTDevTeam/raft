@@ -4,7 +4,7 @@
 
 The fastest way to develop a new analyzer is to make a copy of `raft/analysis/analyzers/SampleTemplate.py`, then make modifications.
 
-The file itself is well documented, and is shown below:
+The file itself is well documented, and is shown below with some extra tips.  To help understand the flow of analysis at execution time, you can uncomment the print statements and run RAFT from the command line to see the flow.
 
 {{{
 
@@ -79,4 +79,3 @@ Many analyzers will not need this function at all (it can be safely deleted).
         
         
 }}}
-
