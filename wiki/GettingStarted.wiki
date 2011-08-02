@@ -3,3 +3,5 @@
 = Getting Started =
 
 Here is information on getting started with RAFT.
+
+  * [Analysis] - Information about analyzers in RAFT
