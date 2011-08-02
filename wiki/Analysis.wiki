@@ -8,9 +8,9 @@ The rest of this page discusses using analyzers in RAFT.  To learn more about wr
 
 == Using an existing analyzer ==
 Analysis consists of three steps:
-  #Choose and configure the analyzers to use (optional)
-  #Run the analysis
-  #View the results
+  # Choose and configure the analyzers to use (optional)
+  # Run the analysis
+  # View the results
 
 ===Configuration===
 Use the "Configuration -> Analysis Configuration" menu to open the configuration dialog.
@@ -23,7 +23,7 @@ PIC
 
 When an analyzer is selected, the bottom pane shows detailed information about the analyzer selected.  The right hand pane shows any configuration options for the analyzer.  Both the keys and values can be edited (see the analyzer information for details about what each analyzer's configuration settings do).  To remove an item from the configuration tree, select the item and click the "-" button.  To add an item, first select a node in the tree to use as a base, then click the "+" button.  A new node will be created at the same level with a similar name.
 
-  **IMPORTANT:* After setting analysis configuration, click "Save" before selecting a new analyzer or your changes will be lost.  This will be fixed in a future version of RAFT.
+  * *IMPORTANT:* After setting analysis configuration, click "Save" before selecting a new analyzer or your changes will be lost.  This will be fixed in a future version of RAFT.
 
 ===Run Analysis===
 To run analysis, select the "Start Analysis" button from the action toolbar.
