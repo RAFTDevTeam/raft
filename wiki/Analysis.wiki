@@ -4,6 +4,8 @@
 
 After getting your data into RAFT's request/response store, use an analyzer to convert data into meaningful information.  RAFT provides useful built-in analyzers, and provides a simple, yet powerful way for you to write your own analyzers for the task at hand.
 
+The rest of this page discusses using analyzers in RAFT.  To learn more about writing your own analyzers, see [AnalyzerDevelopment].
+
 == Using an existing analyzer ==
 Analysis consists of three steps:
 #Choose and configure the analyzers to use (optional)
