@@ -1,0 +1,82 @@
+#summary Basic information about creating your own analyzer.
+
+= Analyzer Basics =
+
+The fastest way to develop a new analyzer is to make a copy of `raft/analysis/analyzers/SampleTemplate.py`, then make modifications.
+
+The file itself is well documented, and is shown below:
+
+{{{
+
+from ..AbstractAnalyzer import AbstractAnalyzer
+
+
+class SampleTemplateClassName(AbstractAnalyzer):
+}}}
+Change the `SampleTemplateClassName` to whatever you'd like, but don't change the rest of this part until you understand the system a little more.
+
+{{{
+    def __init__(self):
+        self.desc="SampleTemplate Description."
+        self.friendlyname="Sample Template Friendly Name"
+}}}
+The description and friendlyname are displayed on the configuration dialog and in the analysis results.  Friendlyname should be fairly short (a few words), but desc can be as long as needed.  The description can include HTML formatting, but be sure to properly close any tags you open.
+
+{{{
+    def preanalysis(self):
+        #print "preanalysis: This function runs once at the start of analysis."
+        #print "Delete this function if you don't have any preanalysis setup."
+        pass
+}}}
+Any special setup for your analyzer happens here.  For example, if you have a special datastore you need to persist between each page analysis, set it up here.
+
+Many analyzers will not need this function at all (it can be safely deleted).
+
+{{{
+    def analyzeTransaction(self, target, results):
+        #print "-------------------------------------------------------------------------------"
+        #print "AnalyzeTransaction():"
+        #print "This function gets run once per request/response pair to be analyzed."
+        #print "We are now analyzing %s:%s"%(target.responseId,target.responseUrl)
+        #print "You must define this function."
+        #print "-------------------------------------------------------------------------------"
+        #To  add a finding, call this (note the slight difference between this and the addOverallResult call below):
+        results.addPageResult(pageid=target.responseId,
+                                 url=target.responseUrl,
+                                 type='Short Finding Name',
+                                 desc='A longer description of the problemAlso, here are your config values: %s'%self.getCurrentConfiguration(),
+                                 data={'somekey1':'somevalue1',
+                                           'somekey2':1337},  #any base python type (list, dict, int, bool, str) works here
+                                 span=(1337,31137), #This is the first character and last character where the finding was detected.
+                                                                 #None is ok here too if it's not pinpointable.
+                                 severity='SAMPLE: NOT A FINDING',  #High, Medium, Low, or make your own
+                                 certainty='HIGH' #High, Medium, Low, or make your own
+                                 )
+        
+        
+    def postanalysis(self,results):
+        #print "This function runs once after all request/response pairs were analyzed."
+        #print "Define if it you need some sort of 'overall' analysis after your per-page analysis."
+        #print "Delete it if you don't do that."
+        #To  add a finding, call this (note the slight difference between this and the addPageResult call below):
+        results.addOverallResult(
+                                context="MyOverallResult",
+                                type='Short Finding Name',
+                                desc='A longer description of the problem.  Also, here are your config values: %s'%self.getCurrentConfiguration(),
+                                data={'somekey1':'somevalue1',
+                                               'somekey2':1337},  #any base python type (list, dict, int, bool, str) works here
+                                span=None ,               #This is the first character and last character where the finding was detected.
+                                                                 #None is ok here too if it's not pinpointable.
+                                severity='SAMPLE: NOT A FINDING',  #High, Medium, Low, or make your own
+                                certainty='HIGH' #High, Medium, Low, or make your own
+                                    )
+        
+    def getDefaultConfiguration(self):
+        #Any config values are defined here.  Users can change them in the Analysis Config section
+        #To access the values, use self.getCurrentConfiguration(), which will return the dictionary with any
+        #modifications made by the user in AnalysisConfig
+        return {"Sample Configuration Key":"Sample Configuration Value"}
+        
+        
+}}}
+
