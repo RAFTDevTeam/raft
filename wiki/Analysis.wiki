@@ -2,12 +2,21 @@
 
 = Introduction to Analysis =
 
-Information on analysis in RAFT here.
+After getting your data into RAFT's request/response store, use an analyzer to convert data into meaningful information.  RAFT provides useful built-in analyzers, and provides a simple, yet powerful way for you to write your own analyzers for the task at hand.
 
+== Using an existing analyzer ==
+Analysis consists of three steps:
+#Choose and configure the analyzers to use (optional)
+#Run the analysis
+#View the results
 
-= Details =
+===Configuration===
+Use the "Configuration -> Analysis Configuration" menu to open the configuration dialog.
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+PIC
+
+The configuration dialog shows a list of available analyzers on the left hand side.  Each can be enabled or disabled with the checkboxes shown.  Click the "Save All" button to save your changes to enabled/disabled state.
+
+PIC
+
+When an analyzer is selected, the bottom pane shows detailed information about the analyzer selected.  The right hand pane shows any configuration options for the analyzer.  Both the keys and values can be edited (see the analyzer information for details about what each analyzer's configuration settings do).  To remove an item from the configuration tree, select the item and click the "-" button.  To add an item, first select a node in the tree to use as a base, then click the "+" button.  A new node will be created at the same level with a similar name.
