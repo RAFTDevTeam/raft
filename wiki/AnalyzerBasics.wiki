@@ -35,11 +35,16 @@ Many analyzers will not need this function at all (it can be safely deleted).
 {{{
     def analyzeTransaction(self, target, results):
         #print "-------------------------------------------------------------------------------"
-        #print "AnalyzeTransaction():"
+        #print "analyzeTransaction():"
         #print "This function gets run once per request/response pair to be analyzed."
         #print "We are now analyzing %s:%s"%(target.responseId,target.responseUrl)
         #print "You must define this function."
         #print "-------------------------------------------------------------------------------"
+}}}
+This is where you will put the analysis logic that runs on each page.  RAFT officially only supports passive analysis on the request/response `target` object, but in theory you can actually do whatever you want.
+
+For more information about the `target` object, see *FIX THIS*
+{{{
         #To  add a finding, call this (note the slight difference between this and the addOverallResult call below):
         results.addPageResult(pageid=target.responseId,
                                  url=target.responseUrl,
@@ -52,15 +57,23 @@ Many analyzers will not need this function at all (it can be safely deleted).
                                  severity='SAMPLE: NOT A FINDING',  #High, Medium, Low, or make your own
                                  certainty='HIGH' #High, Medium, Low, or make your own
                                  )
+
+}}}
+
+Once you've done any logic on a given request/response and decided to report something, this is how you declare a finding.  The finding will be automatically saved to the database and displayed on the analysis tab.
+
+There's nothing that says that a single analyzeTransaction() call can't have multiple results.  For example, if you're searching for credit card numbers on a page, you might want to have a result for each credit card number found.
+
+{{{
         
         
     def postanalysis(self,results):
         #print "This function runs once after all request/response pairs were analyzed."
         #print "Define if it you need some sort of 'overall' analysis after your per-page analysis."
         #print "Delete it if you don't do that."
-        #To  add a finding, call this (note the slight difference between this and the addPageResult call below):
+        #To  add a finding, call this (note the slight difference between this and the addPageResult call above):
         results.addOverallResult(
-                                context="MyOverallResult",
+                                context="*.example.com",
                                 type='Short Finding Name',
                                 desc='A longer description of the problem.  Also, here are your config values: %s'%self.getCurrentConfiguration(),
                                 data={'somekey1':'somevalue1',
@@ -70,12 +83,16 @@ Many analyzers will not need this function at all (it can be safely deleted).
                                 severity='SAMPLE: NOT A FINDING',  #High, Medium, Low, or make your own
                                 certainty='HIGH' #High, Medium, Low, or make your own
                                     )
-        
+}}}
+
+Similar to the `addPageResult` method above, this is where you put any logic to decide if there's something to report, and generate the result object.
+
+The difference is that this function is run only once, after all requests/responses were analyzed.  If you have "overall" results that applies to a broad context instead of a single page, you can note them here.
+
+{{{
     def getDefaultConfiguration(self):
         #Any config values are defined here.  Users can change them in the Analysis Config section
         #To access the values, use self.getCurrentConfiguration(), which will return the dictionary with any
         #modifications made by the user in AnalysisConfig
         return {"Sample Configuration Key":"Sample Configuration Value"}
-        
-        
 }}}
