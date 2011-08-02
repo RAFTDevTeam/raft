@@ -96,3 +96,5 @@ The difference is that this function is run only once, after all requests/respon
         #modifications made by the user in AnalysisConfig
         return {"Sample Configuration Key":"Sample Configuration Value"}
 }}}
+
+If you have any user configurable values in your analyzer, set their default values here.  This can be a nested dictionary, but leaf node values need to be strings.
