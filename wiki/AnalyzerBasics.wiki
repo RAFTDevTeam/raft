@@ -43,7 +43,7 @@ Many analyzers will not need this function at all (it can be safely deleted).
 }}}
 This is where you will put the analysis logic that runs on each page.  RAFT officially only supports passive analysis on the request/response `target` object, but in theory you can actually do whatever you want.
 
-For more information about the `target` object, see *FIX THIS*
+For more information about the `target` object, see http://code.google.com/p/raft/source/browse/trunk/core/RequestResponse.py
 {{{
         #To  add a finding, call this (note the slight difference between this and the addOverallResult call below):
         results.addPageResult(pageid=target.responseId,
