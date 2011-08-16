@@ -4,6 +4,7 @@
 
 Here is information on getting started with RAFT.
 
+  * [Installation] - Information about getting RAFT installed
   * [Analysis] - Information about analyzers in RAFT
 
 == Adding Payloads ==
