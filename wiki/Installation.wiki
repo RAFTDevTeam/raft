@@ -14,6 +14,51 @@ You must use a version of Python that is greater than 2.6.5. Other versions may 
 
 Versions of OSX that are supported are 10.6 (Snow Leopard) and 10.7 (Lion). Other versions should work, but are just untested.
 
+The absolute quickest and easiest way to get RAFT up and running on the Mac is to use {{{MacPorts}}} http://macports.org to install a new Python environment as well as all of the dependencies. This will change once we have a stand alone application but will still be necessary to run the SVN version of RAFT. 
+
+=== Install ===
+Ensure that you have the development tools installed that came from Apple prior to installing {{{MacPorts}}}.
+
+Install {{{MacPorts}}} and configure environment.
+
+Use the following command to install dependencies.
+
+<code>
+sudo port install <package_name>
+</code>
+
+Install the following packages with {{{MacPorts}}}
+<pre>
+python26 or python27
+qscintilla
+lxml
+qt4-mac
+</pre>
+Depending on which version of Python you installed use the prefix py26 or py27 to the following packages. The following assumes you installed python26. If you installed python27 just substitute it in front of the following packages.
+<pre>
+py26-pyqt4
+py26-qscintilla
+</pre>
+You will have to wait until everything is compiled and installed. Feel free to grab a cup of coffee because it's going to be a while.
+
+You have the option to use the python_select command to make the macports version of Python the default for the system. This isn't necessary unless it is a preference of yours. All this means is that you need to specify which version of Python you would like to use at the command line. For instance instead of running
+<code>
+python raft.pyw
+</code>
+You would have to run this instead
+<code>
+python2.6 raft.pyw
+</code>
+Not making the MacPorts version your default version allows the version of Python that came with your system to be called as normal for other applications that may require it.
+
+=== Now Go ===
+
+If everything installed properly you should just be able to run RAFT from the directory by using your installed version of python. The following assumes Python 2.6 was used from MacPorts.
+
+<code>
+python2.6 raft.pyw
+</code>
+
 == <font color="blue">Linux</font> ==
 
 == <font color="blue">Windows</font> ==
