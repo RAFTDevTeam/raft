@@ -9,14 +9,14 @@ You must use a version of Python that is greater than 2.6.5. Other versions may 
 === Dependencies === 
 
 
-== OSX ==
+== <font color="blue">OSX</font> ==
 *Note* We still do not have an installable binary available for Mac OSX. It will be necessary to download the source and use your installed environment. 
 
 Versions of OSX that are supported are 10.6 (Snow Leopard) and 10.7 (Lion). Other versions should work, but are just untested.
 
-== Linux ==
+== <font color="blue">Linux</font> ==
 
-== Windows ==
+== <font color="blue">Windows</font> ==
 
 *Note* We still do not have a self contained executable for Windows. It will be necessary to download the source and use your installed environment.
 
