@@ -8,6 +8,12 @@ You must use a version of Python that is greater than 2.6.5. Other versions may 
 
 === Dependencies === 
 
+RAFT requires Python 2.6.5 and above. Python 3 is not supported.
+<pre>
+lxml
+PyQT
+QScintilla
+</pre>
 
 == <font color="blue">OSX</font> ==
 *Note* We still do not have an installable binary available for Mac OSX. It will be necessary to download the source and use your installed environment. 
