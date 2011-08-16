@@ -1,4 +1,4 @@
-#Installation of RAFT on various platforms.
+#summary Installation of RAFT on various platforms.
 
 = Installation =
 
