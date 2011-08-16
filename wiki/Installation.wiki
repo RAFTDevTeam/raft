@@ -27,4 +27,4 @@ http://www.riverbankcomputing.co.uk/software/pyqt/download
 Binary packages for Windows include QScintilla which is a dependency for RAFT. This inclusion makes life easier.
 
 === Getting Python ===
-You can choose to go two ways when installing Python on Windows. You can choose the standard Python distribution from http://python.org or you can use ActiveState's ActivePython http://www.activestate.com/activepython
+You can choose to go two ways when installing Python on Windows. You can choose the standard Python distribution from http://python.org or you can use {{{ActivePython}}} from {{{ActiveState}}} http://www.activestate.com/activepython
