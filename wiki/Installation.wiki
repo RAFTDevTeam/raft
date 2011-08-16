@@ -78,7 +78,7 @@ Binary packages for Windows include QScintilla which is a dependency for RAFT. T
 
 === Getting lxml ===
 
-The lxml binary can be obtained most easily by using one of two methods, but using Python's easy_install command or by using ActivePython's PyPM command if using an ActivePython install.
+The lxml binary can be obtained most easily by using one of two methods, but using Python's easy_install command or by using {{{ActivePython's}}} PyPM command if using an {{{ActivePython}}} install.
 <code>
 easy_install lxml
 </code>
