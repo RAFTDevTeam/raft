@@ -20,11 +20,32 @@ Versions of OSX that are supported are 10.6 (Snow Leopard) and 10.7 (Lion). Othe
 
 *Note* We still do not have a self contained executable for Windows. It will be necessary to download the source and use your installed environment.
 
+=== Getting Python ===
+You can choose to go two ways when installing Python on Windows. You can choose the standard Python distribution from http://python.org or you can use {{{ActivePython}}} from {{{ActiveState}}} http://www.activestate.com/activepython
+
+Ensure that you set whatever version of python you install to the default version for the system for ease of use.
+
 === Getting PyQT ===
 Download the appropriate binary package of PyQT for your installed Python version from the following location.
 http://www.riverbankcomputing.co.uk/software/pyqt/download
 
 Binary packages for Windows include QScintilla which is a dependency for RAFT. This inclusion makes life easier.
 
-=== Getting Python ===
-You can choose to go two ways when installing Python on Windows. You can choose the standard Python distribution from http://python.org or you can use {{{ActivePython}}} from {{{ActiveState}}} http://www.activestate.com/activepython
+=== Getting lxml ===
+
+The lxml binary can be obtained most easily by using one of two methods, but using Python's easy_install command or by using ActivePython's PyPM command if using an ActivePython install.
+<code>
+easy_install lxml
+</code>
+<code>
+pypm install lxml
+</code>
+*Note* If you are on a 64bit Windows system PyPM requires that you have a valid business license to install lxml.
+
+=== Now Go ===
+
+After installing the previous items you should be able to run RAFT from the project directory by using the following command.
+
+<code>
+python raft.pyw
+</code>
