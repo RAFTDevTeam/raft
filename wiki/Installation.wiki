@@ -66,6 +66,35 @@ python2.6 raft.pyw
 </code>
 
 == <font color="blue">Linux</font> ==
+=== Ubuntu ===
+RAFT has been tested on Ubuntu 11.04 (Natty) and 10.04 (Lucid).
+You will need to install the python bindings for the dependencies:
+<code>
+sudo apt-get install python-qscintilla2
+sudo apt-get install python-lxml
+</code>
+After the installation, change to your RAFT directory and run RAFT as normal.
+
+<code>
+python raft.pyw
+</code>
+
+=== BackTrack 5 ===
+BackTrack 5 is almost ready to run RAFT out of the box.  Only the Python qScintilla packages are missing.  Run the following:
+<code>
+apt-get install python-qscintilla2
+</code>
+
+After the installation, change to your RAFT directory and run RAFT as normal.
+
+<code>
+python raft.pyw
+</code>
+
+=== Other Linux Distributions ===
+RAFT has not been tested with other distributions.  In theory, RAFT should work fine if you install the dependencies listed above.  Please let the RAFT team know of your results, successful or otherwise.
+
+We have had some reports of crashes and other post-installation problems from users who are not on our supported Linux distros.  Unfortunately we do not have the resources to test and debug other distributions.  Try comparing your versions of our dependencies (and their dependencies, and so on) against the versions of those dependencies on our supported Linux distributions.
 
 == <font color="blue">Windows</font> ==
 
