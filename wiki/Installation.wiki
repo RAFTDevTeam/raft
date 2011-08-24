@@ -79,8 +79,8 @@ After the installation, change to your RAFT directory and run RAFT as normal.
 python raft.pyw
 </code>
 
-=== BackTrack 5 ===
-BackTrack 5 is almost ready to run RAFT out of the box.  Only the Python qScintilla packages are missing.  Run the following:
+=== !BackTrack 5 ===
+!BackTrack 5 is almost ready to run RAFT out of the box.  Only the Python qScintilla packages are missing.  Run the following:
 <code>
 apt-get install python-qscintilla2
 </code>
