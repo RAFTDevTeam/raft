@@ -37,13 +37,13 @@ Install the following packages with {{{MacPorts}}}
 <pre>
 python26 or python27
 qscintilla
-lxml
 qt4-mac
 </pre>
 Depending on which version of Python you installed use the prefix py26 or py27 to the following packages. The following assumes you installed python26. If you installed python27 just substitute it in front of the following packages.
 <pre>
 py26-pyqt4
 py26-qscintilla
+py26-lxml
 </pre>
 You will have to wait until everything is compiled and installed. Feel free to grab a cup of coffee because it's going to be a while.
 
