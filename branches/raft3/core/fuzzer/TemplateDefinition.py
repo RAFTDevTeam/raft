@@ -19,10 +19,10 @@
 # along with RAFT.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from cStringIO import StringIO
+from io import StringIO
 import re
 
-from TemplateItem import TemplateItem
+from .TemplateItem import TemplateItem
 
 class TemplateDefinition(object):
 

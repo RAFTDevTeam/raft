@@ -20,7 +20,7 @@
 #
 
 import re
-import StringIO
+import io
 import os
 import sys
 import struct
@@ -44,7 +44,7 @@ class GIFComments(AbstractAnalyzer):
             imageType = found.group(1)
             #print "Found a %s image" % imageType
             data = target.responseBody
-            f = StringIO.StringIO(data)
+            f = io.StringIO(data)
             comments = self.extract_comments(f)
             if (comments != None):
                 #print "GIF Comment: %s" % comments

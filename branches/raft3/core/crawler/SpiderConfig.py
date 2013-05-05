@@ -46,7 +46,7 @@ class SpiderConfig(QObject):
             self.fill_spider_configuration(str(value.toString()))
 
     def config_value_or_default(self, obj, config_name, default_value):
-        if obj.has_key(config_name):
+        if config_name in obj:
             return obj[config_name]
         elif default_value is not None:
             return default_value
@@ -77,7 +77,7 @@ class SpiderConfig(QObject):
         if self.exclude_dangerous_paths:
             try:
                 self.re_dangerous_path = re.compile(self.dangerous_path, re.I)
-            except re.error, error:
+            except re.error as error:
                 self.log_warning('Failed to compile RE [%s]: %s' (self.dangerous_path, error))
                 # TODO: or should this fail completely?
                 self.re_dangerous_path = re.compile(self.default_dangerous_paths, re.I)
@@ -85,7 +85,7 @@ class SpiderConfig(QObject):
         if not self.retrieve_media_files:
             try:
                 self.re_media_extensions = self.make_media_extension_re(self.media_extensions)
-            except re.error, error:
+            except re.error as error:
                 self.re_media_extensions = self.make_media_extension_re(self.default_media_extensions)
     
     def make_media_extension_re(self, extension_string):

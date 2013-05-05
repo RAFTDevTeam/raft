@@ -57,7 +57,7 @@ def get_datafiles():
     os.path.walk('data', walk_datalist, datalist)
     os.path.walk('analyzers', walk_datalist, datalist)
     data_files = []
-    keys = datalist.keys()
+    keys = list(datalist.keys())
     keys.sort()
     for key in keys:
         if len(datalist[key]) > 0:

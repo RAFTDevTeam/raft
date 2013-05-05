@@ -26,7 +26,7 @@ from PyQt4.QtGui import *
 
 from PyQt4 import QtWebKit, QtNetwork, Qsci
 
-from cStringIO import StringIO
+from io import StringIO
 import traceback
 
 from utility import ContentHelper
@@ -408,9 +408,9 @@ class RequestResponseWidget(QObject):
                 for link in rr.results.relative_links:
                     linksIO.write('%s\n' % self.flat_str(link))
 
-        except Exception, e:
+        except Exception as e:
             # TODO: log 
-            print('FIXME:\n error when extracting content:\n %s' % (traceback.format_exc(e)))
+            print(('FIXME:\n error when extracting content:\n %s' % (traceback.format_exc(e))))
 
         self.scriptsScintilla.setText(scriptsIO.getvalue())
         self.commentsScintilla.setText(commentsIO.getvalue())
@@ -424,7 +424,7 @@ class RequestResponseWidget(QObject):
             tmp = str(u).decode('utf-8')
             s = repr(tmp)[2:-1].replace('\\r', '').replace('\\n', '\n').replace('\\t', '\t')
         except UnicodeEncodeError:
-            s = repr(unicode(u))[2:-1].replace('\\r', '').replace('\\n', '\n').replace('\\t', '\t')
+            s = repr(str(u))[2:-1].replace('\\r', '').replace('\\n', '\n').replace('\\t', '\t')
         return s
 
     def attachLexer(self, scintillaWidget, contentType, data = ''):
@@ -478,7 +478,7 @@ class RequestResponseWidget(QObject):
         
     def inferContentType(self, contentType, data):
         # TODO: scan data for additional info
-        for comp in self.contentTypeMapping.keys():
+        for comp in list(self.contentTypeMapping.keys()):
             if comp in contentType:
                 return self.contentTypeMapping[comp]
         return 'text'

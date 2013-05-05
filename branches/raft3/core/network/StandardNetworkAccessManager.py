@@ -42,7 +42,7 @@ class StandardNetworkAccessManager(BaseNetworkAccessManager):
         self.proxyAuthenticationRequired.connect(self.handle_proxyAuthenticationRequired)
 
     def handle_proxyAuthenticationRequired(self, proxy, authenticator):
-        print('proxyAuthenticationRequired', proxy, authenticator)
+        print(('proxyAuthenticationRequired', proxy, authenticator))
 
     def createRequest(self, operation, request, outgoingData = None):
         try: 
@@ -54,6 +54,6 @@ class StandardNetworkAccessManager(BaseNetworkAccessManager):
         except Exception as error:
             # exceptions will cause a segfault
             import traceback
-            print('--->FIX ME:\n%s' % traceback.format_exc(error))
+            print(('--->FIX ME:\n%s' % traceback.format_exc(error)))
             request.setUrl(QUrl('about:blank'))
             return QNetworkAccessManager.createRequest(self, operation, request, outgoingData)

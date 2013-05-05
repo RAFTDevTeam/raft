@@ -24,10 +24,10 @@
 # along with RAFT.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import hashlib
 import cgi
-import StringIO
+import io
 import zlib
 import decimal
 import re
@@ -42,7 +42,7 @@ def url_encode(encvalue):
     """ URL encode the specifed value. Example Format: Hello%20World """
     
     try:
-        encoded_value = urllib.quote(encvalue)
+        encoded_value = urllib.parse.quote(encvalue)
     except:
         encoded_value = "There was a problem with the specified value"
     return(encoded_value)
@@ -252,7 +252,7 @@ def url_decode(decvalue):
     """ URL Decode the specified value. Example Format: Hello%20World """
     
     # returnval = urllib.unquote(decvalue.decode)
-    returnval = urllib.unquote(decvalue)
+    returnval = urllib.parse.unquote(decvalue)
     
     return(returnval)
     
@@ -480,7 +480,7 @@ def decode_values(decode_value, decode_method):
     elif decode_method == "UTF-7":
         value = utf7_decode(decode_value)
     else:
-        print('unimplemented decode method,', decode_method)
+        print(('unimplemented decode method,', decode_method))
 
     return(value)
     

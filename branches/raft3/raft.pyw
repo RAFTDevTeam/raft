@@ -847,7 +847,7 @@ class RaftAboutDialog(QDialog, RaftAbout.Ui_aboutDialog):
 
 def exception_hook(exception_type, exception_value, traceback_obj):
     # TODO: improve this
-    print('Unhandled Exception!\n%s' % ('\n'.join(traceback.format_exception(exception_type, exception_value, traceback_obj))))
+    print(('Unhandled Exception!\n%s' % ('\n'.join(traceback.format_exception(exception_type, exception_value, traceback_obj)))))
 
 # TODO: App.Notify support for other errors
 

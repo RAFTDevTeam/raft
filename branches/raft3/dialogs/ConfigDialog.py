@@ -96,7 +96,7 @@ class ConfigDialog(QDialog, ConfigDialog.Ui_configDialog):
         self.save_spider_config()
 
     def value_or_default(self, obj, name, default_value):
-        if obj.has_key(name):
+        if name in obj:
             return obj[name]
         else:
             return default_value

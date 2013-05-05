@@ -73,7 +73,7 @@ class paros_parse_message():
                 tm = time.strptime(datetime, '%a, %d %b %Y %H:%M:%S %Z')
                 tm = time.localtime(time.mktime(tm)-time.timezone)
                 return time.asctime(tm)
-            except Exception, e:
+            except Exception as e:
                 self.logger.debug('Failed parsing datetime [%s]: %s' % (datetime, e))
                 return ''
         else:
@@ -141,7 +141,7 @@ class paros_parse_message():
 
         return (origin, host, hostip, url, status, datetime, request, response, method, content_type, {})
 
-    def next(self):
+    def __next__(self):
         have_http_request, have_http_response = False, False
         buf = []
         while True:
@@ -187,7 +187,7 @@ if '__main__' == __name__:
         for result in paros_parse_message(parosfile):
             print(result)
             count += 1
-        print('processed %d records' % (count))
+        print(('processed %d records' % (count)))
     else:
-        raise(Exception('unsupported mode: %s' % (mode)))
+        raise Exception
 

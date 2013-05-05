@@ -66,7 +66,7 @@ class SequenceBuilderFormCapture(QObject):
         try:
             self.source_urls[request_id] = url
 
-            if not self.source_parameters.has_key(request_id):
+            if request_id not in self.source_parameters:
                 self.source_parameters[request_id] = {}
 
             self.process_url(url, self.source_parameters[request_id])
@@ -78,13 +78,13 @@ class SequenceBuilderFormCapture(QObject):
         if splitted.query:
             qs_values = urlparse.parse_qs(splitted.query, True)
             position = 0
-            for name, value in qs_values.iteritems():
+            for name, value in qs_values.items():
                 position += 1
                 parameters[SequenceParameter(url, 'Query', name, '', position)] = value
         if splitted.fragment:
             qs_values = urlparse.parse_qs(splitted.fragment, True)
             position = 0
-            for name, value in qs_values.iteritems():
+            for name, value in qs_values.items():
                 position += 1
                 parameters[SequenceParameter(url, 'Fragment', name, '', position)] = value
 
@@ -96,7 +96,7 @@ class SequenceBuilderFormCapture(QObject):
             url = self.source_urls[request_id]
             parameters = self.source_parameters[request_id]
             sequenceParameter = SequenceParameter(url, 'Form', name, Type, position)
-            print('store_source', request_id, sequenceParameter, value)
+            print(('store_source', request_id, sequenceParameter, value))
             parameters[sequenceParameter] = [value]
         finally:
             self.qlock.unlock()
@@ -108,7 +108,7 @@ class SequenceBuilderFormCapture(QObject):
         try:
             self.targets[response_id] = originating_request_id
 
-            if not self.target_parameters.has_key(response_id):
+            if response_id not in self.target_parameters:
                 self.target_parameters[response_id] = {}
 
             self.process_url(url, self.target_parameters[response_id])
@@ -134,21 +134,21 @@ class SequenceBuilderFormCapture(QObject):
             return
         self.qlock.lock()
         try:
-            print('transition sequence; requestId=%s, originatingResponseId=%s, prev=%s' % (requestId, originatingResponseId, previousRequestId))
+            print(('transition sequence; requestId=%s, originatingResponseId=%s, prev=%s' % (requestId, originatingResponseId, previousRequestId)))
             self.sequence_transitions[requestId] = originatingResponseId
-            if self.source_parameters.has_key(previousRequestId):
-                if not self.source_parameters.has_key(requestId):
+            if previousRequestId in self.source_parameters:
+                if requestId not in self.source_parameters:
                     self.source_parameters[requestId] = {}
                 parameters = self.source_parameters[requestId]
-                for param, value in self.source_parameters[previousRequestId].iteritems():
+                for param, value in self.source_parameters[previousRequestId].items():
                     parameters[param] = value
-            if self.source_urls.has_key(previousRequestId):
+            if previousRequestId in self.source_urls:
                 self.source_urls[requestId] = self.source_urls[previousRequestId]
         finally:
             self.qlock.unlock()
 
     def get_sequence_transition(self, requestId):
-        if self.sequence_transitions.has_key(requestId):
+        if requestId in self.sequence_transitions:
             return str(self.sequence_transitions[requestId])
         else:
             return ''
@@ -165,24 +165,24 @@ class SequenceBuilderFormCapture(QObject):
 
         for response_id in response_ids:
             request_id = self.targets.get(response_id)
-            if request_id and self.source_parameters.has_key(request_id):
+            if request_id and request_id in self.source_parameters:
                 # TODO: FIX THIS properly!
                 # source parameters can be collected multiple times
-                if not source_parameters_for_response.has_key(response_id):
+                if response_id not in source_parameters_for_response:
                     source_parameters_for_response[response_id] = {}
                 parameters_for_response = source_parameters_for_response[response_id]
-                for param, values in self.source_parameters[request_id].iteritems():
-                    if not parameters_for_response.has_key(param):
+                for param, values in self.source_parameters[request_id].items():
+                    if param not in parameters_for_response:
                         parameters_for_response[param] = values
 
         for response_id in response_ids:
-            if self.target_parameters.has_key(response_id):
-                if source_parameters_for_response.has_key(response_id):
-                    for param, values in source_parameters_for_response[response_id].iteritems():
+            if response_id in self.target_parameters:
+                if response_id in source_parameters_for_response:
+                    for param, values in source_parameters_for_response[response_id].items():
                         responseId = self.get_sequence_transition(request_id)
                         parameters.append((responseId, request_id, param, values, 'source'))
                 request_id = self.targets.get(response_id)
-                for param, values in self.target_parameters[response_id].iteritems():
+                for param, values in self.target_parameters[response_id].items():
                     parameters.append((response_id, request_id, param, values, 'target'))
 
         return parameters

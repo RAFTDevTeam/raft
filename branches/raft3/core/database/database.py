@@ -403,11 +403,11 @@ class Db:
 
     def do_backup(self, filename):
         backup_filename =  '%s.%d-backup' % (filename, int(time.time()))
-        print('backing up %s to %s' % (filename, backup_filename))
+        print(('backing up %s to %s' % (filename, backup_filename)))
         shutil.copy(filename, backup_filename)
 
     def perform_upgrade(self, cursor, dbversion, version):
-        print('upgrading %s to version %s from %s' % (self.filename, version, dbversion))
+        print(('upgrading %s to version %s from %s' % (self.filename, version, dbversion)))
         while version != dbversion:
             if '2011.7.14-alpha' == dbversion:
                 dbversion = self.upgrade_to_2011_8_31_alpha(cursor)
@@ -682,10 +682,10 @@ class Db:
                              ?, ?, ?, ?, ?, ?, ?, ?
                            )""", insertlist)
         except Exception as error:
-            print('FIX ME! ERROR: %s' % (traceback.format_exc(error)))
+            print(('FIX ME! ERROR: %s' % (traceback.format_exc(error))))
             for i in range(0, len(insertlist)):
                 if i not in [SequenceSourceParameters.INPUT_VALUE]:
-                    print('[%d] %s' % (i, insertlist[i]))
+                    print(('[%d] %s' % (i, insertlist[i])))
         finally:
             self.qlock.unlock()
 
@@ -705,10 +705,10 @@ class Db:
                              ?, ?, ?, ?, ?, ?, ?
                            )""", insertlist)
         except Exception as error:
-            print('FIX ME! ERROR: %s' % (traceback.format_exc(error)))
+            print(('FIX ME! ERROR: %s' % (traceback.format_exc(error))))
             for i in range(0, len(insertlist)):
                 if i not in [SequenceTargetParameters.INPUT_VALUE]:
-                    print('[%d] %s' % (i, insertlist[i]))
+                    print(('[%d] %s' % (i, insertlist[i])))
         finally:
             self.qlock.unlock()
 
@@ -886,14 +886,14 @@ class Db:
             h = self.hashalgo()
             h.update(value)
             digest = h.hexdigest()
-        if not self.hashval_lookup.has_key(digest):
+        if digest not in self.hashval_lookup:
             try:
                 cursor.execute("INSERT INTO content_data (Hashval, Data) VALUES (?, ?)", [digest, Compressed(value)])
                 self.hashval_lookup[digest] = True
             except sqlite.IntegrityError:
                 # okay if exists
                 self.hashval_lookup[digest] = True
-            except sqlite.DatabaseError, e:
+            except sqlite.DatabaseError as e:
                 # okay if exists
                 if 'not unique' in str(e):
                     self.hashval_lookup[digest] = True
@@ -926,11 +926,11 @@ class Db:
 
             return rowid
 
-        except Exception, error:
-            print('FIX ME! ERROR: %s' % (traceback.format_exc(error)))
+        except Exception as error:
+            print(('FIX ME! ERROR: %s' % (traceback.format_exc(error))))
             for i in range(0, len(values)):
                 if i not in [ResponsesTable.REQ_DATA, ResponsesTable.RES_DATA]:
-                    print('[%d] %s' % (i, values[i]))
+                    print(('[%d] %s' % (i, values[i])))
 
         finally:
             self.qlock.unlock()

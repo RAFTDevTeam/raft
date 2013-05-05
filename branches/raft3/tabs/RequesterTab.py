@@ -25,7 +25,7 @@ from PyQt4.QtGui import *
 from PyQt4 import Qsci
 
 
-from cStringIO import StringIO
+from io import StringIO
 from urllib2 import urlparse
 import uuid
 import re
@@ -246,7 +246,7 @@ class RequesterTab(QObject):
     def requester_bulk_request_button_clicked(self):
         if 'Cancel' == self.mainWindow.bulkRequestPushButton.text() and self.pending_bulk_requests is not None:
             self.cancel_bulk_requests = True
-            for context, pending_request in self.pending_bulk_requests.iteritems():
+            for context, pending_request in self.pending_bulk_requests.items():
                 pending_request.cancel()
             self.pending_bulk_requests = None
             self.mainWindow.bulkRequestPushButton.setText('Send')
@@ -312,7 +312,7 @@ class RequesterTab(QObject):
         if self.pending_bulk_requests is not None:
             try:
                 self.pending_bulk_requests.pop(context)
-            except KeyError, e:
+            except KeyError as e:
                 pass
         if 0 != response_id:
             row = self.Data.read_responses_by_id(self.cursor, response_id)

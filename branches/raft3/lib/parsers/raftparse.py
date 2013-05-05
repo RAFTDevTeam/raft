@@ -23,7 +23,7 @@ import sys, bz2, gzip
 import re
 from urllib2 import urlparse
 import logging, traceback
-from cStringIO import StringIO
+from io import StringIO
 from xml.sax.saxutils import escape
 
 class ParseAdapter:
@@ -372,7 +372,7 @@ class raft_parse_xml():
         self.states.pop()
 
     def headers_start(self, elem):
-        if elem.attrib.has_key('encoding'):
+        if 'encoding' in elem.attrib:
             self.current_hb[self.I_HEADERS_ENCODING] = elem.attrib['encoding']
         self.states.append(self.S_HEADERS)
 
@@ -380,7 +380,7 @@ class raft_parse_xml():
         self.common_headers_body_end(elem, self.I_HEADERS, self.I_HEADERS_ENCODING)
 
     def body_start(self, elem):
-        if elem.attrib.has_key('encoding'):
+        if 'encoding' in elem.attrib:
             self.current_hb[self.I_BODY_ENCODING] = elem.attrib['encoding']
         self.states.append(self.S_BODY)
 
@@ -431,7 +431,7 @@ class raft_parse_xml():
         if not content:
             content = ''
         encoding = 'none'
-        if elem.attrib.has_key('encoding'):
+        if 'encoding' in elem.attrib:
             encoding = elem.attrib['encoding']
         if 'none' == encoding:
             self.current_cookie[elem.tag] = content
@@ -459,7 +459,7 @@ class raft_parse_xml():
         if not content:
             content = ''
         encoding = 'none'
-        if elem.attrib.has_key('encoding'):
+        if 'encoding' in elem.attrib:
             encoding = elem.attrib['encoding']
         if 'none' == encoding:
             self.current[elem.tag] = content
@@ -472,9 +472,9 @@ class raft_parse_xml():
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         while True:
-            event, elem = self.iterator.next()
+            event, elem = next(self.iterator)
             tag = elem.tag
             try:
                 state = self.states[-1]
@@ -504,5 +504,5 @@ if '__main__' == __name__:
         print(result)
         count += 1
 
-    print('processed count: %d' % (count))
+    print(('processed count: %d' % (count)))
 

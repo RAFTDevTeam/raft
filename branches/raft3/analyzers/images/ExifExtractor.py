@@ -20,12 +20,12 @@
 #
 
 import re
-import StringIO
+import io
 
 from thirdparty.lib import EXIF
 
 from analysis.AbstractAnalyzer import AbstractAnalyzer
-import ExifExtractorSingleResult
+from . import ExifExtractorSingleResult
 
 class ExifExtractor(AbstractAnalyzer):
     
@@ -41,11 +41,11 @@ class ExifExtractor(AbstractAnalyzer):
         for found in self.ContentTypeRegex.finditer(responseHeaders):
             imageType = found.group(1)
             #print "Found a %s image" % imageType
-            f = StringIO.StringIO(target.responseBody)
+            f = io.StringIO(target.responseBody)
             tags = EXIF.process_file(f)
             first = True
             output = ""
-            for tag in tags.keys():
+            for tag in list(tags.keys()):
                 if tag not in ('JPEGThumbnail', 'TIFFThumbnail', 'Filename','EXIF MakerNote'):
                     if first:
                         first=False

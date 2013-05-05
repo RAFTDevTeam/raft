@@ -42,16 +42,16 @@ class CookieJar(QtNetwork.QNetworkCookieJar):
     def cookiesForUrl(self, url):
         cookieList = QtNetwork.QNetworkCookieJar.cookiesForUrl(self, url)
         if False:
-            print('get cookie url= %s' % (str(url.toEncoded())))
+            print(('get cookie url= %s' % (str(url.toEncoded()))))
             for cookie in cookieList:
-                print('  Cookie: %s' % (str(cookie.toRawForm(QtNetwork.QNetworkCookie.Full))))
+                print(('  Cookie: %s' % (str(cookie.toRawForm(QtNetwork.QNetworkCookie.Full)))))
         return cookieList
 
     def setCookiesFromUrl(self, cookieList, url):
         if False:
-            print('set cookie url= %s' % (str(url.toEncoded())))
+            print(('set cookie url= %s' % (str(url.toEncoded()))))
             for cookie in cookieList:
-                print('  Set-Cookie: %s' % (str(cookie.toRawForm(QtNetwork.QNetworkCookie.Full))))
+                print(('  Set-Cookie: %s' % (str(cookie.toRawForm(QtNetwork.QNetworkCookie.Full)))))
         ok = QtNetwork.QNetworkCookieJar.setCookiesFromUrl(self, cookieList, url)
         return ok
 
@@ -141,15 +141,15 @@ class NetworkReply(QtNetwork.QNetworkReply):
             return str(self.__request.attribute(self.__request.CustomVerbAttribute).toString())
         
     def handleError(self, error):
-        print('error: ', error)
+        print(('error: ', error))
 
     def handleSslErrors(self, errorList):
         try:
             for error in errorList:
                 print(error)
             self.__reply.ignoreSslErrors()
-        except Exception, e:
-            print('Failed: %s' % (traceback.format_exc(e)))
+        except Exception as e:
+            print(('Failed: %s' % (traceback.format_exc(e))))
 
     def handleFinished(self):
         request = self.__request
@@ -310,7 +310,7 @@ class NetworkMemoryCache(QtNetwork.QAbstractNetworkCache):
         return self.size
 
     def clear(self):
-        for k in self.cache.keys():
+        for k in list(self.cache.keys()):
             metaData, buf, mtime = self.cache.pop(k)
             if buf:
                 self.size -= buf.length()
@@ -319,7 +319,7 @@ class NetworkMemoryCache(QtNetwork.QAbstractNetworkCache):
 
     def data(self, url):
         k = url.toEncoded()
-        if self.cache.has_key(k):
+        if k in self.cache:
             buf = self.cache[k][1]
             device = QBuffer(buf)
             device.open(QIODevice.ReadOnly|QIODevice.Unbuffered)
@@ -327,7 +327,7 @@ class NetworkMemoryCache(QtNetwork.QAbstractNetworkCache):
         return None
 
     def insert(self, device):
-        for k in self.outstanding.keys():
+        for k in list(self.outstanding.keys()):
             if self.outstanding[k] == device:
                 self.size += device.size()
                 self.cache[k][1] = device.data()
@@ -338,7 +338,7 @@ class NetworkMemoryCache(QtNetwork.QAbstractNetworkCache):
 
     def metaData(self, url):
         k = url.toEncoded()
-        if self.cache.has_key(k):
+        if k in self.cache:
             metaData, buf, mtime = self.cache.pop(k)
             if buf:
                 return metaData
@@ -356,10 +356,10 @@ class NetworkMemoryCache(QtNetwork.QAbstractNetworkCache):
 
     def remove(self, url):
         k = url.toEncoded()
-        if self.outstanding.has_key(k):
+        if k in self.outstanding:
             device = self.outstanding.pop(k)
             device = None
-        if self.cache.has_key(k):
+        if k in self.cache:
             metaData, buf, mtime = self.cache.pop(k)
             if buf:
                 self.size -= buf.length()
@@ -369,7 +369,7 @@ class NetworkMemoryCache(QtNetwork.QAbstractNetworkCache):
 
     def updateMetaData(self, metaData):
         url = metaData.url().toEncoded()
-        if self.cache.has_key(url):
+        if url in self.cache:
             self.cache[url][0] = metaData
 
 class NetworkCacheL(QtNetwork.QAbstractNetworkCache):
@@ -388,47 +388,47 @@ class NetworkCacheL(QtNetwork.QAbstractNetworkCache):
             self.nc = NetworkMemoryCache(parent)
 
     def __attr__(self, name):
-        print('NetworkCache: [%s]' % (name))
+        print(('NetworkCache: [%s]' % (name)))
         return getattr(self.nc, msg)
 
     def insert(self, device):
         msg = 'NetworkCache: [%s](%s)' % ('insert', device)
         r = self.nc.insert(device)
-        print('%s -> %s' % (msg, r))
+        print(('%s -> %s' % (msg, r)))
         return r
 
     def metaData(self, url):
         msg = 'NetworkCache: [%s](%s)' % ('metaData', url)
         r = self.nc.metaData(url)
-        print('%s -> %s, isValid=%s' % (msg, r, r.isValid()))
-        print('\n'.join(['%s: %s' % (n, v) for n,v in r.rawHeaders()]))
+        print(('%s -> %s, isValid=%s' % (msg, r, r.isValid())))
+        print(('\n'.join(['%s: %s' % (n, v) for n,v in r.rawHeaders()])))
         return r
 
     def data(self, url):
         msg = 'NetworkCache: [%s](%s)' % ('data', url)
         r = self.nc.data(url)
         if r:
-            print('%s -> %s, isOpen=%s' % (msg, r, r.isOpen()))
+            print(('%s -> %s, isOpen=%s' % (msg, r, r.isOpen())))
         return r
 
     def prepare(self, metaData):
         msg = 'NetworkCache: [%s](%s)' % ('prepare', metaData)
         r = self.nc.prepare(metaData)
-        print('%s -> %s' % (msg, r))
+        print(('%s -> %s' % (msg, r)))
 #        print('\n'.join(['%s: %s' % (n, v) for n,v in metaData.rawHeaders()]))
         return r
 
     def remove(self, url):
         msg = 'NetworkCache: [%s](%s)' % ('remove', url)
         r = self.nc.remove(url)
-        print('%s -> %s' % (msg, r))
+        print(('%s -> %s' % (msg, r)))
         return r
 
     def updateMetaData(self, metaData):
         msg = 'NetworkCache: [%s](%s)' % ('updateMetaData', metaData)
         r = self.nc.updateMetaData(metaData)
-        print('%s -> %s' % (msg, r))
-        print('\n'.join(['%s: %s' % (n, v) for n,v in metaData.rawHeaders()]))
+        print(('%s -> %s' % (msg, r)))
+        print(('\n'.join(['%s: %s' % (n, v) for n,v in metaData.rawHeaders()])))
 
 class NetworkManager(QtNetwork.QNetworkAccessManager):
     def __init__(self, writer, parent = None):
@@ -489,7 +489,7 @@ class NetworkManager(QtNetwork.QNetworkAccessManager):
                 if targetUrl != reply.url():
                     originatingObject = reply.request().originatingObject()
                     if originatingObject and (reply.url() == originatingObject.requestedUrl()):
-                        print('**reply finished: %s, redirect target=%s' % (reply.url().toString(), targetUrl.toString()))
+                        print(('**reply finished: %s, redirect target=%s' % (reply.url().toString(), targetUrl.toString())))
                         originatingObject.setUrl(targetUrl)
 
 class setTimeoutWrapper(QObject):
@@ -521,16 +521,16 @@ class WebPage(QtWebKit.QWebPage):
         return True
 
     def javaScriptAlert(self, frame, msg):
-        print('alert from [%s / %s]: %s' % (frame.url(), frame.requestedUrl(), msg))
+        print(('alert from [%s / %s]: %s' % (frame.url(), frame.requestedUrl(), msg)))
 
     def javaScriptConfirm(self, frame, msg):
-        print('confirm from [%s / %s]: %s' % (frame.url(), frame.requestedUrl(), msg))
+        print(('confirm from [%s / %s]: %s' % (frame.url(), frame.requestedUrl(), msg)))
 
     def javaScriptPrompt(self, frame, msg, defaultValue, result):
-        print('prompt from [%s / %s]: %s' % (frame.url(), frame.requestedUrl(), msg))
+        print(('prompt from [%s / %s]: %s' % (frame.url(), frame.requestedUrl(), msg)))
 
     def javaScriptConsoleMessage(self, message, lineNumber, sourceID):
-        print('console log from [%s / %s]: %s' % (lineNumber, sourceID, message))
+        print(('console log from [%s / %s]: %s' % (lineNumber, sourceID, message)))
 
     def userAgentForUrl(self, url):
         return 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/533.21.1 (KHTML, like Gecko) Version/5.0.5 Safari/533.21.1'
@@ -543,7 +543,7 @@ class WebPage(QtWebKit.QWebPage):
         pf = frame.parentFrame()
         if pf is not None:
             pfUrl = pf.url().toEncoded()
-        print('navigation request to --> %s from %s | %s' % (request.url().toEncoded(), fUrl, pfUrl))
+        print(('navigation request to --> %s from %s | %s' % (request.url().toEncoded(), fUrl, pfUrl)))
         if self.__browserWindow.processing_links:
             if request.url().isValid() and frame.url().host() == request.url().host() and frame.url() != request.url():
                 self.__mainWindow.emit(SIGNAL('addTargetUrl(QUrl,QWebFrame)'), request.url(), frame)
@@ -553,7 +553,7 @@ class WebPage(QtWebKit.QWebPage):
             return True
 
     def frameCreatedHandler(self, frame):
-        print('--> new frame created: %s' % (frame))
+        print(('--> new frame created: %s' % (frame)))
         QObject.connect(frame, SIGNAL('javaScriptWindowObjectCleared()'), self.javaScriptWindowObjectClearedHandler)
 
     def javaScriptWindowObjectClearedHandler(self):
@@ -642,7 +642,7 @@ class BrowserWindow(QWidget):
         return False
 
     def processFrame(self, frame):
-        print('processing frame [%s]: %s' % (frame.frameName(), frame.url().toEncoded()))
+        print(('processing frame [%s]: %s' % (frame.frameName(), frame.url().toEncoded())))
         baseUrl = frame.url()
         dom = frame.documentElement()
         headElement = dom.findFirst('head')
@@ -670,7 +670,7 @@ class BrowserWindow(QWidget):
                     pass
 
                 for aname in form.attributeNames():
-                    print('%s: %s' % (aname, form.attribute(aname)))
+                    print(('%s: %s' % (aname, form.attribute(aname))))
             # links
             alinks = dom.findAll("a")
             for alink in alinks:
@@ -680,9 +680,9 @@ class BrowserWindow(QWidget):
                     href = alink.attribute(aname)
                     hrefUrl = QUrl(href)
                     if hrefUrl.isValid():
-                        print('href=%s' % href)
+                        print(('href=%s' % href))
                         if hrefUrl.scheme() == 'javascript':
-                            print('evaluating javascript->%s' % hrefUrl.path())
+                            print(('evaluating javascript->%s' % hrefUrl.path()))
                             alink.evaluateJavaScript(hrefUrl.path())
                         else:
                             if hrefUrl.isRelative():
@@ -692,7 +692,7 @@ class BrowserWindow(QWidget):
                             if self.shouldAddTarget(frame, baseUrl, resolvedUrl):
                                 self.__mainWindow.emit(SIGNAL('addTargetUrl(QUrl)'), resolvedUrl)
                     else:
-                        print('ignoring invalid href=%s' % href)
+                        print(('ignoring invalid href=%s' % href))
 #                    print('%s: %s' % (aname, alink.attribute(aname)))
 #        print(buffer(dom.toOuterXml()))
 
@@ -709,7 +709,7 @@ class BrowserWindow(QWidget):
         securityOrigin = mainFrame.securityOrigin()
         databases = securityOrigin.databases()
         for database in databases:
-            print('database=%s' % (database.fileName()))
+            print(('database=%s' % (database.fileName())))
         self.processing_links = False
         self.__mainWindow.emit(SIGNAL('navigationFinished(int, QString)'), self.__index, self.__url)
             
@@ -933,14 +933,14 @@ class MainWindow(QWidget):
                     return
             if not target in self.targets:
                 host = str(url.host())
-                if self.link_count.has_key(host):
+                if host in self.link_count:
                     if self.link_count[host] > MAX_LINK_COUNT:
                         return
                     else:
                         self.link_count[host] += 1
                 else:
                     self.link_count[host] = 1
-                print('adding target [%s]' % (target))
+                print(('adding target [%s]' % (target)))
                 self.targets_outstanding[target] = True
                 self.targets.append(target)
         finally:
@@ -954,7 +954,7 @@ class MainWindow(QWidget):
             self.logger.debug('locked after tryLock')
         try:
             target = str(url)
-            if not self.targets_outstanding.has_key(target):
+            if target not in self.targets_outstanding:
                 self.logger.debug('unexpected target: %s, %s' % (target, repr(self.targets_outstanding)))
             else:
                 self.logger.debug('removing outstanding: %s' % (target))
@@ -991,7 +991,7 @@ class MainWindow(QWidget):
 
 def capture_error(typ, val, traceb):
     import traceback
-    print('type=%s, value=%s\n%s' % (typ, val, traceback.format_tb(traceb)))
+    print(('type=%s, value=%s\n%s' % (typ, val, traceback.format_tb(traceb))))
 
 if '__main__' == __name__:
 

@@ -19,9 +19,9 @@
 # along with RAFT.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from BaseExtractor import BaseExtractor
-from JSParser import JSParser
-from JSLiteParser import JSLiteParser
+from .BaseExtractor import BaseExtractor
+from .JSParser import JSParser
+from .JSLiteParser import JSLiteParser
 from urllib2 import urlparse
 import re
 
@@ -117,8 +117,8 @@ if '__main__' == __name__:
     results = extractor.process(contents, url)
 
     for link in results.links:
-        print('link: %s' % link)
+        print(('link: %s' % link))
 
     for link in results.relative_links:
-        print('relative link: %s' % link)
+        print(('relative link: %s' % link))
 

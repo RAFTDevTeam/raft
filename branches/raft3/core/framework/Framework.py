@@ -192,7 +192,7 @@ class Framework(QObject):
         print(msg)
 
     def debug_log(self, msg):
-        print('DEBUG', msg)
+        print(('DEBUG', msg))
 
     def set_global_cookie_jar(self, cookie_jar):
         self._global_cookie_jar = cookie_jar
@@ -228,7 +228,7 @@ class Framework(QObject):
         QObject.connect(self, SIGNAL('raftConfigUpdated(QString, QVariant)'), callback, Qt.DirectConnection)
 
     def set_raft_config_value(self, name, value):
-        if self._raft_config_cache.has_key(name):
+        if name in self._raft_config_cache:
             if str(value) == str(self._raft_config_cache[name]):
                 return
         cursor = self._db.allocate_thread_cursor()
@@ -239,7 +239,7 @@ class Framework(QObject):
         self.emit(SIGNAL('raftConfigUpdated(QString, QVariant)'), name, value)
 
     def get_raft_config_value(self, name, rtype = str, default_value = None):
-        if self._raft_config_cache.has_key(name):
+        if name in self._raft_config_cache:
             value = self._raft_config_cache[name]
             if value is not None:
                 return rtype(value)
@@ -281,7 +281,7 @@ class Framework(QObject):
     def get_request_response(self, response_id):
         self.rrd_qlock.lock()
         try:
-            if self._request_response_cache.has_key(response_id):
+            if response_id in self._request_response_cache:
                 request_response = self._request_response_cache[response_id]
             else:
                 request_response = self._request_response_cache[response_id] = self._requestResponseFactory.fill(response_id)
@@ -290,7 +290,7 @@ class Framework(QObject):
         return request_response
 
     def report_exception(self, exc):
-        print('EXCEPTION:\n%s' % traceback.format_exc(exc))
+        print(('EXCEPTION:\n%s' % traceback.format_exc(exc)))
 
     def subscribe_add_differ_response_id(self, callback):
         QObject.connect(self, SIGNAL('differAddResponseId(int)'), callback, Qt.DirectConnection)
@@ -367,10 +367,10 @@ class Framework(QObject):
         self.emit(SIGNAL('sequencesChanged()'))
 
     def report_implementation_error(self, exc):
-        print('IMPLEMENTATION ERROR:\n%s' % traceback.format_exc(exc))
+        print(('IMPLEMENTATION ERROR:\n%s' % traceback.format_exc(exc)))
 
     def log_warning(self, msg):
-        print('WARNING', msg)
+        print(('WARNING', msg))
 
     def subscribe_populate_tester_csrf(self, callback):
         QObject.connect(self, SIGNAL('testerPopulateCSRFResponseId(int)'), callback, Qt.DirectConnection)

@@ -133,10 +133,10 @@ class FindInsecureCookies(AbstractAnalyzer):
 
     def postanalysis(self,results):
         outputSecureValue = ""
-        for h in self.notSecure.iterkeys():
+        for h in self.notSecure.keys():
             outputSecureValue += " %s (" % h
             first = True
-            for v in self.notSecure[h].iterkeys():
+            for v in self.notSecure[h].keys():
                 if not first:
                     outputSecureValue += ", "
                 else:
@@ -153,10 +153,10 @@ class FindInsecureCookies(AbstractAnalyzer):
                                      )
 
         outputHttpValue = ""
-        for h in self.notHttpOnly.iterkeys():
+        for h in self.notHttpOnly.keys():
             outputHttpValue += " %s (" % h
             first = True
-            for v in self.notHttpOnly[h].iterkeys():
+            for v in self.notHttpOnly[h].keys():
                 if not first:
                     outputHttpValue += ", "
                 else:
@@ -174,8 +174,8 @@ class FindInsecureCookies(AbstractAnalyzer):
         
         for cookie in self.OWASP_Cookie_Map:
             cookieRE = re.compile(cookie,re.I)
-            for h in self.cookies.iterkeys():
-                for c in self.cookies[h].iterkeys():
+            for h in self.cookies.keys():
+                for c in self.cookies[h].keys():
                     if cookieRE.search(c):
                         results.addOverallResult(type='OWASP Cookie Database',
                                      desc='Cookies identified in the OWASP Cookie Database (https://www.owasp.org/index.php/Category:OWASP_Cookies_Database) may reveal architecture information about the application and/or web server.',

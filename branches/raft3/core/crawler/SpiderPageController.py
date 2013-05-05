@@ -143,7 +143,7 @@ class SpiderPageController(QObject):
         if self.extraction_finished:
             return True
 
-        print('rejected navigation -->', self.page_url, frame, link, navigationType)
+        print(('rejected navigation -->', self.page_url, frame, link, navigationType))
 
         # TODO: allow other?
         return False

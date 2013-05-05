@@ -21,7 +21,7 @@
 from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
 from PyQt4.QtCore import QTimer, SIGNAL, QUrl, QObject, QByteArray, QMetaType
 
-from cStringIO import StringIO
+from io import StringIO
 import time, re, traceback
 from urllib2 import urlparse
 
@@ -137,7 +137,7 @@ class StoreNetworkReply(QNetworkReply):
         return r
 
     def debug_print(self, *args):
-        print(args, self.__url)
+        print((args, self.__url))
 
     def manager(self):
         return self.__reply.manager()
@@ -295,7 +295,7 @@ class StoreNetworkReply(QNetworkReply):
         try:
             ### self.debug_print('abort')
             self.__reply.abort()
-        except AttributeError, e:
+        except AttributeError as e:
             # TODO: determine where corruption is occuring
             self.debug_print('abort error', e)
         self.is_finished = True
@@ -311,7 +311,7 @@ class StoreNetworkReply(QNetworkReply):
                 available = self.__reply.bytesAvailable()
             ### self.debug_print('bytes available', available)
             return available
-        except AttributeError, e:
+        except AttributeError as e:
             # TODO: determine where corruption is occuring
             self.debug_print('bytesAvailable failed', e)
             return 0

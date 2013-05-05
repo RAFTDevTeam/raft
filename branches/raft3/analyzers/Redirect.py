@@ -20,7 +20,7 @@
 #
 
 import re
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 from analysis.AbstractAnalyzer import AbstractAnalyzer
 
@@ -43,14 +43,14 @@ class Redirect(AbstractAnalyzer):
             m = self.LocationRegex.search(target.responseHeaders)
             if ( m != None ):
                 redirectLocation = m.group(1)
-                for k,val in target.requestParams.iteritems():
-                    v = urllib2.unquote(val)
+                for k,val in target.requestParams.items():
+                    v = urllib.parse.unquote(val)
                     matched = False
                     if redirectLocation in v:
                         matched = True
-                    elif urllib2.quote(redirectLocation) in v:
+                    elif urllib.parse.quote(redirectLocation) in v:
                         matched = True
-                    elif urllib2.unquote(redirectLocation) in v:
+                    elif urllib.parse.unquote(redirectLocation) in v:
                         matched = True
                     if matched:
                         results.addPageResult(pageid=target.responseId, 

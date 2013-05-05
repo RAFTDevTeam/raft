@@ -73,7 +73,7 @@ class OfflineNetworkAccessManager(BaseNetworkAccessManager):
             elif scheme in ('http', 'https'):
                 url = str(requestUrl.toEncoded()).encode('ascii', 'ignore')
                 url_response = None
-                if self.request_lookaside.has_key(url):
+                if url in self.request_lookaside:
                     url_response = self.request_lookaside[url]
                 else:
                     responses = []
@@ -103,7 +103,7 @@ class OfflineNetworkAccessManager(BaseNetworkAccessManager):
                 if url_response:
                     reply = CustomNetworkReply(self, requestUrl, str(url_response[ResponsesTable.RES_HEADERS]), str(url_response[ResponsesTable.RES_DATA]))
 
-        except Exception, error:
+        except Exception as error:
             self.framework.report_implementation_error(error)
 
         if not reply:

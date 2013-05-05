@@ -88,4 +88,4 @@ class BaseNetworkAccessManager(QtNetwork.QNetworkAccessManager):
 
 
     def handle_authenticationRequired(self, reply, authenticator):
-        print('authenticationRequired', reply, authenticator)
+        print(('authenticationRequired', reply, authenticator))

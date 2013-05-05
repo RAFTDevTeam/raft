@@ -19,7 +19,7 @@
 # along with RAFT.  If not, see <http://www.gnu.org/licenses/>.
 #
 import json
-import resultsclasses.AnalysisResults
+from . import resultsclasses.AnalysisResults
 from utility import TreeWidgetTools
 from PyQt4.QtGui import *
 from PyQt4.QtCore import Qt
@@ -87,7 +87,7 @@ class AbstractAnalyzer(object):
         """Accepts any configuration data from the system.
             Either a settings dictionary or a JSON string representation
             of the same is OK."""
-        if (type(newconfiguration)==str or type(newconfiguration)==unicode) and len(newconfiguration)>0:
+        if (type(newconfiguration)==str or type(newconfiguration)==str) and len(newconfiguration)>0:
             #print "FOUND JSON, decoding"
             #pprint.pprint(newconfiguration)
             temp=json.loads(newconfiguration)

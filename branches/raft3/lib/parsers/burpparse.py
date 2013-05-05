@@ -105,7 +105,7 @@ class burp_parse_state():
                 self.file = self.zfile.open(zi.filename, 'r')
                 break
         else:
-            raise(Exception('Failed to find valid entry: %s' % (burpfile)))
+            raise Exception
 
         self.states = []
         self.buffer = ''
@@ -182,18 +182,18 @@ class burp_parse_state():
             elif self.T_UNKNOWN_5 == datatype: # not known, maybe empty data/emptry string?
                 return (datatype, '')
             else:
-                raise(Exception('unhandled datatype: %d (%s)' % (datatype, token)))
+                raise Exception
 
     def __read_tag(self, tagname = None):
         result = self.__read_next()
         if tagname:
             if self.T_TAG != result[0] or tagname != result[1]:
                 self.logger.error('failed on tag read; read: [%d,%s], expected: [%s]' % (result, tagname))
-                raise(Exception('internal parse error'))
+                raise Exception
         else:
             if self.T_TAG != result[0]:
                 self.logger.error('failed on tag read; read: [%d,%s]' % (result))
-                raise(Exception('internal parse error'))
+                raise Exception
         self.logger.debug('read tag: [%s]' % (result[1]))
         return result[1]
 
@@ -359,7 +359,7 @@ class burp_parse_state():
                 url, host = self.__process_url()
             elif (self.T_TAG == nextdata[0] and '<info>' == nextdata[1]):
                 if result:
-                    raise(Exception('internal error; already have result'))
+                    raise Exception
                 result = self.__process_info(url, host)
             nextdata = self.__read_next()
         return result
@@ -551,7 +551,7 @@ class burp_parse_state():
         while not (self.T_TAG == nextdata[0] and tagname == nextdata[1]):
             nextdata = self.__read_next()
 
-    def next(self):
+    def __next__(self):
         while True:
             if self.S_INITIAL == self.state:
                 self.__process_version()
@@ -563,7 +563,7 @@ class burp_parse_state():
                 elif '<state>' == nexttag:
                     self.state = self.S_BEGIN_STATE
                 else:
-                    raise(Exception('internal state error; invalid transition from [%s] to [%s]' % (self.state, nexttag)))
+                    raise Exception
             elif self.state in (self.S_BEGIN_STATE, self.S_END_TARGET, self.S_END_PROXY, self.S_END_SCANNER, self.S_END_REPEATER):
                 nexttag = self.__read_tag()
                 if '<target>' == nexttag:
@@ -577,7 +577,7 @@ class burp_parse_state():
                 elif '</state>' == nexttag:
                     self.state = self.S_END_STATE
                 else:
-                    raise(Exception('internal state error; invalid transition from [%s] to [%s]' % (self.state, nexttag)))
+                    raise Exception
             elif self.S_BEGIN_TARGET == self.state:
                 nexttag = self.__read_tag()
                 if '<item>' == nexttag:
@@ -587,7 +587,7 @@ class burp_parse_state():
                 elif '</target>' == nexttag:
                     self.state = self.S_END_TARGET
                 else:
-                    raise(Exception('internal state error; invalid transition from [%s] to [%s]' % (self.state, nexttag)))
+                    raise Exception
             elif self.S_BEGIN_PROXY == self.state:
                 nexttag = self.__read_tag()
                 if '<historyItem>' == nexttag:
@@ -597,7 +597,7 @@ class burp_parse_state():
                 elif '</proxy>' == nexttag:
                     self.state = self.S_END_PROXY
                 else:
-                    raise(Exception('internal state error; invalid transition from [%s] to [%s]' % (self.state, nexttag)))
+                    raise Exception
             elif self.S_BEGIN_SCANNER == self.state:
                 nexttag = self.__read_tag()
                 if '<issue>' == nexttag:
@@ -618,7 +618,7 @@ class burp_parse_state():
                 elif '</scanner>' == nexttag:
                     self.state = self.S_END_SCANNER
                 else:
-                    raise(Exception('internal state error; invalid transition from [%s] to [%s]' % (self.state, nexttag)))
+                    raise Exception
             elif self.state in (self.S_BEGIN_REPEATER, self.S_END_REQUEST_PANEL):
                 nexttag = self.__read_tag()
                 if '<requestPanel>' == nexttag:
@@ -626,7 +626,7 @@ class burp_parse_state():
                 elif '</repeater>' == nexttag:
                     self.state = self.S_END_REPEATER
                 else:
-                    raise(Exception('internal state error; invalid transition from [%s] to [%s]' % (self.state, nexttag)))
+                    raise Exception
             elif self.S_BEGIN_REQUEST_PANEL == self.state:
                 nexttag = self.__read_tag()
                 if '<tabCaption>' == nexttag:
@@ -644,7 +644,7 @@ class burp_parse_state():
                 elif '</requestPanel>' == nexttag:
                     self.state = self.S_END_REQUEST_PANEL
                 else:
-                    raise(Exception('internal state error; invalid transition from [%s] to [%s]' % (self.state, nexttag)))
+                    raise Exception
             elif self.S_BEGIN_CONFIG == self.state:
                 self.__read_until_tag('</config>')
                 self.state = self.S_END_CONFIG
@@ -653,12 +653,12 @@ class burp_parse_state():
                 self.file.close()
                 raise(StopIteration)
             else:
-                raise(Exception('unhandled state: %s' % (self.state)))
+                raise Exception
 
 class burp_dump_state(burp_parse_state):
     """ For exploration of state content """
 
-    def next(self):
+    def __next__(self):
         return burp_parse_state.read_next(self)
 
 class burp_parse_log():
@@ -730,7 +730,7 @@ class burp_parse_log():
             try:
                 tm = time.strptime(datetime, '%a, %d %b %Y %H:%M:%S %Z')
                 tm = time.localtime(time.mktime(tm)-time.timezone)
-            except Exception, e:
+            except Exception as e:
                 self.logger.debug('Failed parsing datetime [%s]: %s' % (datetime, e))
         else:
             tm = time.localtime()
@@ -783,7 +783,7 @@ class burp_parse_log():
     def __read_data(self, length):
         data = self.file.read(length)
         if len(data) != length:
-            raise(Exception('Internal error: bad data read [%d] versus [%d]' % (len(data), length)))
+            raise Exception
         return data
 
     def __read_chunked(self, line):
@@ -864,7 +864,7 @@ class burp_parse_log():
     def __process_response(self, method, firstline):
         return self.__process_block(firstline, 'HEAD' == method.upper())
         
-    def next(self):
+    def __next__(self):
         have_burp_header, have_http_request, have_http_response = False, False, False
         while True:
             line = self.__read_line()
@@ -936,7 +936,7 @@ class burp_parse_log():
                 else:
                     self.logger.debug('Garbage: %s' % (line))
             else:
-                raise(Exception('unhandled state: %s' % (self.state)))
+                raise Exception
 
 class burp_parse_xml():
     """ parse Burp broken XML format """
@@ -1123,7 +1123,7 @@ class burp_parse_xml():
 
     def item_host_start(self, elem):
         self.states.append(self.S_ITEM_XML_ELEMENT)
-        if elem.attrib.has_key('ip'):
+        if 'ip' in elem.attrib:
             self.current['hostip'] = elem.attrib['ip']
 
     def xml_element_end(self, elem):
@@ -1131,7 +1131,7 @@ class burp_parse_xml():
         self.states.pop()
 
     def xml_element_end_base64(self, elem):
-        if elem.attrib.has_key('base64') and 'true' == elem.attrib['base64']:
+        if 'base64' in elem.attrib and 'true' == elem.attrib['base64']:
             self.current[elem.tag] = str(elem.text).decode('base64')
         else:
             self.current[elem.tag] = self.re_encoded.sub(self.decode_entity, str(elem.text))
@@ -1140,11 +1140,11 @@ class burp_parse_xml():
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         event, elem, tag, state = None, None, None, None
         while True:
             try:
-                event, elem = self.iterator.next()
+                event, elem = next(self.iterator)
                 tag = elem.tag
                 state = self.states[-1]
                 transitions = self.state_table[state]
@@ -1162,7 +1162,7 @@ class burp_parse_xml():
                 self.source.close()
                 raise
             except Exception as error:
-                print('***%s***\n^^^%s^^^' % (self.source.last_response, self.source.buffer))
+                print(('***%s***\n^^^%s^^^' % (self.source.last_response, self.source.buffer)))
                 self.source.close()
                 raise Exception('Internal error: state=%s, event=%s, elem=%s\n%s' % (state, event, elem.tag, traceback.format_exc(error)))
 
@@ -1188,21 +1188,21 @@ if '__main__' == __name__:
         for result in burp_parse_log(burpfile):
             print(result)
             count += 1
-        print('processed %d records' % (count))
+        print(('processed %d records' % (count)))
     elif 'state' == mode:
         count = 0
         for result in burp_parse_state(burpfile):
             count += 1
-        print('processed %d records' % (count))
+        print(('processed %d records' % (count)))
     elif 'xml' == mode:
         count = 0
         for result in burp_parse_xml(burpfile):
             print(result)
             count += 1
-        print('processed %d records' % (count))
+        print(('processed %d records' % (count)))
     elif 'dumpstate' == mode:
         for result in burp_dump_state(burpfile):
             print(result)
     else:
-        raise(Exception('unsupported mode: %s' % (mode)))
+        raise Exception
 

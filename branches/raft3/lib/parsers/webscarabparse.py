@@ -121,7 +121,7 @@ class webscarab_parse_conversation():
                 return m.group(1)
         return ''
 
-    def next(self):
+    def __next__(self):
         while True:
             line = self.__read_line().rstrip()
             if self.state in (self.S_INITIAL, self.S_END_CONVERSATION):
@@ -172,7 +172,7 @@ class webscarab_parse_conversation():
                     else:
                         self.logger.debug('Garbage: %s' % (line))
             else:
-                raise(Exception('unhandled state: %s' % (self.state)))
+                raise Exception
 
 if '__main__' == __name__:
     # test code
@@ -195,7 +195,7 @@ if '__main__' == __name__:
         count = 0
         for result in webscarab_parse_conversation(wsfile):
             count += 1
-        print('processed %d records' % (count))
+        print(('processed %d records' % (count)))
     else:
-        raise(Exception('unsupported mode: %s' % (mode)))
+        raise Exception
 

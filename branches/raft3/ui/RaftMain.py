@@ -1888,4 +1888,4 @@ class Ui_MainWindow(object):
         self.actionExport_Settings.setText(QtGui.QApplication.translate("MainWindow", "Export Settings", None, QtGui.QApplication.UnicodeUTF8))
         self.actionImport_Settings.setText(QtGui.QApplication.translate("MainWindow", "Import Settings", None, QtGui.QApplication.UnicodeUTF8))
 
-import resources_rc
+from . import resources_rc

@@ -53,8 +53,8 @@ class TesterTab(QObject):
             self.cursor = None
 
     def tester_populate_csrf(self, response_id):
-        print('IMPLEMENT ME: tester csrf', response_id)
+        print(('IMPLEMENT ME: tester csrf', response_id))
 
     def tester_populate_click_jacking(self, response_id):
-        print('IMPLEMENT ME: tester click jacking', response_id)
+        print(('IMPLEMENT ME: tester click jacking', response_id))
 

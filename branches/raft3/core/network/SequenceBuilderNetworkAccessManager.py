@@ -68,7 +68,7 @@ class SequenceBuilderNetworkAccessManager(BaseNetworkAccessManager):
             if originatingObject:
                 varId = originatingObject.property('RAFT_requestId')
                 if varId.isValid():
-                    print('createRequest', '%s->%s' % (str(varId.toString()), str(request.url().toEncoded())))
+                    print(('createRequest', '%s->%s' % (str(varId.toString()), str(request.url().toEncoded()))))
                     request.setAttribute(QtNetwork.QNetworkRequest.User + 1, varId)
                     requestId = str(varId.toString())
                     if requestId not in self.originalRequestIds:
@@ -83,6 +83,6 @@ class SequenceBuilderNetworkAccessManager(BaseNetworkAccessManager):
         except Exception as error:
             # exceptions will cause a segfault
             import traceback
-            print('--->FIX ME:\n%s' % traceback.format_exc(error))
+            print(('--->FIX ME:\n%s' % traceback.format_exc(error)))
             request.setUrl(QUrl('about:blank'))
             return QNetworkAccessManager.createRequest(self, operation, request, outgoingData)

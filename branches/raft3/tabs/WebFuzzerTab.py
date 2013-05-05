@@ -26,7 +26,7 @@ from PyQt4.QtGui import *
 from PyQt4 import Qsci
 
 
-from cStringIO import StringIO
+from io import StringIO
 from urllib2 import urlparse
 import uuid
 import re
@@ -468,7 +468,7 @@ def randomize_alert(input):
 
         if 'Cancel' == self.mainWindow.wfStdStartButton.text() and self.pending_fuzz_requests is not None:
             self.cancel_fuzz_requests = True
-            for context, pending_request in self.pending_fuzz_requests.iteritems():
+            for context, pending_request in self.pending_fuzz_requests.items():
                 pending_request.cancel()
             self.pending_fuzz_requests = None
             self.mainWindow.wfStdStartButton.setText('Start Attack')
@@ -506,7 +506,7 @@ def randomize_alert(input):
                 
         errors = []
         fuzz_payloads = {}
-        for name, payload_info in payload_mapping.iteritems():
+        for name, payload_info in payload_mapping.items():
             if name in parameter_names:
                 payload_type, payload_value = payload_info
                 if 'fuzz' == payload_type:
@@ -528,7 +528,7 @@ def randomize_alert(input):
         tests_count = []
         total_tests = 1
         
-        for name, payload_info in payload_mapping.iteritems():
+        for name, payload_info in payload_mapping.items():
             if name in parameter_names:
                 payload_type, payload_value = payload_info
                 if 'static' == payload_type:
@@ -697,7 +697,7 @@ def randomize_alert(input):
         if self.pending_fuzz_requests is not None:
             try:
                 self.pending_fuzz_requests.pop(context)
-            except KeyError, e:
+            except KeyError as e:
                 pass
         if 0 != response_id:
             row = self.Data.read_responses_by_id(self.cursor, response_id)

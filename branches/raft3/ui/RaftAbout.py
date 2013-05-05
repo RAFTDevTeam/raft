@@ -140,4 +140,4 @@ class Ui_aboutDialog(object):
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><a href=\"http://code.google.com/p/raft\"><span style=\" font-size:14pt; font-weight:600; text-decoration: underline; color:#0000ff;\">http://code.google.com/p/raft</span></a></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.closeButton.setText(QtGui.QApplication.translate("aboutDialog", "Close", None, QtGui.QApplication.UnicodeUTF8))
 
-import resources_rc
+from . import resources_rc

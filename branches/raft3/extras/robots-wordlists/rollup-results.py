@@ -43,7 +43,7 @@ def process(file):
     outfile = file[0:-4]+'.txt'
     output = open(outfile, 'w')
     count = 0
-    for k in ordered.keys():
+    for k in list(ordered.keys()):
         count += 1
 #        output.write('%s\t%s\n' % (k, count))
         output.write('%s\n' % (k))
@@ -51,7 +51,7 @@ def process(file):
 
 for file in sys.argv[1:]:
     if not file.endswith('.dat'):
-        print('sorry don\'t know what to do with: %s' % file)
+        print(('sorry don\'t know what to do with: %s' % file))
     else:
         process(file)
 

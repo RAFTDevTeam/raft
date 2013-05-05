@@ -68,7 +68,7 @@ class SequenceBuilderWebPage(BaseWebPage):
         self.configure_frame(frame)
 
     def configure_frame(self, frame):
-        print('frame configured', str(frame.property('RAFT_requestId').toString()), str(frame.property('RAFT_responseId').toString()))
+        print(('frame configured', str(frame.property('RAFT_requestId').toString()), str(frame.property('RAFT_responseId').toString())))
         self.add_javascript_window_object(frame)
         QObject.connect(frame, SIGNAL('loadFinished(bool)'), lambda x: self.handle_frame_loadFinished(frame, x))
         QObject.connect(frame, SIGNAL('javaScriptWindowObjectCleared()'), lambda: self.handle_javaScriptWindowObjectCleared(frame))
@@ -82,7 +82,7 @@ class SequenceBuilderWebPage(BaseWebPage):
     def handle_frame_loadFinished(self, frame, ok):
         self.do_sequence_transition(frame)
         self.input_elements(frame)
-        print('frame [%s] load finished (new) (%s)' % (frame.url().toEncoded(), ok), str(frame.property('RAFT_requestId').toString()))
+        print(('frame [%s] load finished (new) (%s)' % (frame.url().toEncoded(), ok), str(frame.property('RAFT_requestId').toString())))
 
     @PyQt4.QtCore.pyqtSlot(QString, int, QVariant, QVariant, QVariant, name='record_input_value')
     def record_input_value(self, requestId, position, name, Type, value):
@@ -93,7 +93,7 @@ class SequenceBuilderWebPage(BaseWebPage):
         self.process_frame_input_elements(self.mainFrame())
 
     def acceptNavigationRequest(self, frame, request, navigationType):
-        print('navigation', frame, request, navigationType)
+        print(('navigation', frame, request, navigationType))
 
         if frame and navigationType != QtWebKit.QWebPage.NavigationTypeOther:
             self.do_sequence_transition(frame)
@@ -104,7 +104,7 @@ class SequenceBuilderWebPage(BaseWebPage):
         request.setAttribute(request.CacheLoadControlAttribute, request.AlwaysNetwork)
 
         if frame:
-            print('%s->%s' % (frame.property('RAFT_requestId').toString(), request.url().toEncoded()))
+            print(('%s->%s' % (frame.property('RAFT_requestId').toString(), request.url().toEncoded())))
 
 #        print(['%s:%s' % (str(n), str(request.rawHeader(n))) for n in request.rawHeaderList()])
 #        if 'Referer' in [str(n) for n in request.rawHeaderList()]:

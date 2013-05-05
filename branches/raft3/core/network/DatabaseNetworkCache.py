@@ -57,7 +57,7 @@ class DatabaseNetworkCache(QtNetwork.QAbstractNetworkCache):
         return self.size
 
     def clear(self):
-        for k in self.cache.keys():
+        for k in list(self.cache.keys()):
             metaData, buf, mtime = self.cache.pop(k)
             if buf:
                 self.size -= buf.length()
@@ -66,7 +66,7 @@ class DatabaseNetworkCache(QtNetwork.QAbstractNetworkCache):
 
     def data(self, url):
         k = url.toEncoded()
-        if self.cache.has_key(k):
+        if k in self.cache:
             buf = self.cache[k][1]
             device = QBuffer(buf)
             device.open(QIODevice.ReadOnly|QIODevice.Unbuffered)
@@ -74,7 +74,7 @@ class DatabaseNetworkCache(QtNetwork.QAbstractNetworkCache):
         return None
 
     def insert(self, device):
-        for k in self.outstanding.keys():
+        for k in list(self.outstanding.keys()):
             if self.outstanding[k] == device:
                 self.size += device.size()
                 self.cache[k][1] = device.data()
@@ -84,9 +84,9 @@ class DatabaseNetworkCache(QtNetwork.QAbstractNetworkCache):
             raise Exception('Failed to find outstanding entry on cache insert')
 
     def metaData(self, url):
-        print(self.cache.keys())
+        print((list(self.cache.keys())))
         k = url.toEncoded()
-        if self.cache.has_key(k):
+        if k in self.cache:
             metaData, buf, mtime = self.cache[k]
             if buf:
                 return metaData
@@ -109,8 +109,8 @@ class DatabaseNetworkCache(QtNetwork.QAbstractNetworkCache):
                             metaData.setLastModified(QDateTime.fromString(value))
                         elif 'expires' == name.lower():
                             metaData.setExpirationDate(QDateTime.fromString(value))
-                    except Exception, e:
-                        print('ignoring error: %s' % e)
+                    except Exception as e:
+                        print(('ignoring error: %s' % e))
 
             metaData.setRawHeaders(rawHeaders)
             buf = QByteArray(str(responses[-1][ResponsesTable.RES_DATA]))
@@ -130,10 +130,10 @@ class DatabaseNetworkCache(QtNetwork.QAbstractNetworkCache):
 
     def remove(self, url):
         k = url.toEncoded()
-        if self.outstanding.has_key(k):
+        if k in self.outstanding:
             device = self.outstanding.pop(k)
             device = None
-        if self.cache.has_key(k):
+        if k in self.cache:
             metaData, buf, mtime = self.cache.pop(k)
             if buf:
                 self.size -= buf.length()
@@ -143,6 +143,6 @@ class DatabaseNetworkCache(QtNetwork.QAbstractNetworkCache):
 
     def updateMetaData(self, metaData):
         url = metaData.url().toEncoded()
-        if self.cache.has_key(url):
+        if url in self.cache:
             self.cache[url][0] = metaData
 

@@ -161,7 +161,7 @@ class DomFuzzerTab(QObject):
         print('loading started')
 
     def handle_webView_loadFinished(self, ok):
-        print('handle_webView_loadFinished', ok)
+        print(('handle_webView_loadFinished', ok))
         if self.qtimer.isActive():
             self.qtimer.stop()
         if self.qtimer2.isActive():

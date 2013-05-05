@@ -246,7 +246,7 @@ class DataOutput(object):
         @see: U{Supported character sets on Livedocs (external)
             <http://livedocs.adobe.com/flex/201/langref/charset-codes.html>}
         """
-        if type(value) is unicode:
+        if type(value) is str:
             value = value.encode(charset)
 
         self.stream.write(value)
@@ -315,10 +315,10 @@ class DataOutput(object):
         """
         val = None
 
-        if isinstance(value, unicode):
+        if isinstance(value, str):
             val = value
         else:
-            val = unicode(value, 'utf8')
+            val = str(value, 'utf8')
 
         self.stream.write_utf8_string(val)
 
@@ -414,7 +414,7 @@ class DataInput(object):
         #FIXME nick: how to work out the code point byte size (on the fly)?
         bytes = self.stream.read(length)
 
-        return unicode(bytes, charset)
+        return str(bytes, charset)
 
     def readObject(self):
         """
@@ -650,7 +650,7 @@ class Context(codec.Context):
 
         @raise TypeError: The parameter C{s} is not of C{basestring} type.
         """
-        if not isinstance(s, basestring):
+        if not isinstance(s, str):
             raise TypeError
 
         if len(s) == 0:
@@ -923,7 +923,7 @@ class Decoder(codec.Decoder):
             result = []
             self.context.addObject(result)
 
-            for i in xrange(size):
+            for i in range(size):
                 result.append(self.readElement())
 
             return result
@@ -935,7 +935,7 @@ class Decoder(codec.Decoder):
             result[key] = self.readElement()
             key = self.readBytes()
 
-        for i in xrange(size):
+        for i in range(size):
             el = self.readElement()
             result[i] = el
 
@@ -974,7 +974,7 @@ class Decoder(codec.Decoder):
         class_def.static_properties = []
 
         if class_def.attr_len > 0:
-            for i in xrange(class_def.attr_len):
+            for i in range(class_def.attr_len):
                 key = self.readBytes()
 
                 class_def.static_properties.append(key)
@@ -1216,7 +1216,7 @@ class Encoder(codec.Encoder):
         @type   s: C{str}
         @param  s: The string data to be encoded to the AMF3 data stream.
         """
-        if type(s) is unicode:
+        if type(s) is str:
             s = self.context.getBytesForString(s)
 
         self.serialiseBytes(s)
@@ -1328,7 +1328,7 @@ class Encoder(codec.Encoder):
         self.context.addObject(n)
 
         # The AMF3 spec demands that all str based indicies be listed first
-        keys = n.keys()
+        keys = list(n.keys())
         int_keys = []
         str_keys = []
 
@@ -1460,7 +1460,7 @@ class Encoder(codec.Encoder):
 
         if definition.encoding == ObjectEncoding.DYNAMIC:
             if attrs:
-                for attr, value in attrs.iteritems():
+                for attr, value in attrs.items():
                     if type(attr) in python.int_types:
                         attr = str(attr)
 

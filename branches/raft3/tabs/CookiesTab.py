@@ -27,7 +27,7 @@ from PyQt4.QtNetwork import QNetworkCookie
 from core.data.LocalStorage import LocalStorage
 from core.data.FlashCookies import FlashCookies
 
-from cStringIO import StringIO
+from io import StringIO
 import bz2
 import time
 from lxml import etree
@@ -144,7 +144,7 @@ class CookiesTab(QObject):
         in_cookie = False
         while True:
             try:
-                event, elem = iterator.next()
+                event, elem = next(iterator)
                 tag = elem.tag
                 if not in_cookies and 'cookies' == tag and 'start' == event:
                     in_cookies = True
@@ -153,7 +153,7 @@ class CookiesTab(QObject):
                 elif in_cookie and 'raw' == tag and 'end' == event:
                     value = str(elem.text)
                     encoding = None
-                    if elem.attrib.has_key('encoding'):
+                    if 'encoding' in elem.attrib:
                         encoding = str(elem.attrib['encoding'])
                     if 'base64' == encoding:
                         value = value.decode('base64')
@@ -296,7 +296,7 @@ class CookiesTab(QObject):
     def populate_local_storage_tree(self):
         self.mainWindow.cookiesLocalStorageTreeWidget.clear()
         localstorage = self.localStorage.read_storage()
-        for domain in localstorage.keys():
+        for domain in list(localstorage.keys()):
             domainItems = self.mainWindow.cookiesLocalStorageTreeWidget.findItems(domain, Qt.MatchExactly)
             if len(domainItems) > 0:
                 # append
@@ -353,7 +353,7 @@ class CookiesTab(QObject):
     def populate_flash_cookies_tree(self):
         self.mainWindow.cookiesFlashCookiesTreeWidget.clear()
         flashcookies = self.flashCookies.read_flashcookies()
-        for domain in flashcookies.keys():
+        for domain in list(flashcookies.keys()):
             domainItems = self.mainWindow.cookiesFlashCookiesTreeWidget.findItems(domain, Qt.MatchExactly)
             if len(domainItems) > 0:
                 # append
@@ -376,7 +376,7 @@ class CookiesTab(QObject):
 
     def add_flash_name_value_item(self, parentItem, domain, element):
         if isinstance(element, dict):
-            for name in element.keys():
+            for name in list(element.keys()):
                 value = element[name]
                 if isinstance(value, dict):
                     item = QTreeWidgetItem([

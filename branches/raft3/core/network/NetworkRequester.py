@@ -37,7 +37,7 @@ class NetworkRequester(QObject):
 
     def POST(self, url, body, headers = {}, enctype = 'application/x-www-form-urlencoded'):
         content_encoding = None
-        for name, value in headers.iteritems():
+        for name, value in headers.items():
             if 'content-encoding' == name.lower():
                 content_encoding = value
         if not content_encoding:
@@ -52,7 +52,7 @@ class NetworkRequester(QObject):
         method = self.translate_method(method, request)
 
         host, useragent, content_encoding = None, None, None
-        for name, value in headers.iteritems():
+        for name, value in headers.items():
             lname = name.lower()
             if 'user-agent' == lname:
                 useragent = value

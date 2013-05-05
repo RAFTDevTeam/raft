@@ -21,10 +21,10 @@
 
 import ast
 
-import resultsclasses.AnalysisRun
-import resultsclasses.AnalysisResults
-import resultsclasses.ResultSet
-import resultsclasses.SingleResult
+from . import resultsclasses.AnalysisRun
+from . import resultsclasses.AnalysisResults
+from . import resultsclasses.ResultSet
+from . import resultsclasses.SingleResult
 
 
 class ResultFactory(object):
@@ -52,7 +52,7 @@ class ResultFactory(object):
         elif isinstance(requesterclass,resultsclasses.SingleResult.SingleResult):
             return self.createItemsSingleResult(requesterclass, itemid ,db ,cursor)
         else:
-            raise()
+            raise Exception('unsupported instance type %s' % (type(requesterclass)))
 
     def createItemsAnalysisRun(self, requesterclass, itemid ,db ,cursor):
         #print "Starting createItemsAnalysisRun"

@@ -22,7 +22,7 @@
 import sys, re
 
 from raftparse import raft_parse_xml
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 from urllib2 import urlparse
 import hashlib
 import time
@@ -85,7 +85,7 @@ def initialize_mapcounts(mapcount):
         mapcount[name] = {}
 
 def update_entry_count(mapcount, path):
-    if not mapcount.has_key(path):
+    if path not in mapcount:
         mapcount[path] = 1
     else:
         mapcount[path] += 1
@@ -97,7 +97,7 @@ def normalize_entry(entry):
         splitted = urlparse.urlsplit(entry)
         entry = splitted.path
 
-    entry = urllib2.unquote(entry)
+    entry = urllib.parse.unquote(entry)
     entry = re_strip_chars.sub('', entry)
     entry = re_chomp_chars.sub('', entry)
 
@@ -184,7 +184,7 @@ def process(files):
             count += tcount
             duplicates += tdup
             skipcount += tskip
-        except Exception, e:
+        except Exception as e:
             import traceback
             sys.stdout.write('ERROR: processing %s\n%s' % (filename, traceback.format_exc(e)))
 
@@ -207,7 +207,7 @@ def process_response(host, body, content_type):
         try:
             body = body.decode(charset)
             body = body.encode('ascii', 'ignore')
-        except Exception, e:
+        except Exception as e:
 #            sys.stderr.write('ignoring: %s' % (e))
             pass
     comments = ''
@@ -262,7 +262,7 @@ def process_response(host, body, content_type):
 def merge_mappings(site_mapping):
     found_words = {}
     for name in ['all', 'files', 'directories', 'extensions']:
-        entries =  site_mapping[name].keys()
+        entries =  list(site_mapping[name].keys())
         entries.sort()
         entries.reverse()
         for entry in entries:
@@ -277,7 +277,7 @@ def merge_mappings(site_mapping):
                 if pos > -1:
                     this_entry = entry[pos+1:]
                     parent_entry = entry[0:pos+1]
-                    if len(this_entry) > 0 and this_entry != parent_entry and site_mapping['directories'].has_key(parent_entry):
+                    if len(this_entry) > 0 and this_entry != parent_entry and parent_entry in site_mapping['directories']:
                         parent_count = site_mapping['directories'][parent_entry]
 #                        print('*** [%s]: %d (%s)' % (parent_entry, parent_count, entry))
                         if  parent_count > 256: # TODO: adjust ?
@@ -299,18 +299,18 @@ def merge_mappings(site_mapping):
                             found_words[w2] = True
                         else:
                             found_words[w] = True
-                if not robot_mappings[name].has_key(entry):
+                if entry not in robot_mappings[name]:
                     robot_mappings[name][entry] = 1
                 else:
                     robot_mappings[name][entry] += 1
 
     # process words separately
-    for word in site_mapping['words'].keys():
+    for word in list(site_mapping['words'].keys()):
         found_words[word] = True
 
     name = 'words'
-    for word in found_words.keys():
-        if not robot_mappings[name].has_key(word):
+    for word in list(found_words.keys()):
+        if word not in robot_mappings[name]:
             robot_mappings[name][word] = 1
         else:
             robot_mappings[name][word] += 1
@@ -352,14 +352,14 @@ def process_file(filename):
                 sha1 = hashlib.sha1()
                 sha1.update(normalized)
                 hashval = sha1.hexdigest()
-                if not unique_hashes.has_key(hashval):
+                if hashval not in unique_hashes:
                     unique_hashes[hashval] = True
                     process_response(host, body, content_type)
                     count += 1
                 else:
                     duplicates += 1
 
-        if not status_counts.has_key(status):
+        if status not in status_counts:
             status_counts[status] = 1
         else:
             status_counts[status] += 1
@@ -368,15 +368,15 @@ def process_file(filename):
 
 def print_mapcount(fhandle, cutoff, mapcount):
     count_mapping = {}
-    for entry in mapcount.keys():
+    for entry in list(mapcount.keys()):
         count = mapcount[entry]
         if count >= cutoff:
-            if not count_mapping.has_key(count):
+            if count not in count_mapping:
                 count_mapping[count] = [entry]
             else:
                 count_mapping[count].append(entry)
 
-    keys = count_mapping.keys()
+    keys = list(count_mapping.keys())
     keys.sort(key=int)
     keys.reverse()
     for value in keys:
@@ -408,8 +408,8 @@ for arg in sys.argv[1:]:
 
 process(files)
 
-for status in status_counts.keys():
-    print('status %s: %d' % (status, status_counts[status]))
+for status in list(status_counts.keys()):
+    print(('status %s: %d' % (status, status_counts[status])))
 
 print_ordered('mappings', robot_mappings)
 

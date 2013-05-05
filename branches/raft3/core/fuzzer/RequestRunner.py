@@ -133,11 +133,11 @@ class RequestRunner(QObject):
         original_request = None
         self.qlock.lock()
         try:
-            if not self.inflight_list.has_key(response.context):
+            if response.context not in self.inflight_list:
                 raise Exception('unexpected response; context=%s' % (response.context))
             request = self.inflight_list.pop(response.context)
 
-            if self.request_context.has_key(response.context):
+            if response.context in self.request_context:
                 # user request
                 if not self.sequence_enabled:
                     user_request_completed = True
@@ -198,7 +198,7 @@ class RequestRunner(QObject):
                     single_step = False
 
                 request = self.request_queue.popleft()
-                if self.request_context.has_key(request.context):
+                if request.context in self.request_context:
                     if self.sequence_enabled and request.sequence_needed:
                         single_step = True
                         # put back user request

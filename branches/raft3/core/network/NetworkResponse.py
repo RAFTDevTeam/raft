@@ -22,7 +22,7 @@
 from PyQt4.QtCore import (Qt, QObject, SIGNAL, QUrl, QByteArray, QIODevice, QMetaType)
 from PyQt4.QtNetwork import *
 
-from cStringIO import StringIO
+from io import StringIO
 
 from core.database.constants import ResponsesTable
 
@@ -65,7 +65,7 @@ class NetworkResponse(QObject):
         if status:
             try:
                 status = int(status)
-            except ValueError, e:
+            except ValueError as e:
                 print(e)
                 # TODO: should log bogus code value
                 pass
@@ -95,7 +95,7 @@ class NetworkResponse(QObject):
 
     def reply_error(self, error):
         # TODO: log
-        print('ignoring', error)
+        print(('ignoring', error))
         pass
 
     def reply_ssl_errors(self, ssl_errors):

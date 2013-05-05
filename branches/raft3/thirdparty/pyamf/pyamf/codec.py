@@ -19,10 +19,10 @@ __all__ = [
 ]
 
 try:
-    unicode
+    str
 except NameError:
     # py3k support
-    unicode = str
+    str = str
     str = bytes
 
 
@@ -299,7 +299,7 @@ class Decoder(_Codec):
         """
         self.stream.append(data)
 
-    def next(self):
+    def __next__(self):
         """
         Part of the iterator protocol.
         """
@@ -433,7 +433,7 @@ class Encoder(_Codec):
         # try types that we know will work
         if t is str or issubclass(t, str):
             return self.writeBytes
-        if t is unicode or issubclass(t, unicode):
+        if t is str or issubclass(t, str):
             return self.writeString
         elif t is bool:
             return self.writeBoolean
@@ -455,7 +455,7 @@ class Encoder(_Codec):
             return self.writeXML
 
         # check for any overridden types
-        for type_, func in pyamf.TYPE_MAP.iteritems():
+        for type_, func in pyamf.TYPE_MAP.items():
             try:
                 if isinstance(data, type_):
                     return _CustomTypeFunc(self, func)
@@ -501,7 +501,7 @@ class Encoder(_Codec):
     def send(self, element):
         self.bucket.append(element)
 
-    def next(self):
+    def __next__(self):
         try:
             element = self.bucket.pop(0)
         except IndexError:

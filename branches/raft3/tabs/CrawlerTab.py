@@ -155,10 +155,10 @@ class CrawlerTab(QObject):
         self.crawlerSpiderWebView.setHtml(self.currentHtmlContent, self.currentQUrl)
 
     def handle_spiderWebView_loadStarted(self):
-        print('spider web loading started: %s' % (self.spiderPageController.get_phase()))
+        print(('spider web loading started: %s' % (self.spiderPageController.get_phase())))
 
     def handle_spiderWebView_loadFinished(self, ok):
-        print('spider web loading finished [%s]: %s' % (ok, self.spiderPageController.get_phase()))
+        print(('spider web loading finished [%s]: %s' % (ok, self.spiderPageController.get_phase())))
         if self.spider_qtimer.isActive():
             self.spider_qtimer.stop()
         if self.spider_qtimer2.isActive():
@@ -212,7 +212,7 @@ class CrawlerTab(QObject):
             webPage.process_page_events(frame)
             for child in frame.childFrames():
                 self.process_page_events(webPage, child)
-        except Exception, error:
+        except Exception as error:
             self.framework.report_exception(error)
 
     def process_frame_content(self, frame):

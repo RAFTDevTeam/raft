@@ -406,7 +406,7 @@ class SequenceDialog(QDialog, SequenceDialog.Ui_seqBuildDialog):
             self.sequenceParametersTreeWidget.clear()
             parameters = self.formCapture.allParameters(self.sequenceResponseIds)
             for responseId, requestId, param, value, origin in parameters:
-                print(responseId, requestId, param, value, origin)
+                print((responseId, requestId, param, value, origin))
                 rId = ''
                 Xref = ''
                 source = ''
@@ -474,10 +474,10 @@ class SequenceDialog(QDialog, SequenceDialog.Ui_seqBuildDialog):
             if varId.isValid():
                 xrefId = str(varId.toString())
 
-            print('process_request_finished', responseId, requestId, xrefId)
+            print(('process_request_finished', responseId, requestId, xrefId))
 
             if xrefId and requestId and responseId:
-                if not self.originatingResponses.has_key(requestId):
+                if requestId not in self.originatingResponses:
                     self.originatingResponses[requestId] = responseId
 
                 # TODO: is this necessary?
@@ -623,7 +623,7 @@ class SequenceDialog(QDialog, SequenceDialog.Ui_seqBuildDialog):
                         self.re_insession = re.compile(searchText, re.I)
                     if self.re_insession.search(rawResponse):
                         is_insession = True
-                except Exception, e:
+                except Exception as e:
                     print(e)
             else:
                 if -1 != rawResponse.lower().find(searchText.lower()):
@@ -637,7 +637,7 @@ class SequenceDialog(QDialog, SequenceDialog.Ui_seqBuildDialog):
                         self.re_outofsession = re.compile(searchText, re.I)
                     if self.re_outofsession.search(rawResponse):
                         is_outofsession = True
-                except Exception, e:
+                except Exception as e:
                     print(e)
 
             else:
@@ -708,7 +708,7 @@ class SequenceDialog(QDialog, SequenceDialog.Ui_seqBuildDialog):
                     if m:
                         searchText = m.group(0)
                         is_re = False
-                except Exception, e:
+                except Exception as e:
                     pass
                       
             if not self.sequenceResponseViewEdit.findFirst(searchText, is_re, False, False, True, True, 0, 0):

@@ -50,7 +50,7 @@ class BaseExtractor():
     def getBaseType(self, content_type):
         # TODO: improve
         content_type = content_type.lower()
-        if self.CONTENT_TYPE_MAPPING.has_key(content_type):
+        if content_type in self.CONTENT_TYPE_MAPPING:
             return self.CONTENT_TYPE_MAPPING[content_type]
         if 'html' in content_type:
             return 'html'
@@ -59,9 +59,9 @@ class BaseExtractor():
         return content_type
 
     def getExtractor(self, content_type):
-        import HtmlExtractor
-        import PostDataExtractor
-        import JSExtractor
+        from . import HtmlExtractor
+        from . import PostDataExtractor
+        from . import JSExtractor
         base_type = self.getBaseType(content_type)
         if 'html' == content_type:
             return HtmlExtractor.HtmlExtractor()

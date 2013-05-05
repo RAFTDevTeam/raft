@@ -21,8 +21,8 @@
 # along with RAFT.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from BaseExtractor import BaseExtractor
-from cStringIO import StringIO
+from .BaseExtractor import BaseExtractor
+from io import StringIO
 from urllib2 import urlparse
 import cgi
 import sys
@@ -33,7 +33,7 @@ class PostDataResults():
         self.name_values_dictionary = {}
 
     def add_name_value(self, name, value, Type = ''):
-        if not self.name_values_dictionary.has_key(name):
+        if name not in self.name_values_dictionary:
             self.name_values_dictionary[name] = value
             self.name_values.append((name, value, Type))
 
@@ -73,17 +73,17 @@ class PostDataExtractor(BaseExtractor):
 
         if 'application/x-www-form-urlencoded' == content_type:
             qs_values = urlparse.parse_qs(request_body, True)
-            for name, value in qs_values.iteritems():
+            for name, value in qs_values.items():
                 results.add_name_value(name, value)
         elif 'text/plain' == content_type:
             # treat text plain as url encoded
             qs_values = urlparse.parse_qs(request_body, True)
-            for name, value in qs_values.iteritems():
+            for name, value in qs_values.items():
                 results.add_name_value(name, value)
         elif 'multipart/form-data' == content_type:
             fp = StringIO(request_body)
             qs_values = cgi.parse_multipart(fp, ctdict)
-            for name, value in qs_values.iteritems():
+            for name, value in qs_values.items():
                 results.add_name_value(name, value)
         else:
             # TODO: should support more types instead of just name/value pairs
@@ -99,4 +99,4 @@ if '__main__' == __name__:
     results = postDataExtractor.process_request('', 'a=1&b=2')
 
     for name, value, Type in results.name_values:
-        print(name, value, Type)
+        print((name, value, Type))

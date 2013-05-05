@@ -55,7 +55,7 @@ class SpiderWebView(QtWebKit.QWebView):
             varId = reply.attribute(QtNetwork.QNetworkRequest.User)
             if varId.isValid():
                 responseId = str(varId.toString())
-                print('got response --> %s' % (responseId))
+                print(('got response --> %s' % (responseId)))
                 self.pageController.append_response(responseId)
         finally:
             self.qlock.unlock()

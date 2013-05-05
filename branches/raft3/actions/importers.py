@@ -46,7 +46,7 @@ def process_import(proxy_log, framework, source):
     elif 'raft_capture_xml' == source:
         func = raft_parse_xml
     else:
-        raise(Exception('internal error; invalid source=' + source))
+        raise Exception
 
     raw_cookie_list = []
     cursor = Data.allocate_thread_cursor()
@@ -69,12 +69,12 @@ def process_import(proxy_log, framework, source):
                 else:
                     response_headers, response_body = '', ''
 
-                if extras.has_key('notes'):
+                if 'notes' in extras:
                     notes = extras['notes']
                 else:
                     notes = None
 
-                if extras.has_key('confirmed'):
+                if 'confirmed' in extras:
                     try:
                         confirmed = bool(extras['confirmed'])
                     except ValueError:
@@ -82,12 +82,12 @@ def process_import(proxy_log, framework, source):
                 else:
                     confirmed = None
 
-                if extras.has_key('content_length') and extras['content_length']:
+                if 'content_length' in extras and extras['content_length']:
                     content_length = int(extras['content_length'])
                 else:
                     content_length = len(response_body)
 
-                if extras.has_key('elapsed'):
+                if 'elapsed' in extras:
                     elapsed = extras['elapsed']
                 else:
                     elapsed = ''

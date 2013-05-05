@@ -19,12 +19,12 @@
 # along with RAFT.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from BaseExtractor import BaseExtractor
-from JSLiteParser import JSLiteParser
+from .BaseExtractor import BaseExtractor
+from .JSLiteParser import JSLiteParser
 from lxml import etree
-from cStringIO import StringIO
+from io import StringIO
 from urllib2 import urlparse
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import hashlib
 import re
 
@@ -122,7 +122,7 @@ class HtmlParseResults():
         splitted = urlparse.urlsplit(uri)
         if self.__re_url_encoded.search(splitted.path):
             # url-encoded
-            uri = urllib2.unquote(uri)
+            uri = urllib.parse.unquote(uri)
             splitted = urlparse.urlsplit(uri)
         if not splitted.scheme and splitted.path and not splitted.path.startswith('/'):
             if splitted.path not in self.relative_links:
@@ -209,9 +209,9 @@ class HtmlParseResults():
     def attach_input_label(self, input):
         name = input.name
         Id = input.Id
-        if name and self.labels_by_name.has_key(name):
+        if name and name in self.labels_by_name:
             input.label = self.labels_by_name[name]
-        if Id and self.labels_by_id.has_key(Id):
+        if Id and Id in self.labels_by_id:
             input.label = self.labels_by_id[Id]
 
     def set_baseurl(self, baseurl):
@@ -387,8 +387,8 @@ class HtmlExtractor(BaseExtractor):
 
         # merge default attribute types
         for tag in self.HTML_TAG_ATTRS:
-            for attr_name in self.DEFAULT_TAG_ATTRS.keys():
-                if not self.HTML_TAG_ATTRS[tag].has_key(attr_name):
+            for attr_name in list(self.DEFAULT_TAG_ATTRS.keys()):
+                if attr_name not in self.HTML_TAG_ATTRS[tag]:
                     self.HTML_TAG_ATTRS[tag][attr_name] = self.DEFAULT_TAG_ATTRS[attr_name]
         
     def process_tag(self, results, jsParser, elem):
@@ -457,7 +457,7 @@ class HtmlExtractor(BaseExtractor):
 
     def process_form(self, results, elem):
         form = HtmlForm(results.baseurl)
-        for name, value in elem.attrib.iteritems():
+        for name, value in elem.attrib.items():
             if value:
                 lname = name.lower()
                 if 'method' == lname:
@@ -482,7 +482,7 @@ class HtmlExtractor(BaseExtractor):
 
     def process_input_element(self, results, elem):
         input = HtmlInput()
-        for name, value in elem.attrib.iteritems():
+        for name, value in elem.attrib.items():
             if value:
                 lname = name.lower()
                 if 'name' == lname:
@@ -512,7 +512,7 @@ class HtmlExtractor(BaseExtractor):
     def process_label(self, results, elem):
         forId, forName = '', ''
         text = self.get_text_string(results, elem.text)
-        for name, value in elem.attrib.iteritems():
+        for name, value in elem.attrib.items():
             if value:
                 lname = name.lower()
                 if 'for' == lname:
@@ -522,7 +522,7 @@ class HtmlExtractor(BaseExtractor):
             if input_elem is not None:
                 if not text:
                     text == self.get_text_string(results, input_elem.text)
-                for name, value in input_elem.attrib.iteritems():
+                for name, value in input_elem.attrib.items():
                     if value:
                         lname = name.lower()
                         if 'id' == lname:
@@ -553,14 +553,14 @@ class HtmlExtractor(BaseExtractor):
 
     def process_attributes(self, results, jsParser, elem):
         tag = elem.tag.lower()
-        if self.HTML_TAG_ATTRS.has_key(tag):
+        if tag in self.HTML_TAG_ATTRS:
             tag_attrs = self.HTML_TAG_ATTRS[tag]
         else:
             tag_attrs = self.DEFAULT_TAG_ATTRS
-        for name, value in elem.attrib.iteritems():
+        for name, value in elem.attrib.items():
             if value:
                 lname = name.lower()
-                if tag_attrs.has_key(lname):
+                if lname in tag_attrs:
                     attr_type = tag_attrs[lname]
                     if self.T_SCRIPT == attr_type:
                         self.process_inline_script(results, jsParser, value)
@@ -585,7 +585,7 @@ class HtmlExtractor(BaseExtractor):
 
     def normalize_attributes(self, attrib):
         normalized = {}
-        for name, value in elem.attrib.iteritems():
+        for name, value in elem.attrib.items():
             lname = name.lower()
             if lname and value:
                 # TODO: should use a multi-map?
@@ -602,7 +602,7 @@ class HtmlExtractor(BaseExtractor):
     def process_anchor_uri(self, results, elem, uri):
         anchor_text = self.get_text_string(results, elem.text)
         Id, classname, title = '', '', ''
-        for name, value in elem.attrib.iteritems():
+        for name, value in elem.attrib.items():
             lname = name.lower()
             if value:
                 if 'id' == lname:
@@ -616,7 +616,7 @@ class HtmlExtractor(BaseExtractor):
         
     def process_meta_content(self, results, elem):
         http_equiv, content = '', ''
-        for name, value in elem.attrib.iteritems():
+        for name, value in elem.attrib.items():
             lname = name.lower()
             if lname and value:
                 if 'http-equiv' == lname:
@@ -660,7 +660,7 @@ class HtmlExtractor(BaseExtractor):
             results.add_uri(m.strip())
 
     def process_param_content(self, results, elem):
-        for name, value in elem.attrib.iteritems():
+        for name, value in elem.attrib.items():
             lname = name.lower()
             if lname and value:
                 if 'value' == lname:
@@ -704,7 +704,7 @@ class HtmlExtractor(BaseExtractor):
                         contextual_io.write('<')
                         structural_io.write('<')
                         contextual_io.write(str(elem.tag))
-                        for k in elem.attrib.keys():
+                        for k in list(elem.attrib.keys()):
                             contextual_io.write(' ')
                             contextual_io.write(k)
                             structural_io.write('@')
@@ -743,10 +743,10 @@ class HtmlExtractor(BaseExtractor):
                 htmlbuf = StringIO(html)
                 try:
                     self.process_etree(results, jsParser, htmlbuf, html)
-                except etree.XMLSyntaxError, e:
+                except etree.XMLSyntaxError as e:
                     # TODO: consider using beautiful soup
                     # TODO: real warning
-                    print('Exception on html extraction: %s (%s)' % (e, html[0:128]))
+                    print(('Exception on html extraction: %s (%s)' % (e, html[0:128])))
                     pass
 
         js_comments =jsParser.comments()
@@ -788,37 +788,37 @@ if '__main__' == __name__:
     extractor = HtmlExtractor()
     results = extractor.process(contents, url)
 
-    print('contextual fingerprint: %s' % (results.contextual_fingerprint))
-    print('structural fingerprint: %s' % (results.structural_fingerprint))
+    print(('contextual fingerprint: %s' % (results.contextual_fingerprint)))
+    print(('structural fingerprint: %s' % (results.structural_fingerprint)))
 
     for form in results.forms:
-        print('form:\n%s' % (form))
+        print(('form:\n%s' % (form)))
 
     for input in results.other_inputs:
-        print('input:\n%s' % (input))
+        print(('input:\n%s' % (input)))
 
     if True:
         for comment in results.comments:
-            print('comment: %s' % comment)
+            print(('comment: %s' % comment))
 
         for link in results.links:
-            print('link: %s' % link)
+            print(('link: %s' % link))
 
         for link in results.relative_links:
-            print('relative link: %s' % link)
+            print(('relative link: %s' % link))
 
         for anchor in results.anchors:
-            print('anchor: %s' % repr(anchor))
+            print(('anchor: %s' % repr(anchor)))
 
         for script in results.inline_scripts:
-            print('inline script: %s' % script)
+            print(('inline script: %s' % script))
 
         for script in results.scripts:
-            print('script: %s' % script)
+            print(('script: %s' % script))
 
         for style in results.inline_styles:
-            print('inline style: %s' % style)
+            print(('inline style: %s' % style))
 
         for style in results.styles:
-            print('style: %s' % style)
+            print(('style: %s' % style))
 

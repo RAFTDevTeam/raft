@@ -26,7 +26,7 @@ from urllib2 import urlparse
 from PyQt4.QtCore import Qt, SIGNAL, QObject, QModelIndex
 from PyQt4.QtGui import *
 
-from cStringIO import StringIO
+from io import StringIO
 
 from actions import interface
 from core.database.constants import ResponsesTable

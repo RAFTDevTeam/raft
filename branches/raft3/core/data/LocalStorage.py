@@ -57,7 +57,7 @@ class LocalStorage():
             scheme, domain_name, filename = item
             domain = urlparse.urlunsplit((scheme, domain_name, '', '', ''))
 
-            if not self.localstorage.has_key(domain):
+            if domain not in self.localstorage:
                 self.localstorage[domain] = []
 
             localstorage_db, cursor = None, None
@@ -73,7 +73,7 @@ class LocalStorage():
                 cursor = None
                 localstorage_db.close()
                 localstorage_db = None
-            except Exception, error:
+            except Exception as error:
                 self.framework.report_exception(error)
             finally:
                 if cursor:
@@ -102,7 +102,7 @@ class LocalStorage():
                     cursor = None
                     localstorage_db.close()
                     localstorage_db = None
-                except Exception, error:
+                except Exception as error:
                     self.framework.report_exception(error)
                 finally:
                     if cursor:
@@ -143,7 +143,7 @@ class LocalStorage():
                 cursor = None
                 localstorage_db.close()
                 localstorage_db = None
-            except Exception, error:
+            except Exception as error:
                 self.framework.report_exception(error)
             finally:
                 if cursor:
@@ -168,7 +168,7 @@ class LocalStorage():
             cursor = None
             localstorage_db.close()
             localstorage_db = None
-        except Exception, error:
+        except Exception as error:
             self.framework.report_exception(error)
         finally:
             if cursor:

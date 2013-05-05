@@ -40,7 +40,7 @@ class ASPNETApplicationServerErrors(AbstractAnalyzer):
         m = self.re_server_error.search(response_body)
         if m:
             appname = m.group(1)
-            if not self.applications.has_key(appname):
+            if appname not in self.applications:
                 self.applications[appname] = url
                 self.all_urls[appname] = [url]
             else:
@@ -50,7 +50,7 @@ class ASPNETApplicationServerErrors(AbstractAnalyzer):
                     self.applications[appname] = url
                     
     def postanalysis(self,results):
-        for appname, url in self.applications.iteritems():
+        for appname, url in self.applications.items():
             results.addOverallResult(self.friendlyname,
                                      desc = self.desc,
                                      data = self.all_urls[appname],

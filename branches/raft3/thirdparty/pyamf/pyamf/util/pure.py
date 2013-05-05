@@ -14,9 +14,9 @@ Do not reference directly, use L{pyamf.util.BufferedByteStream} instead.
 import struct
 
 try:
-    from cStringIO import StringIO
+    from io import StringIO
 except ImportError:
-    from StringIO import StringIO
+    from io import StringIO
 
 from pyamf import python
 
@@ -496,7 +496,7 @@ class DataTypeMixIn(object):
 
         bytes = u
 
-        if isinstance(bytes, unicode):
+        if isinstance(bytes, str):
             bytes = u.encode("utf8")
 
         self.write(struct.pack("%s%ds" % (self.endian, len(bytes)), bytes))

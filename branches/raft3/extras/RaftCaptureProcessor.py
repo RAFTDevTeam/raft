@@ -22,20 +22,20 @@
 # THE SOFTWARE
 # 
 
-import urllib2, StringIO, os, time, bz2, sys
+import urllib.request, urllib.error, urllib.parse, io, os, time, bz2, sys
 import re, string
 import threading
-import cStringIO
+import io
 from urllib2 import urlparse
 from xml.sax.saxutils import escape, quoteattr
 
-class RaftCaptureProcessor(urllib2.BaseHandler):
-    class _wrapper(StringIO.StringIO):
+class RaftCaptureProcessor(urllib.request.BaseHandler):
+    class _wrapper(io.StringIO):
         def __init__(self, parent, request, response):
             request = request
             self.response = response
             data = parent.write_capture(request, response)
-            StringIO.StringIO.__init__(self, data)
+            io.StringIO.__init__(self, data)
 
         def __getattr__(self, name):
             return getattr(self.response,name)
@@ -81,7 +81,7 @@ class RaftCaptureProcessor(urllib2.BaseHandler):
 
     def __write_capture(self, request, response):
 
-        ohandle = cStringIO.StringIO()
+        ohandle = io.StringIO()
         response_body = ''
         saved_exception = None
         try:
@@ -132,7 +132,7 @@ class RaftCaptureProcessor(urllib2.BaseHandler):
             else:
                 try:
                     response_body = response.read()
-                except urllib2.IncompleteRead, e:
+                except urllib2.IncompleteRead as e:
                     saved_exception = e
             response_headers = 'HTTP/1.1 %d %s\r\n' % (status, response.msg) # TODO: is there access to the HTTP version?
             response_headers += ''.join(headers.headers)
@@ -163,7 +163,7 @@ class RaftCaptureProcessor(urllib2.BaseHandler):
                 self.close()
                 self.open_file()
 
-        except Exception, e:
+        except Exception as e:
             sys.stderr.write('*** unhandled error in RaftCaptureProcessor: %s\n' % (e))
 
         if saved_exception:
@@ -171,7 +171,7 @@ class RaftCaptureProcessor(urllib2.BaseHandler):
 
         return response_body
 
-class IgnoreRedirect(urllib2.HTTPRedirectHandler):
+class IgnoreRedirect(urllib.request.HTTPRedirectHandler):
     def http_error_301(self, req, fp, code, msg, hdrs):
         return fp
     def http_error_302(self, req, fp, code, msg, hdrs):
@@ -203,24 +203,24 @@ if '__main__' == __name__:
 
     with closing(RaftCaptureProcessor('.')) as raftCapture:
         # proxyHandler = urllib2.ProxyHandler({'http':'localhost:8080', 'https':'localhost:8080'})
-        opener = urllib2.build_opener(raftCapture, )
+        opener = urllib.request.build_opener(raftCapture, )
 
         for target in targets:
             url = 'http://'+target+'/'
-            req = urllib2.Request(url)
+            req = urllib.request.Request(url)
             req.add_header('User-agent', 'Mozilla/5.0 (Windows NT 5.1; rv:2.0) Gecko/20100101 Firefox/4.0')
 
             try:
                 response = opener.open(req, timeout=5)
-            except urllib2.HTTPError, error:
+            except urllib.error.HTTPError as error:
                 response = error
-            except urllib2.URLError, error:
+            except urllib.error.URLError as error:
                 sys.stdout.write('failed on %s: %s\n' % (url, error))
                 sys.stdout.flush()
                 response = None
 
             if False and response:
-                print('%d %s' % (response.getcode(), response.msg))
-                print(''.join(response.headers.headers))
-                print(response.read())
+                print(('%d %s' % (response.getcode(), response.msg)))
+                print((''.join(response.headers.headers)))
+                print((response.read()))
 

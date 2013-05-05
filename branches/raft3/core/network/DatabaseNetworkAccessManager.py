@@ -121,7 +121,7 @@ class DatabaseNetworkAccessManager(BaseNetworkAccessManager):
                                               QtNetwork.QNetworkAccessManager.createRequest(self, operation, request, outgoingData), self)
 
             return reply
-        except Exception, error:
+        except Exception as error:
             # exceptions will cause a segfault
             self.framework.report_exception(error)
             request.setUrl(QUrl('about:blank'))

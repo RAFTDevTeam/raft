@@ -234,7 +234,7 @@ class Decoder(codec.Decoder):
 
         attrs = self.readObjectAttributes(obj)
 
-        for key in attrs.keys():
+        for key in list(attrs.keys()):
             try:
                 key = int(key)
             except ValueError:
@@ -252,7 +252,7 @@ class Decoder(codec.Decoder):
         self.context.addObject(obj)
         l = self.stream.read_ulong()
 
-        for i in xrange(l):
+        for i in range(l):
             obj.append(self.readElement())
 
         return obj
@@ -472,7 +472,7 @@ class Encoder(codec.Encoder):
         """
         Similar to L{writeString} but does not encode a type byte.
         """
-        if type(s) is unicode:
+        if type(s) is str:
             s = self.context.getBytesForString(s)
 
         l = len(s)
@@ -532,7 +532,7 @@ class Encoder(codec.Encoder):
 
         @param o: The C{dict} data to be encoded to the AMF0 data stream.
         """
-        for key, val in o.iteritems():
+        for key, val in o.items():
             if type(key) in python.int_types:
                 key = str(key)
 
@@ -555,8 +555,8 @@ class Encoder(codec.Encoder):
         # work out the highest integer index
         try:
             # list comprehensions to save the day
-            max_index = max([y[0] for y in o.items()
-                if isinstance(y[0], (int, long))])
+            max_index = max([y[0] for y in list(o.items())
+                if isinstance(y[0], int)])
 
             if max_index < 0:
                 max_index = 0
@@ -642,7 +642,7 @@ class Encoder(codec.Encoder):
 
         data = xml.tostring(e)
 
-        if isinstance(data, unicode):
+        if isinstance(data, str):
             data = data.encode('utf-8')
 
         self.stream.write_ulong(len(data))

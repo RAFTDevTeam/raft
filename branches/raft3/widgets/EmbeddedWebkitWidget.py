@@ -86,7 +86,7 @@ class EmbeddedWebkitWidget(QObject):
             return
         self.tabWidget.removeTab(index)
         tab_id = self.tabs.pop(index)
-        if self.browserTabs.has_key(tab_id):
+        if tab_id in self.browserTabs:
             browserTab = self.browserTabs[tab_id]
             self.browserTabs.pop(tab_id)
             browserTab.stop()
@@ -95,7 +95,7 @@ class EmbeddedWebkitWidget(QObject):
         if index >= len(self.tabs):
             return
         tab_id = self.tabs[index]
-        if self.browserTabs.has_key(tab_id):
+        if tab_id in self.browserTabs:
             browserTab = self.browserTabs[tab_id]
             self.currentTab = browserTab
             self.set_url_edit_text(self.currentTab)

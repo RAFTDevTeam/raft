@@ -97,12 +97,12 @@ class RequestResponseFactory(QObject):
             splitted = urlparse.urlsplit(rr.responseUrl)
             if splitted.query:
                 qs_values = urlparse.parse_qs(splitted.query, True)
-                for name, value in qs_values.iteritems():
+                for name, value in qs_values.items():
                     rr.requestParams[name] = value
             postDataResults = self.postDataExtractor.process_request(rr.requestHeaders, rr.requestBody)
             if postDataResults:
                 # TODO: support non-name/value pair types
-                for name, value in postDataResults.name_values_dictionary.iteritems():
+                for name, value in postDataResults.name_values_dictionary.items():
                     rr.requestParams[name] = value
 
             if not rr.responseContentType:
