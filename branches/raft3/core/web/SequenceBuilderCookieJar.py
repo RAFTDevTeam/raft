@@ -22,7 +22,7 @@
 #
 
 from core.network.InMemoryCookieJar import InMemoryCookieJar
-from urllib2 import urlparse
+from urllib import parse as urlparse
 
 class SequenceBuilderCookieJar(InMemoryCookieJar):
     def __init__(self, framework, parent = None):

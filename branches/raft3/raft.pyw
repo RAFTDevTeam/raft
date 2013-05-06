@@ -36,16 +36,24 @@ import traceback
 
 #ToDo: Provide more detail in the try statements when modules are not found.
 try:
-    from PyQt4.QtCore import (Qt, SIGNAL, QObject, pyqtSignature, QSettings, QDir, QThread, QMutex, QDateTime, QString)
+    from PyQt4.QtCore import (Qt, SIGNAL, QObject, pyqtSignature, QSettings, QDir, QThread, QMutex, QDateTime)
     from PyQt4.QtGui import *
     from PyQt4.QtNetwork import *
-except:
+except Exception as error:
+    print(error)
     print("You need to have PyQT4 installed. Use your package manager to install it")
     sys.exit(1)
 
 try:
+    from PyQt4.QtCore import QString
+except ImportError:
+    # we are using Python3 so QString is not defined
+    QString = type("")
+
+try:
     from PyQt4 import Qsci
-except:
+except Exception as error:
+    print(error)
     print("You do not have QScintilla installed")
     sys.exit(1)
 
@@ -76,7 +84,8 @@ add_thirdparty_path(basepath)
 
 try:
     import pyamf.sol
-except:
+except Exception as error:
+    print(error)
     print("You do not have a usable version of pyamf installed")
     sys.exit(1)
 

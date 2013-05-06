@@ -23,7 +23,7 @@ from .BaseExtractor import BaseExtractor
 from .JSLiteParser import JSLiteParser
 from lxml import etree
 from io import StringIO
-from urllib2 import urlparse
+from urllib import parse as urlparse
 import urllib.request, urllib.error, urllib.parse
 import hashlib
 import re

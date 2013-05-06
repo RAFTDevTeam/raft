@@ -20,7 +20,7 @@
 #
 
 from PyQt4.QtCore import QUrl
-from urllib2 import urlparse
+from urllib import parse as urlparse
 from sqlite3 import dbapi2 as sqlite
 
 import os

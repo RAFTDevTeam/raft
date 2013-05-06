@@ -26,7 +26,7 @@ import urllib.request, urllib.error, urllib.parse, io, os, time, bz2, sys
 import re, string
 import threading
 import io
-from urllib2 import urlparse
+from urllib import parse as urlparse
 from xml.sax.saxutils import escape, quoteattr
 
 class RaftCaptureProcessor(urllib.request.BaseHandler):

@@ -23,7 +23,7 @@ from PyQt4.QtGui import *
 
 import re
 from core.database.constants import *
-from urllib2 import urlparse
+from urllib import parse as urlparse
 from io import StringIO
 from collections import deque
 

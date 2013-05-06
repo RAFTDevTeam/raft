@@ -22,7 +22,7 @@
 from .BaseExtractor import BaseExtractor
 from .JSParser import JSParser
 from .JSLiteParser import JSLiteParser
-from urllib2 import urlparse
+from urllib import parse as urlparse
 import re
 
 class JSParseResults():

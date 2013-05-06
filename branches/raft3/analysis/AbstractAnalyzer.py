@@ -19,7 +19,7 @@
 # along with RAFT.  If not, see <http://www.gnu.org/licenses/>.
 #
 import json
-from . import resultsclasses.AnalysisResults
+from .resultsclasses import AnalysisResults
 from utility import TreeWidgetTools
 from PyQt4.QtGui import *
 from PyQt4.QtCore import Qt

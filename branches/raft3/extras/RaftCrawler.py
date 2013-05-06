@@ -21,7 +21,7 @@
 #
 
 from xml.sax.saxutils import escape
-from urllib2 import urlparse
+from urllib import parse as urlparse
 import sys, logging, os, bz2, time, collections
 import re
 import traceback

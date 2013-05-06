@@ -20,7 +20,7 @@
 #
 # Classes to support parsing Paros converstation log files
 import re, time, os
-from urllib2 import urlparse
+from urllib import parse as urlparse
 import logging
 
 class paros_parse_message():

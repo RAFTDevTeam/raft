@@ -23,7 +23,7 @@
 
 from PyQt4.QtCore import (Qt, SIGNAL, QObject, QMutex)
 
-from urllib2 import urlparse
+from urllib import parse as urlparse
 
 class SequenceParameter():
     def __init__(self, url, source, name, Type, position):

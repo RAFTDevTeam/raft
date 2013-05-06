@@ -27,7 +27,7 @@ from PyQt4 import Qsci
 
 
 from io import StringIO
-from urllib2 import urlparse
+from urllib import parse as urlparse
 import uuid
 import re
 import json

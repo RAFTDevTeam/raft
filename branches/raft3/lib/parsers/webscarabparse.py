@@ -20,7 +20,7 @@
 #
 # Classes to support parsing WebScarab converstation log files
 import re, time, os
-from urllib2 import urlparse
+from urllib import parse as urlparse
 import logging
 
 class webscarab_parse_conversation():

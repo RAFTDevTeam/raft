@@ -29,7 +29,7 @@ import collections
 import argparse
 from io import StringIO
 from xml.sax.saxutils import escape
-from urllib2 import urlparse
+from urllib import parse as urlparse
 import traceback
 import adns
 from OpenSSL import SSL

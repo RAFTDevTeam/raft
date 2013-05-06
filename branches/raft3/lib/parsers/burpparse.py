@@ -20,7 +20,7 @@
 #
 # Classes to support parsing Burp logs and state files
 import re, time, struct
-from urllib2 import urlparse
+from urllib import parse as urlparse
 import zipfile, string
 import logging, traceback
 

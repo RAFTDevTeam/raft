@@ -21,7 +21,7 @@
 
 from PyQt4.QtCore import Qt, QObject, SIGNAL, QThread, QTimer, QMutex, QUrl
 from PyQt4.QtNetwork import QNetworkCookie
-from urllib2 import urlparse
+from urllib import parse as urlparse
 import re
 
 from core.data.SiteMapModel import SiteMapNode

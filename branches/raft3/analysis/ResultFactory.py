@@ -21,11 +21,10 @@
 
 import ast
 
-from . import resultsclasses.AnalysisRun
-from . import resultsclasses.AnalysisResults
-from . import resultsclasses.ResultSet
-from . import resultsclasses.SingleResult
-
+from .resultsclasses import AnalysisRun
+from .resultsclasses import AnalysisResults
+from .resultsclasses import ResultSet
+from .resultsclasses import SingleResult
 
 class ResultFactory(object):
     

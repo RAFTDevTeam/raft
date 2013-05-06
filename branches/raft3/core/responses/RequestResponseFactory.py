@@ -29,7 +29,7 @@ from core.responses.RequestResponse import RequestResponse
 from utility import ContentHelper
 
 import re
-from urllib2 import urlparse
+from urllib import parse as urlparse
 import cgi
 
 class RequestResponseFactory(QObject):

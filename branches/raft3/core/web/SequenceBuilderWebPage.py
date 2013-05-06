@@ -25,6 +25,12 @@ import PyQt4
 from PyQt4 import QtWebKit, QtNetwork
 from PyQt4.QtCore import *
 
+try:
+    from PyQt4.QtCore import QString
+except ImportError:
+    # we are using Python3 so QString is not defined
+    QString = type("")
+
 import uuid
 from core.web.BaseWebPage import BaseWebPage
 

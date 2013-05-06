@@ -627,7 +627,7 @@ def is_float_broken():
     @rtype: C{bool}
     """
     return str(python.NaN) != str(
-        struct.unpack("!d", '\xff\xf8\x00\x00\x00\x00\x00\x00')[0])
+        struct.unpack("!d", b'\xff\xf8\x00\x00\x00\x00\x00\x00')[0])
 
 
 # init the module from here ..

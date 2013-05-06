@@ -23,7 +23,7 @@ import sys, re
 
 from raftparse import raft_parse_xml
 import urllib.request, urllib.error, urllib.parse
-from urllib2 import urlparse
+from urllib import parse as urlparse
 import hashlib
 import time
 

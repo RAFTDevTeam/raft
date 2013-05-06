@@ -23,7 +23,7 @@
 
 from .BaseExtractor import BaseExtractor
 from io import StringIO
-from urllib2 import urlparse
+from urllib import parse as urlparse
 import cgi
 import sys
 

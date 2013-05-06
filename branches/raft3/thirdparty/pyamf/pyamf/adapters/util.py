@@ -9,7 +9,7 @@ Useful helpers for adapters.
 
 import builtins
 
-if not hasattr(__builtin__, 'set'):
+if not hasattr(__builtins__, 'set'):
     from sets import Set as set
 
 

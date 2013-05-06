@@ -21,7 +21,7 @@
 from lxml import etree
 import sys, bz2, gzip
 import re
-from urllib2 import urlparse
+from urllib import parse as urlparse
 import logging, traceback
 from io import StringIO
 from xml.sax.saxutils import escape

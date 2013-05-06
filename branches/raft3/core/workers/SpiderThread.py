@@ -30,7 +30,7 @@ from core.crawler.SpiderRules import SpiderRules
 
 import re
 import urllib.request, urllib.error, urllib.parse
-from urllib2 import urlparse
+from urllib import parse as urlparse
 from io import StringIO
 from collections import deque
 import uuid

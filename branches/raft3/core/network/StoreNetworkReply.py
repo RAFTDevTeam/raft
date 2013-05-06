@@ -23,7 +23,7 @@ from PyQt4.QtCore import QTimer, SIGNAL, QUrl, QObject, QByteArray, QMetaType
 
 from io import StringIO
 import time, re, traceback
-from urllib2 import urlparse
+from urllib import parse as urlparse
 
 class StoreNetworkReply(QNetworkReply):
     def __init__(self, framework, url, operation, request, requestContent, cookieJar, reply, parent = None):

@@ -21,7 +21,7 @@
 #
 
 import time
-from urllib2 import urlparse
+from urllib import parse as urlparse
 
 from PyQt4.QtCore import Qt, SIGNAL, QObject, QModelIndex
 from PyQt4.QtGui import *

@@ -25,7 +25,13 @@
 
 import inspect
 
-from PyQt4.QtCore import Qt, QObject, SIGNAL, QThread, QTimer, QMutex, QString
+from PyQt4.QtCore import Qt, QObject, SIGNAL, QThread, QTimer, QMutex
+
+try:
+    from PyQt4.QtCore import QString
+except ImportError:
+    # we are using Python3 so QString is not defined
+    QString = type("")
 
 from io import StringIO
 
