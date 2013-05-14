@@ -67,7 +67,7 @@ def process_import(proxy_log, framework, source):
                 if response:
                     response_headers, response_body = response[0], response[1]
                 else:
-                    response_headers, response_body = '', ''
+                    response_headers, response_body = b'', b''
 
                 if 'notes' in extras:
                     notes = extras['notes']

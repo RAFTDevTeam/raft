@@ -1,7 +1,7 @@
 #
 # Author: Gregory Fleischer (gfleischer@gmail.com)
 #
-# Copyright (c) 2011 RAFT Team
+# Copyright (c) 2011-2013 RAFT Team
 #
 # This file is part of RAFT.
 #
@@ -26,9 +26,9 @@ import logging, traceback
 
 class BurpUtil():
     def __init__(self):
-        self.re_content_type = re.compile(r'^Content-Type:\s*([-_+0-9a-z.]+/[-_+0-9a-z.]+(?:\s*;\s*\S+=\S+)*)\s*$', re.I)
-        self.re_request = re.compile(r'^(\S+)\s+((?:https?://(?:\S+\.)+\w+(?::\d+)?)?/.*)\s+HTTP/\d+\.\d+\s*$', re.I)
-        self.re_response = re.compile(r'^HTTP/\d+\.\d+\s+(\d{3}).*\s*$', re.M)
+        self.re_content_type = re.compile(br'^Content-Type:\s*([-_+0-9a-z.]+/[-_+0-9a-z.]+(?:\s*;\s*\S+=\S+)*)\s*$', re.I)
+        self.re_request = re.compile(br'^(\S+)\s+((?:https?://(?:\S+\.)+\w+(?::\d+)?)?/.*)\s+HTTP/\d+\.\d+\s*$', re.I)
+        self.re_response = re.compile(br'^HTTP/\d+\.\d+\s+(\d{3}).*\s*$', re.M)
 
     def split_request_block(self, request):
         request_headers, request_body = self.split_block(request)
@@ -37,7 +37,7 @@ class BurpUtil():
     def split_response_block(self, response):
         response_headers, response_body = self.split_block(response)
         m = self.re_response.match(response_headers)
-        if m and '100' == m.group(1):
+        if m and b'100' == m.group(1):
             # TODO: decide if this is best way to handle
             actual_response_headers, actual_response_body = self.split_block(response_body)
             m = self.re_response.match(actual_response_headers)
@@ -47,17 +47,17 @@ class BurpUtil():
 
     def split_block(self, block):
         c = 4
-        n = block.find('\r\n\r\n')
+        n = block.find(b'\r\n\r\n')
         if -1 == n:
             c = 2
-            block.find('\n\n')
+            block.find(b'\n\n')
         if -1 == n:
             n = len(block)
             c = 0
         return (block[0:n+c], block[n+c:])
 
     def get_content_type(self, headers):
-        content_type = ''
+        content_type = b''
         for line in headers.splitlines():
             m = self.re_content_type.search(line)
             if m:
@@ -232,7 +232,7 @@ class burp_parse_state():
         self.logger.debug('read burp state version: %d', version)
 
     def __make_url(self, scheme, host, port, path):
-        url = scheme + '://' + host
+        url = scheme + b'://' + host
         if 'http' == scheme and 80 == port:
             pass
         elif 'https' == scheme and 443 == port:
@@ -664,7 +664,7 @@ class burp_dump_state(burp_parse_state):
 class burp_parse_log():
     """ Parses Burp log file into request and result data """
 
-    DELIMITER = '======================================================'
+    DELIMITER = b'======================================================'
 
     S_INITIAL = 1
     S_DELIMITER = 2
@@ -678,17 +678,17 @@ class burp_parse_log():
         self.util = BurpUtil()
         self.burpfile = burpfile
 
-        self.re_burp = re.compile(r'^(\d{1,2}:\d{1,2}:\d{1,2}\s+(?:AM|PM))\s+(https?://(?:\S+\.)*\w+:\d+)(?:\s+\[((?:\d{1,3}\.){3}\d{1,3})\])?\s*$', re.I)
-        self.re_content_length = re.compile(r'^Content-Length:\s*(\d+)\s*$', re.I)
-        self.re_chunked = re.compile(r'^Transfer-Encoding:\s*chunked\s*$', re.I)
-        self.re_chunked_length = re.compile('^[a-f0-9]+$', re.I)
-        self.re_date = re.compile(r'^Date:\s*(\w+,.*\w+)\s*$', re.I)
+        self.re_burp = re.compile(br'^(\d{1,2}:\d{1,2}:\d{1,2}\s+(?:AM|PM))\s+(https?://(?:\S+\.)*\w+:\d+)(?:\s+\[((?:\d{1,3}\.){3}\d{1,3})\])?\s*$', re.I)
+        self.re_content_length = re.compile(br'^Content-Length:\s*(\d+)\s*$', re.I)
+        self.re_chunked = re.compile(br'^Transfer-Encoding:\s*chunked\s*$', re.I)
+        self.re_chunked_length = re.compile(b'^[a-f0-9]+$', re.I)
+        self.re_date = re.compile(br'^Date:\s*(\w+,.*\w+)\s*$', re.I)
 
         self.file = open(self.burpfile, 'rb')
 
         self.state = self.S_INITIAL
         self.peaked = False
-        self.peakbuf = ''
+        self.peakbuf = b''
 
     def __iter__(self):
         return self
@@ -710,25 +710,25 @@ class burp_parse_log():
             host = p1.hostname
 
         # TODO: maybe change this to use hostname and port?
-        if 'http' == scheme:
-            netloc = netloc.replace(':80','')
-        elif 'https' == scheme:
-            netloc = netloc.replace(':443','')
+        if b'http' == scheme:
+            netloc = netloc.replace(b':80',b'')
+        elif b'https' == scheme:
+            netloc = netloc.replace(b':443',b'')
         
-        url = scheme + '://' + netloc + p2.path
+        url = scheme + b'://' + netloc + p2.path
         if p2.query:
-            url += '?' + p2.query
+            url += b'?' + p2.query
         if p2.fragment:
-            url += '#' + p2.fragment
+            url += b'#' + p2.fragment
 
         return url, host
 
     def __synthesize_date(self, burptime, datetime):
         if not burptime and not datetime:
-            return ''
+            return b''
         if datetime:
             try:
-                tm = time.strptime(datetime, '%a, %d %b %Y %H:%M:%S %Z')
+                tm = time.strptime(str(datetime,'ascii'), '%a, %d %b %Y %H:%M:%S %Z')
                 tm = time.localtime(time.mktime(tm)-time.timezone)
             except Exception as e:
                 self.logger.debug('Failed parsing datetime [%s]: %s' % (datetime, e))
@@ -737,15 +737,15 @@ class burp_parse_log():
 
         # use today's date
         # TODO: improve
-        n = burptime.rfind(' ')
-        hms = burptime[0:n].split(':')
+        n = burptime.rfind(b' ')
+        hms = burptime[0:n].split(b':')
         ampm = burptime[n+1:]
 
         h = int(hms[0])
-        if 'PM' == ampm:
+        if b'PM' == ampm:
             if h < 12:
                 h += 12
-        elif 'AM' == ampm:
+        elif b'AM' == ampm:
             if h == 12:
                 h = 0
 
@@ -756,7 +756,7 @@ class burp_parse_log():
             tm = time.localtime(time.mktime(tm)-60*60*24)
 
         reqtm = time.mktime((tm.tm_year, tm.tm_mon, tm.tm_mday, h, m, s, tm.tm_wday, tm.tm_yday, tm.tm_isdst))
-        return time.asctime(time.localtime(reqtm))
+        return bytes(time.asctime(time.localtime(reqtm)), 'ascii')
 
     def __peak_line(self):
         line = self.file.readline()
@@ -787,7 +787,7 @@ class burp_parse_log():
         return data
 
     def __read_chunked(self, line):
-        data = ''
+        data = b''
         while line:
             length = int(line, 16)
             if 0 == length:
@@ -803,9 +803,9 @@ class burp_parse_log():
 
     def __process_block(self, firstline, skipbody = False):
         headers = firstline
-        body = ''
-        datetime = ''
-        content_type = ''
+        body = b''
+        datetime = b''
+        content_type = b''
         content_length = -1
         chunked = False
         while True:
@@ -862,7 +862,7 @@ class burp_parse_log():
         return self.__process_block(firstline)
 
     def __process_response(self, method, firstline):
-        return self.__process_block(firstline, 'HEAD' == method.upper())
+        return self.__process_block(firstline, b'HEAD' == method.upper())
         
     def __next__(self):
         have_burp_header, have_http_request, have_http_response = False, False, False
@@ -911,16 +911,16 @@ class burp_parse_log():
                     hostip = m.group(3)
                     if not hostip:
                         parsed = urlparse.urlsplit(hosturl)
-                        hostip = parsed.netloc[0:parsed.netloc.find(':')]
+                        hostip = parsed.netloc[0:parsed.netloc.find(b':')]
                     have_burp_header = True
                     have_http_request, have_http_response = False, False
                     request, response = None, None
                     url = hosturl
-                    datetime = ''
+                    datetime = b''
                     status = 0
-                    method = ''
-                    requrl = ''
-                    content_type = ''
+                    method = b''
+                    requrl = b''
+                    content_type = b''
                     self.state = self.S_BURP_HEADER
                     continue
 

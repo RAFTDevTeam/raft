@@ -7,7 +7,7 @@
 #          Justin Engler
 #          Seth Law
 #
-# Copyright (c) 2011 RAFT Team
+# Copyright (c) 2011-2013 RAFT Team
 #
 # This file is part of RAFT.
 #
@@ -25,7 +25,10 @@
 # along with RAFT.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import os, hashlib, zlib, traceback
+import os
+import hashlib
+import zlib
+import traceback
 import shutil
 import time,datetime
 import uuid
@@ -37,19 +40,25 @@ from core.database.constants import *
 
 class Compressed(object):
     def __init__(self, value):
+        # TODO: remove this check eventually
+        if bytes != type(value):
+            raise Exception('unsupported type[%s] for Compressed objects: [%s]' % (type(value), value))
         self.value = value
 
     def __str__(self):
-        return str(self.value)
+        return str(self.value, 'utf-8') # assume utf-8 for unknown content
 
     def __repr__(self):
         return str(self.value)
 
+    def __bytes__(self):
+        return self.value
+
 def adapt_compressed(compressed):
-    return buffer(zlib.compress(compressed.value))
+    return zlib.compress(compressed.value)
 
 def convert_compressed(blob):
-    return Compressed(zlib.decompress(str(blob)))
+    return Compressed(zlib.decompress(blob))
 
 class Db:
     """ Db database class """
@@ -369,7 +378,7 @@ class Db:
                           )
                           """)
 
-        cursor.execute("""INSERT INTO configuration (Component, ConfigName, ConfigValue) values (?, ?, ?)""", ['RAFT', 'black_hole_network', Compressed(str(True))])
+        cursor.execute("""INSERT INTO configuration (Component, ConfigName, ConfigValue) values (?, ?, ?)""", ['RAFT', 'black_hole_network', Compressed(bytes(True))])
 
         conn.commit()
         cursor.close()
@@ -668,7 +677,7 @@ class Db:
     def insert_sequence_source_parameter(self, cursor, insertlist):
         self.qlock.lock()
         try:
-            insertlist[SequenceSourceParameters.INPUT_VALUE] = Compressed(str(insertlist[SequenceSourceParameters.INPUT_VALUE]))
+            insertlist[SequenceSourceParameters.INPUT_VALUE] = Compressed(insertlist[SequenceSourceParameters.INPUT_VALUE])
             cursor.execute("""INSERT INTO sequence_source_parameters (
                               Sequence_Id, 
                               Response_Id, 
@@ -692,7 +701,7 @@ class Db:
     def insert_sequence_target_parameter(self, cursor, insertlist):
         self.qlock.lock()
         try:
-            insertlist[SequenceTargetParameters.INPUT_VALUE] = Compressed(str(insertlist[SequenceTargetParameters.INPUT_VALUE]))
+            insertlist[SequenceTargetParameters.INPUT_VALUE] = Compressed(insertlist[SequenceTargetParameters.INPUT_VALUE])
             cursor.execute("""INSERT INTO sequence_target_parameters (
                               Sequence_Id, 
                               Response_Id, 
@@ -715,7 +724,7 @@ class Db:
     def insert_sequence_cookie(self, cursor, insertlist):
         self.qlock.lock()
         try:
-            insertlist[SequenceCookies.COOKIE_RAW_VALUE] = Compressed(str(insertlist[SequenceCookies.COOKIE_RAW_VALUE]))
+            insertlist[SequenceCookies.COOKIE_RAW_VALUE] = Compressed(insertlist[SequenceCookies.COOKIE_RAW_VALUE])
             cursor.execute("""INSERT INTO sequence_cookies (
                               Sequence_Id, 
                               Cookie_Domain,
@@ -880,8 +889,8 @@ class Db:
 
     def insert_content_data(self, cursor, value):
         if not value or len(value) == 0:
-            digest = ''
-            value = ''
+            digest = b''
+            value = b''
         else:
             h = self.hashalgo()
             h.update(value)
@@ -1016,7 +1025,7 @@ class Db:
                 else:
                     value = ''
             else:
-                value = str(row[0])
+                value = str(bytes(row[0]), 'utf-8')
             if rtype == bool:
                 if not value:
                     return False
@@ -1036,7 +1045,9 @@ class Db:
         if not is_locked:
             self.qlock.lock()
         try:
-            cursor.execute("UPDATE configuration SET ConfigValue=? WHERE Component=? AND ConfigName=?", [Compressed(str(value)), component, name])
+            if type(value) is not bytes:
+                value = bytes(str(value), 'utf-8')
+            cursor.execute("UPDATE configuration SET ConfigValue=? WHERE Component=? AND ConfigName=?", [Compressed(value), component, name])
             self.commit()
         finally:
             if not is_locked:
@@ -1049,7 +1060,9 @@ class Db:
             count = int(cursor.fetchone()[0])
             if 0 == count:
                 # TODO: gross
-                cursor.execute("INSERT INTO configuration (Component, ConfigName, ConfigValue) VALUES (?, ?, ?)", [component, name, Compressed(str(value))])
+                if type(value) is not bytes:
+                    value = bytes(str(value), 'utf-8')
+                cursor.execute("INSERT INTO configuration (Component, ConfigName, ConfigValue) VALUES (?, ?, ?)", [component, name, Compressed(value)])
                 self.commit()
             else:
                 self.update_config_value(cursor, component, name, value, True)
