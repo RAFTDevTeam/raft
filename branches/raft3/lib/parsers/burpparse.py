@@ -23,6 +23,7 @@ import re, time, struct
 from urllib import parse as urlparse
 import zipfile, string
 import logging, traceback
+import base64
 
 class BurpUtil():
     def __init__(self):
@@ -108,7 +109,7 @@ class burp_parse_state():
             raise Exception
 
         self.states = []
-        self.buffer = ''
+        self.buffer = b''
         self.state = self.S_INITIAL
 
     def __iter__(self):
@@ -116,7 +117,7 @@ class burp_parse_state():
 
     def __read_data(self, length):
 
-        data = ''
+        data = b''
         if self.buffer:
             # buffered data
             if len(self.buffer) >= length:
@@ -124,7 +125,7 @@ class burp_parse_state():
                 self.buffer = self.buffer[length:]
             else:
                 data = self.buffer
-                self.buffer = ''
+                self.buffer = b''
 
         readlen = length - len(data)
         while readlen > 0:
@@ -148,7 +149,7 @@ class burp_parse_state():
         while True:
             b = self.__read_data(1)
             data += b
-            if '>' == b:
+            if b'>' == b:
                 break
         return data
 
@@ -157,7 +158,7 @@ class burp_parse_state():
 
     def __read_next(self):
         token = self.__read_data(1)
-        if '<' == token:
+        if b'<' == token:
             tag = self.__read_next_tag(token)
             return (self.T_TAG, tag)
         else:
@@ -180,7 +181,7 @@ class burp_parse_state():
                 datavalue = self.__read_data(datalen)
                 return (datatype, datavalue)
             elif self.T_UNKNOWN_5 == datatype: # not known, maybe empty data/emptry string?
-                return (datatype, '')
+                return (datatype, b'')
             else:
                 raise Exception
 
@@ -222,52 +223,52 @@ class burp_parse_state():
         return result[1]
 
     def __read_node_int(self, tagname):
-        self.__read_tag('<'+tagname+'>')
+        self.__read_tag(b'<'+tagname+b'>')
         result = self.__read_int()
-        self.__read_tag('</'+tagname+'>')
+        self.__read_tag(b'</'+tagname+b'>')
         return result
         
     def __process_version(self):
-        version = self.__read_node_int('version')
+        version = self.__read_node_int(b'version')
         self.logger.debug('read burp state version: %d', version)
 
     def __make_url(self, scheme, host, port, path):
         url = scheme + b'://' + host
-        if 'http' == scheme and 80 == port:
+        if b'http' == scheme and 80 == port:
             pass
-        elif 'https' == scheme and 443 == port:
+        elif b'https' == scheme and 443 == port:
             pass
         else:
-            url += ':' + str(port)
-        if '/' != path[0]:
-            url += '/'
+            url += b':' + str(port)
+        if b'/' != path[0]:
+            url += b'/'
         url += path
         return url
 
     def __process_url(self):
         port = 80
         https = False
-        scheme = 'http'
+        scheme = b'http'
         path = None
-        url = ''
+        url = b''
         nextdata = self.__read_next()
-        while not (self.T_TAG == nextdata[0] and '</url>' == nextdata[1]):
+        while not (self.T_TAG == nextdata[0] and b'</url>' == nextdata[1]):
             if self.T_TAG == nextdata[0]:
                 tagname = nextdata[1]
-                if '<https>' == tagname:
+                if b'<https>' == tagname:
                     https = self.__read_bool()
                     if https:
-                        scheme = 'https'
-                    self.__read_tag('</https>')
-                elif '<host>' == tagname:
+                        scheme = b'https'
+                    self.__read_tag(b'</https>')
+                elif b'<host>' == tagname:
                     host = self.__read_string()
-                    self.__read_tag('</host>')
-                elif '<file>' == tagname:
+                    self.__read_tag(b'</host>')
+                elif b'<file>' == tagname:
                     path = self.__read_string()
-                    self.__read_tag('</file>')
-                elif '<port>' == tagname:
+                    self.__read_tag(b'</file>')
+                elif b'<port>' == tagname:
                     port = self.__read_int()
-                    self.__read_tag('</port>')
+                    self.__read_tag(b'</port>')
                 else:
                     self.logger.debug('unhandled tag: [%s]' % tagname)
             else:
@@ -284,12 +285,12 @@ class burp_parse_state():
         return time.asctime(time.localtime(dt))
 
     def __parse_method_content_type(self, request, response):
-        method = ''
-        content_type = ''
+        method = b''
+        content_type = b''
 
         # get method from request header
         headers = request[0]
-        n = headers.find('\n')
+        n = headers.find(b'\n')
         if n != -1:
             line = headers[0:n]
             m = self.util.re_request.search(line)
@@ -303,39 +304,39 @@ class burp_parse_state():
         return (method, content_type)
 
     def __process_info(self, url, host):
-        hostip = ''
+        hostip = b''
         status = 0
-        datetime = ''
+        datetime = b''
         request = None
         response = None
         resplen = -1
         state = None
 
         nextdata = self.__read_next()
-        while not (self.T_TAG == nextdata[0] and '</info>' == nextdata[1]):
+        while not (self.T_TAG == nextdata[0] and b'</info>' == nextdata[1]):
             if self.T_TAG == nextdata[0]:
                 tagname = nextdata[1]
-                if '<statusCode>' == tagname:
+                if b'<statusCode>' == tagname:
                     status = self.__read_int()
-                    self.__read_tag('</statusCode>')
-                elif '<responseLength>' == tagname:
+                    self.__read_tag(b'</statusCode>')
+                elif b'<responseLength>' == tagname:
                     resplen = self.__read_int()
-                    self.__read_tag('</responseLength>')
-                elif '<responseLength>' == tagname:
+                    self.__read_tag(b'</responseLength>')
+                elif b'<responseLength>' == tagname:
                     resplen = self.__read_int()
-                    self.__read_tag('</responseLength>')
-                elif '<response>' == tagname:
+                    self.__read_tag(b'</responseLength>')
+                elif b'<response>' == tagname:
                     response = self.util.split_response_block(self.__read_string())
-                    self.__read_tag('</response>')
-                elif '<request>' == tagname:
+                    self.__read_tag(b'</response>')
+                elif b'<request>' == tagname:
                     request = self.util.split_request_block(self.__read_string())
-                    self.__read_tag('</request>')
-                elif '<state>' == tagname:
+                    self.__read_tag(b'</request>')
+                elif b'<state>' == tagname:
                     state = self.__read_int()
-                    self.__read_tag('</state>')
-                elif  '<time>' == tagname:
+                    self.__read_tag(b'</state>')
+                elif  b'<time>' == tagname:
                     datetime = self.__read_datetime()
-                    self.__read_tag('</time>')
+                    self.__read_tag(b'</time>')
                 else:
                     self.logger.debug('unhandled tag: [%s]' % tagname)
             else:
@@ -354,10 +355,10 @@ class burp_parse_state():
         result = None
         url = None
         host = None
-        while not (self.T_TAG == nextdata[0] and '</item>' == nextdata[1]):
-            if (self.T_TAG == nextdata[0] and '<url>' == nextdata[1]):
+        while not (self.T_TAG == nextdata[0] and b'</item>' == nextdata[1]):
+            if (self.T_TAG == nextdata[0] and b'<url>' == nextdata[1]):
                 url, host = self.__process_url()
-            elif (self.T_TAG == nextdata[0] and '<info>' == nextdata[1]):
+            elif (self.T_TAG == nextdata[0] and b'<info>' == nextdata[1]):
                 if result:
                     raise Exception
                 result = self.__process_info(url, host)
@@ -366,10 +367,10 @@ class burp_parse_state():
 
     def __process_historyItem(self):
 
-        hostip = ''
-        host = ''
+        hostip = b''
+        host = b''
         status = 0
-        datetime = ''
+        datetime = b''
         request = None
         response = None
         resplen = -1
@@ -377,35 +378,35 @@ class burp_parse_state():
         url = None
 
         nextdata = self.__read_next()
-        while not (self.T_TAG == nextdata[0] and '</historyItem>' == nextdata[1]):
+        while not (self.T_TAG == nextdata[0] and b'</historyItem>' == nextdata[1]):
             if self.T_TAG == nextdata[0]:
                 tagname = nextdata[1]
-                if '<url>' == tagname:
+                if b'<url>' == tagname:
                     url, host = self.__process_url()
-                elif '<statusCode>' == tagname:
+                elif b'<statusCode>' == tagname:
                     status = self.__read_int()
-                    self.__read_tag('</statusCode>')
-                elif '<ipAddress>' == tagname:
+                    self.__read_tag(b'</statusCode>')
+                elif b'<ipAddress>' == tagname:
                     hostip = self.__read_string()
-                    self.__read_tag('</ipAddress>')
-                elif  '<time>' == tagname:
+                    self.__read_tag(b'</ipAddress>')
+                elif  b'<time>' == tagname:
                     datetime = self.__read_datetime()
-                    self.__read_tag('</time>')
-                elif '<originalResponse>' == tagname:
+                    self.__read_tag(b'</time>')
+                elif b'<originalResponse>' == tagname:
                     response = self.util.split_response_block(self.__read_string())
-                    self.__read_tag('</originalResponse>')
-                elif '<originalRequest>' == tagname:
+                    self.__read_tag(b'</originalResponse>')
+                elif b'<originalRequest>' == tagname:
                     request = self.util.split_request_block(self.__read_string())
-                    self.__read_tag('</originalRequest>')
-                elif '<editedResponse>' == tagname:
+                    self.__read_tag(b'</originalRequest>')
+                elif b'<editedResponse>' == tagname:
                     response = self.util.split_response_block(self.__read_string())
-                    self.__read_tag('</editedResponse>')
-                elif '<editedRequest>' == tagname:
+                    self.__read_tag(b'</editedResponse>')
+                elif b'<editedRequest>' == tagname:
                     request = self.util.split_request_block(self.__read_string())
-                    self.__read_tag('</editedRequest>')
-                elif '<responseLength>' == tagname:
+                    self.__read_tag(b'</editedRequest>')
+                elif b'<responseLength>' == tagname:
                     resplen = self.__read_int()
-                    self.__read_tag('</responseLength>')
+                    self.__read_tag(b'</responseLength>')
                 else:
                     self.logger.debug('unhandled tag: [%s]' % tagname)
             else:
@@ -421,10 +422,10 @@ class burp_parse_state():
 
     def __process_repeater_historyItem(self):
 
-        hostip = ''
-        host = ''
+        hostip = b''
+        host = b''
         status = 0
-        datetime = ''
+        datetime = b''
         request = None
         response = None
         resplen = -1
@@ -432,29 +433,29 @@ class burp_parse_state():
         url = None
 
         nextdata = self.__read_next()
-        while not (self.T_TAG == nextdata[0] and '</historyItem>' == nextdata[1]):
+        while not (self.T_TAG == nextdata[0] and b'</historyItem>' == nextdata[1]):
             if self.T_TAG == nextdata[0]:
                 tagname = nextdata[1]
-                if '<url>' == tagname:
+                if b'<url>' == tagname:
                     url, host = self.__process_url()
-                elif '<statusCode>' == tagname:
+                elif b'<statusCode>' == tagname:
                     status = self.__read_int()
-                    self.__read_tag('</statusCode>')
-                elif '<ipAddress>' == tagname:
+                    self.__read_tag(b'</statusCode>')
+                elif b'<ipAddress>' == tagname:
                     hostip = self.__read_string()
-                    self.__read_tag('</ipAddress>')
-                elif  '<time>' == tagname:
+                    self.__read_tag(b'</ipAddress>')
+                elif  b'<time>' == tagname:
                     datetime = self.__read_datetime()
-                    self.__read_tag('</time>')
-                elif '<response>' == tagname:
+                    self.__read_tag(b'</time>')
+                elif b'<response>' == tagname:
                     response = self.util.split_response_block(self.__read_string())
-                    self.__read_tag('</response>')
-                elif '<request>' == tagname:
+                    self.__read_tag(b'</response>')
+                elif b'<request>' == tagname:
                     request = self.util.split_request_block(self.__read_string())
-                    self.__read_tag('</request>')
-                elif '<responseLength>' == tagname:
+                    self.__read_tag(b'</request>')
+                elif b'<responseLength>' == tagname:
                     resplen = self.__read_int()
-                    self.__read_tag('</responseLength>')
+                    self.__read_tag(b'</responseLength>')
                 else:
                     self.logger.debug('unhandled tag: [%s]' % tagname)
             else:
@@ -471,21 +472,21 @@ class burp_parse_state():
     def __process_requestPanel(self):
         nextdata = self.__read_next()
         result = None
-        while not (self.T_TAG == nextdata[0] and '</requestPanel>' == nextdata[1]):
-            if (self.T_TAG == nextdata[0] and '<historyItem>' == nextdata[1]):
+        while not (self.T_TAG == nextdata[0] and b'</requestPanel>' == nextdata[1]):
+            if (self.T_TAG == nextdata[0] and b'<historyItem>' == nextdata[1]):
                 result = self.__process_repeater_historyItem()
             nextdata = self.__read_next()
         return result
 
     def __process_issue(self):
 
-        hostip = ''
-        host = ''
+        hostip = b''
+        host = b''
         status = 0
-        datetime = ''
+        datetime = b''
         request = None
         response = None
-        notes = ''
+        notes = b''
         resplen = -1
 
         url = None
@@ -495,35 +496,35 @@ class burp_parse_state():
         found_r = False
 
         nextdata = self.__read_next()
-        while not (self.T_TAG == nextdata[0] and '</issue>' == nextdata[1]):
+        while not (self.T_TAG == nextdata[0] and b'</issue>' == nextdata[1]):
             if self.T_TAG == nextdata[0]:
                 tagname = nextdata[1]
                 if found_r:
                     pass
-                elif '<url>' == tagname:
+                elif b'<url>' == tagname:
                     url, host = self.__process_url()
-                elif '<statusCode>' == tagname:
+                elif b'<statusCode>' == tagname:
                     status = self.__read_int()
-                    self.__read_tag('</statusCode>')
-                elif '<ipAddress>' == tagname:
+                    self.__read_tag(b'</statusCode>')
+                elif b'<ipAddress>' == tagname:
                     hostip = self.__read_string()
-                    self.__read_tag('</ipAddress>')
-                elif '<id>' == tagname:
+                    self.__read_tag(b'</ipAddress>')
+                elif b'<id>' == tagname:
                     notes = self.__read_string()
-                    self.__read_tag('</id>')
-                elif  '<time>' == tagname:
+                    self.__read_tag(b'</id>')
+                elif  b'<time>' == tagname:
                     datetime = self.__read_datetime()
-                    self.__read_tag('</time>')
-                elif '<response>' == tagname:
+                    self.__read_tag(b'</time>')
+                elif b'<response>' == tagname:
                     response = self.util.split_response_block(self.__read_string())
-                    self.__read_tag('</response>')
-                elif '<request>' == tagname:
+                    self.__read_tag(b'</response>')
+                elif b'<request>' == tagname:
                     request = self.util.split_request_block(self.__read_string())
-                    self.__read_tag('</request>')
-                elif '<responseLength>' == tagname:
+                    self.__read_tag(b'</request>')
+                elif b'<responseLength>' == tagname:
                     resplen = self.__read_int()
-                    self.__read_tag('</responseLength>')
-                elif '</r>' == tagname:
+                    self.__read_tag(b'</responseLength>')
+                elif b'</r>' == tagname:
                     found_r = True
                 else:
                     self.logger.debug('unhandled tag: [%s]' % tagname)
@@ -541,7 +542,7 @@ class burp_parse_state():
     def __process_hps(self):
         # ignore
         nextdata = self.__read_next()
-        while not (self.T_TAG == nextdata[0] and '</hps>' == nextdata[1]):
+        while not (self.T_TAG == nextdata[0] and b'</hps>' == nextdata[1]):
             nextdata = self.__read_next()
         return None
 
@@ -558,95 +559,95 @@ class burp_parse_state():
                 self.state = self.S_VERSION
             elif self.state in (self.S_VERSION, self.S_END_STATE):
                 nexttag = self.__read_tag()
-                if '<config>' == nexttag:
+                if b'<config>' == nexttag:
                     self.state = self.S_BEGIN_CONFIG
-                elif '<state>' == nexttag:
+                elif b'<state>' == nexttag:
                     self.state = self.S_BEGIN_STATE
                 else:
                     raise Exception
             elif self.state in (self.S_BEGIN_STATE, self.S_END_TARGET, self.S_END_PROXY, self.S_END_SCANNER, self.S_END_REPEATER):
                 nexttag = self.__read_tag()
-                if '<target>' == nexttag:
+                if b'<target>' == nexttag:
                     self.state = self.S_BEGIN_TARGET
-                elif '<proxy>' == nexttag:
+                elif b'<proxy>' == nexttag:
                     self.state = self.S_BEGIN_PROXY
-                elif '<scanner>' == nexttag:
+                elif b'<scanner>' == nexttag:
                     self.state = self.S_BEGIN_SCANNER
-                elif '<repeater>' == nexttag:
+                elif b'<repeater>' == nexttag:
                     self.state = self.S_BEGIN_REPEATER
-                elif '</state>' == nexttag:
+                elif b'</state>' == nexttag:
                     self.state = self.S_END_STATE
                 else:
                     raise Exception
             elif self.S_BEGIN_TARGET == self.state:
                 nexttag = self.__read_tag()
-                if '<item>' == nexttag:
+                if b'<item>' == nexttag:
                     result = self.__process_item()
                     if result:
                         return result
-                elif '</target>' == nexttag:
+                elif b'</target>' == nexttag:
                     self.state = self.S_END_TARGET
                 else:
                     raise Exception
             elif self.S_BEGIN_PROXY == self.state:
                 nexttag = self.__read_tag()
-                if '<historyItem>' == nexttag:
+                if b'<historyItem>' == nexttag:
                     result = self.__process_historyItem()
                     if result:
                         return result
-                elif '</proxy>' == nexttag:
+                elif b'</proxy>' == nexttag:
                     self.state = self.S_END_PROXY
                 else:
                     raise Exception
             elif self.S_BEGIN_SCANNER == self.state:
                 nexttag = self.__read_tag()
-                if '<issue>' == nexttag:
+                if b'<issue>' == nexttag:
                     result = self.__process_issue()
                     if result:
                         return result
-                elif '<paused>' == nexttag:
+                elif b'<paused>' == nexttag:
                     paused = self.__read_bool()
-                    self.__read_tag('</paused>')
-                elif '<hps>' == nexttag:
+                    self.__read_tag(b'</paused>')
+                elif b'<hps>' == nexttag:
                     self.__process_hps()
-                elif '<queueitem>' == nexttag:
-                    self.__read_until_tag('</queueitem>')
-                elif '<asi>' == nexttag:
-                    self.__read_until_tag('</asi>')
-                elif '<has>' == nexttag:
-                    self.__read_until_tag('</has>')
-                elif '</scanner>' == nexttag:
+                elif b'<queueitem>' == nexttag:
+                    self.__read_until_tag(b'</queueitem>')
+                elif b'<asi>' == nexttag:
+                    self.__read_until_tag(b'</asi>')
+                elif b'<has>' == nexttag:
+                    self.__read_until_tag(b'</has>')
+                elif b'</scanner>' == nexttag:
                     self.state = self.S_END_SCANNER
                 else:
                     raise Exception
             elif self.state in (self.S_BEGIN_REPEATER, self.S_END_REQUEST_PANEL):
                 nexttag = self.__read_tag()
-                if '<requestPanel>' == nexttag:
+                if b'<requestPanel>' == nexttag:
                     self.state = self.S_BEGIN_REQUEST_PANEL
-                elif '</repeater>' == nexttag:
+                elif b'</repeater>' == nexttag:
                     self.state = self.S_END_REPEATER
                 else:
                     raise Exception
             elif self.S_BEGIN_REQUEST_PANEL == self.state:
                 nexttag = self.__read_tag()
-                if '<tabCaption>' == nexttag:
-                    self.__read_until_tag('</tabCaption>')
-                elif '<historyIndex>' == nexttag:
-                    self.__read_until_tag('</historyIndex>')
-                elif '<displayedService>' == nexttag:
-                    self.__read_until_tag('</displayedService>')
-                elif '<displayedRequest>' == nexttag:
-                    self.__read_until_tag('</displayedRequest>')
-                elif '<historyItem>' == nexttag:
+                if b'<tabCaption>' == nexttag:
+                    self.__read_until_tag(b'</tabCaption>')
+                elif b'<historyIndex>' == nexttag:
+                    self.__read_until_tag(b'</historyIndex>')
+                elif b'<displayedService>' == nexttag:
+                    self.__read_until_tag(b'</displayedService>')
+                elif b'<displayedRequest>' == nexttag:
+                    self.__read_until_tag(b'</displayedRequest>')
+                elif b'<historyItem>' == nexttag:
                     result = self.__process_repeater_historyItem()
                     if result:
                         return result
-                elif '</requestPanel>' == nexttag:
+                elif b'</requestPanel>' == nexttag:
                     self.state = self.S_END_REQUEST_PANEL
                 else:
                     raise Exception
             elif self.S_BEGIN_CONFIG == self.state:
-                self.__read_until_tag('</config>')
+                self.__read_until_tag(b'</config>')
                 self.state = self.S_END_CONFIG
             elif self.S_END_CONFIG == self.state:
                 self.logger.debug('reached end configuration state')
@@ -950,13 +951,13 @@ class burp_parse_xml():
     class BurpBrokenXml(object):
         def __init__(self, filename):
             self.xmlfile = open(filename, 'rb')
-            self.buffer = ''
-            self.re_nonprintable = re.compile('[^%s]' % re.escape('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%\'()*+,-./:;<=>?@[\\]^_`{|}~ \t\n\r'))
-            self.entity_encode = lambda m: '&#x%02X;' % ord(m.group(0))
-            self.name = '<BurpBrokenXml>'
+            self.buffer = b''
+            self.re_nonprintable = re.compile(bytes('[^%s]' % re.escape('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%\'()*+,-./:;<=>?@[\\]^_`{|}~ \t\n\r'),'ascii'))
+            self.entity_encode = lambda m: bytes('&#x%02X;' % ord(m.group(0)),'ascii')
+            self.name = b'<BurpBrokenXml>'
             self.closed = False
-            self.last_response = ''
-            self.buffer = ''
+            self.last_response = b''
+            self.buffer = b''
 
         def close(self):
             if not self.closed:
@@ -976,19 +977,19 @@ class burp_parse_xml():
                 response = None
                 if self.buffer:
                     response = self.buffer
-                    self.buffer = ''
+                    self.buffer = b''
             else:
                 fixed = self.re_nonprintable.sub(self.entity_encode, raw)
                 if self.buffer:
                     response = self.buffer + fixed
-                    self.buffer = ''
+                    self.buffer = b''
                 else:
                     response = fixed
             if -1 != size and response:
                 rlen = len(response)
                 if rlen > size:
                     # TODO: avoid splitting encoded entities across buffers ?
-                    apos = response.rfind('&', size - 6, size)
+                    apos = response.rfind(b'&', size - 6, size)
                     if apos != -1:
                         self.buffer = response[apos:]
                         response = response[0:apos]
@@ -1127,14 +1128,19 @@ class burp_parse_xml():
             self.current['hostip'] = elem.attrib['ip']
 
     def xml_element_end(self, elem):
-        self.current[elem.tag] = self.re_encoded.sub(self.decode_entity, str(elem.text))
+        if elem.text is None:
+            self.current[elem.tag] = ''
+        else:
+            self.current[elem.tag] = self.re_encoded.sub(self.decode_entity, elem.text)
         self.states.pop()
 
     def xml_element_end_base64(self, elem):
-        if 'base64' in elem.attrib and 'true' == elem.attrib['base64']:
-            self.current[elem.tag] = str(elem.text).decode('base64')
+        if elem.text is None:
+            self.current[elem.tag] = b''
+        elif 'base64' in elem.attrib and 'true' == elem.attrib['base64']:
+            self.current[elem.tag] = base64.b64decode(elem.text)
         else:
-            self.current[elem.tag] = self.re_encoded.sub(self.decode_entity, str(elem.text))
+            self.current[elem.tag] = bytes(self.re_encoded.sub(self.decode_entity, elem.text), 'utf-8') # TODO: or ascii?
         self.states.pop()
             
     def __iter__(self):
@@ -1170,7 +1176,7 @@ if '__main__' == __name__:
     # test code
     import sys
     if (len(sys.argv) != 3):
-        sys.stderr.write('usage: %s [log|state|dumpstate] [file]\n' % sys.argv[0])
+        sys.stderr.write('usage: %s [log|state|dumpstate|xml] [file]\n' % sys.argv[0])
         sys.exit(1)
     mode = sys.argv[1]
     burpfile = sys.argv[2]
