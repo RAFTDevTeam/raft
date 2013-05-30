@@ -27,7 +27,6 @@ from core.database.constants import ResponsesTable
 
 def format_headers_str(data):
     """ Format header values from a Python dictionary to a string """
-    
     formatted = ""
     for key in data:
         formatted += "{0}: {1}\n".format(key, data[key])
@@ -38,7 +37,10 @@ def index_to_id(dataModel, index):
     index = dataModel.index(index.row(), ResponsesTable.ID)
     if index.isValid():
         currentItem = dataModel.data(index)
-        if currentItem.isValid():
+        if int == type(currentItem):
+            return currentItem
+        elif currentItem.isValid(): #TODO: remove this code
+            print(('FIXME', type(currentItem), 'currentItem', currentItem))
             Id = str(currentItem.toString())
             return Id
     return None
@@ -47,7 +49,10 @@ def index_to_url(dataModel, index):
     index = dataModel.index(index.row(), ResponsesTable.URL)
     if index.isValid():
         currentItem = dataModel.data(index)
-        if currentItem.isValid():
+        if str == type(currentItem):
+            return currentItem
+        elif currentItem.isValid(): #TODO: remove this code
+            print(('FIXME', type(currentItem), 'currentItem', currentItem))
             url = str(currentItem.toString())
             return url
     return None

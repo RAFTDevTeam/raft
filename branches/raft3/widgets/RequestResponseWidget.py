@@ -355,14 +355,14 @@ class RequestResponseWidget(QObject):
         rr = self.requestResponse
 
         confirmedState = Qt.Unchecked
-        if rr.confirmed and rr.confirmed.lower() in ['y', '1']:
+        if rr.confirmed and rr.confirmed.lower() in ['y', '1', 'true']:
             confirmedState = Qt.Checked
         self.confirmedButtonStateChanged(confirmedState)
 
         self.requestScintilla.setText(rr.rawRequest)
 
         self.attachLexer(self.responseScintilla, rr.responseContentType, rr.responseBody)
-        self.responseScintilla.setText(rr.rawResponse)
+        self.responseScintilla.setText(ContentHelper.convertBytesToDisplayText(rr.rawResponse))
         self.contentResults = self.generateExtractorResults(rr.responseBody, rr.responseUrl, rr.charset)
         self.notesTextEdit.setText(rr.notes)
         self.handle_tab_currentChanged(self.tabwidget.currentIndex())
@@ -418,14 +418,17 @@ class RequestResponseWidget(QObject):
         self.formsScintilla.setText(formsIO.getvalue())
 
     def flat_str(self, u):
-        try:
-            s = str(u).encode('ascii')
-        except UnicodeDecodeError:
-            tmp = str(u).decode('utf-8')
-            s = repr(tmp)[2:-1].replace('\\r', '').replace('\\n', '\n').replace('\\t', '\t')
-        except UnicodeEncodeError:
-            s = repr(str(u))[2:-1].replace('\\r', '').replace('\\n', '\n').replace('\\t', '\t')
-        return s
+        if bytes == type(u):
+            try:
+                s = u.decode('utf-8')
+            except UnicodeDecodeError:
+                s = repr(u)[2:-1].replace('\\r', '').replace('\\n', '\n').replace('\\t', '\t')
+
+            return s
+        else:
+            # may be object type implementing str
+            s = str(u)
+            return s
 
     def attachLexer(self, scintillaWidget, contentType, data = ''):
         lexer = self.getLexer(contentType, data)
@@ -469,8 +472,8 @@ class RequestResponseWidget(QObject):
         if self.requestResponse:
             xhtml = webview.page().mainFrame().documentElement().toOuterXml()
             self.generatedSourceScintilla.setText(xhtml)
-            body = str(xhtml.toUtf8())
-            self.generateExtractorResults(body, self.requestResponse.responseUrl, self.requestResponse.charset)
+            body_bytes = xhtml.encode('utf-8')
+            self.generateExtractorResults(body_bytes, self.requestResponse.responseUrl, self.requestResponse.charset)
 
     def getLexer(self, contentType, data):
         lexerContentType = self.inferContentType(contentType, data)
@@ -478,6 +481,7 @@ class RequestResponseWidget(QObject):
         
     def inferContentType(self, contentType, data):
         # TODO: scan data for additional info
+        # XXX: data -> bytes
         for comp in list(self.contentTypeMapping.keys()):
             if comp in contentType:
                 return self.contentTypeMapping[comp]

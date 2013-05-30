@@ -50,7 +50,7 @@ class Framework(QObject):
         # Dictionary for RequestResponse objects loaded into cache
         self.rrd_qlock = QMutex()
         self._request_response_cache = {}
-        self.home_dir = str(QDir.toNativeSeparators(QDir.homePath()).toUtf8())
+        self.home_dir = QDir.toNativeSeparators(QDir.homePath())
         self.raft_dir = self.create_raft_directory(self.home_dir, '.raft')
         self.user_db_dir = self.create_raft_directory(self.raft_dir, 'db')
         self.user_data_dir = self.create_raft_directory(self.raft_dir, 'data')

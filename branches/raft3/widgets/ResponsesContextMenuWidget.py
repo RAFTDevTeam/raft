@@ -317,10 +317,10 @@ class ResponsesContextMenuWidget(QObject):
         index = self.treeView.currentIndex()
         index = self.dataModel.index(index.row(), column)
         if index.isValid():
-            value = str(self.dataModel.data(index).toString())
+            value = self.dataModel.data(index)
             for i in range(0, self.dataModel.rowCount()):
                 itemIndex = self.dataModel.index(i, column)
-                data = str(self.dataModel.data(itemIndex).toString())
+                data = self.dataModel.data(itemIndex)
                 if data == value:
                     self.treeView.setRowHidden(i, QModelIndex(), True)
 
@@ -334,10 +334,10 @@ class ResponsesContextMenuWidget(QObject):
         index = self.treeView.currentIndex()
         index = self.dataModel.index(index.row(), column)
         if index.isValid():
-            value = str(self.dataModel.data(index).toString())
+            value = self.dataModel.data(index)
             for i in range(0, self.dataModel.rowCount()):
                 itemIndex = self.dataModel.index(i, column)
-                data = str(self.dataModel.data(itemIndex).toString())
+                data = self.dataModel.data(itemIndex)
                 if data != value:
                     self.treeView.setRowHidden(i, QModelIndex(), True)
 
@@ -346,7 +346,7 @@ class ResponsesContextMenuWidget(QObject):
         urlColumn = self.dataModel.translate_offset(ResponsesTable.URL)
         for i in range(0, self.dataModel.rowCount()):
             itemIndex = self.dataModel.index(i, urlColumn)
-            url = str(self.dataModel.data(itemIndex).toString())
+            url = self.dataModel.data(itemIndex)
             if scopeController.isUrlInScope(url, url):
                 self.treeView.setRowHidden(i, QModelIndex(), False)
             else:

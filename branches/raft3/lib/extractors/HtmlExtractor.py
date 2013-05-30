@@ -22,7 +22,7 @@
 from .BaseExtractor import BaseExtractor
 from .JSLiteParser import JSLiteParser
 from lxml import etree
-from io import StringIO
+from io import StringIO, BytesIO
 from urllib import parse as urlparse
 import urllib.request, urllib.error, urllib.parse
 import hashlib
@@ -86,7 +86,7 @@ class HtmlForm():
         s.write(self.make_form_string_start())
         for input in self.inputs:
             if isinstance(input, HtmlInput):
-                tmp = input.make_input_string().encode('utf-8')
+                tmp = input.make_input_string()
             else:
                 tmp = str(input)
             s.write(tmp)
@@ -224,12 +224,12 @@ class HtmlParseResults():
 
     def set_contextual_fingerprint(self, data):
         sha256 = hashlib.sha256()
-        sha256.update(data)
+        sha256.update(data.encode('utf-8'))
         self.contextual_fingerprint = sha256.hexdigest()
 
     def set_structural_fingerprint(self, data):
         sha256 = hashlib.sha256()
-        sha256.update(data)
+        sha256.update(data.encode('utf-8'))
         self.structural_fingerprint = sha256.hexdigest()
 
 class HtmlExtractor(BaseExtractor):
@@ -412,24 +412,27 @@ class HtmlExtractor(BaseExtractor):
     def get_text_string(self, results, text):
         if text is None:
             return ''
-        try:
-            ret = None
+        if bytes == type(text):
             try:
-                ret = text.decode(results.encoding)
+                ret = None
+                try:
+                    ret = text.decode(results.encoding)
+                except UnicodeDecodeError:
+                    pass
+                except UnicodeEncodeError:
+                    pass
+                except LookupError:
+                    pass
+                if ret is None:
+                    ret = text.decode('utf-8')
             except UnicodeDecodeError:
-                pass
+                ret = repr(text)[2:-1]
             except UnicodeEncodeError:
-                pass
-            except LookupError:
-                pass
-            if ret is None:
-                ret = text.decode('utf-8')
-        except UnicodeDecodeError:
-            ret = repr(text)[1:-1]
-        except UnicodeEncodeError:
-            ret = repr(text)[1:-1]
+                ret = repr(text)[2:-1]
 
-        return ret
+            return ret
+        else:
+            return text
 
     def process_script_block(self, results, jsParser, elem):
         script = self.get_text_string(results, elem.text)
@@ -666,7 +669,7 @@ class HtmlExtractor(BaseExtractor):
                 if 'value' == lname:
                     self.match_uri_contents(results, value)
 
-    def process_etree(self, results, jsParser, htmlbuf, html):
+    def process_etree(self, results, jsParser, htmlbuf, html_bytes):
 
         # TODO: decide if XHTML needs different parsing
         parser = etree.HTMLParser()
@@ -678,14 +681,14 @@ class HtmlExtractor(BaseExtractor):
 
         if root is None:
             # okay, maybe not real HTML
-            if html.startswith('<!--') and html.endswith('-->'):
-                htmlbuf = StringIO(html[4:-3])
+            if html_bytes.startswith(b'<!--') and html_bytes.endswith(b'-->'):
+                htmlbuf = BytesIO(html_bytes[4:-3])
                 dom = etree.parse(htmlbuf, parser)
                 root = dom.getroot()
             else:
                 # something else or totallly invalid
-                raise Exception('invalid content for now: %s' % html)
-                self.match_uri_contents(results, self.get_text_string(results, html))
+                raise Exception('invalid content for now: %s' % html_bytes)
+                self.match_uri_contents(results, self.get_text_string(results, html_bytes))
 
         if root is not None:
             for elem in root.itersiblings(tag=etree.Comment, preceding=True):
@@ -730,23 +733,23 @@ class HtmlExtractor(BaseExtractor):
             for elem in root.itersiblings(tag=etree.Comment, preceding=False):
                 self.process_comment(results, elem)
 
-    def process(self, html, baseurl, encoding = 'utf-8', results = None):
+    def process(self, html_bytes, baseurl, encoding = 'utf-8', results = None):
         parser = etree.HTMLParser()
         jsParser = JSLiteParser()
 
         if results is None:
             results = HtmlParseResults(baseurl, encoding)
 
-        if html is not None:
-            html = html.strip()
-            if len(html) > 0:
-                htmlbuf = StringIO(html)
+        if html_bytes is not None:
+            html = html_bytes.strip()
+            if len(html_bytes) > 0:
+                htmlbuf = BytesIO(html_bytes)
                 try:
-                    self.process_etree(results, jsParser, htmlbuf, html)
+                    self.process_etree(results, jsParser, htmlbuf, html_bytes)
                 except etree.XMLSyntaxError as e:
                     # TODO: consider using beautiful soup
                     # TODO: real warning
-                    print(('Exception on html extraction: %s (%s)' % (e, html[0:128])))
+                    print(('Exception on html extraction: %s (%s)' % (e, html_bytes[0:128])))
                     pass
 
         js_comments =jsParser.comments()

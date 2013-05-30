@@ -46,12 +46,10 @@ def decodeBody(data, charset):
             if data.startswith(codecs.BOM_UTF16):
                 bodyText = data.decode('utf-16')
             elif data.startswith(codecs.BOM_UTF8):
-                bodyText = data.replace(codecs.BOM_UTF8, '').decode('utf-8')
+                bodyText = data[len(codecs.BOM_UTF8):].decode('utf-8')
             else:
                 bodyText = data.decode(charset)
         except UnicodeDecodeError:
-            pass
-        except UnicodeEncodeError:
             pass
         except LookupError:
             pass
@@ -62,10 +60,10 @@ def decodeBody(data, charset):
             bodyText = repr(bodyText)[1:-1].replace('\\r', '').replace('\\n', '\n').replace('\\t', '\t')
     except UnicodeDecodeError:
         # TODO: handle binary content ???
-        bodyText = repr(data)[1:-1].replace('\\r', '').replace('\\n', '\n').replace('\\t', '\t')
+        bodyText = repr(data)[2:-1].replace('\\r', '').replace('\\n', '\n').replace('\\t', '\t')
     except UnicodeEncodeError:
         # TODO: handle binary content ???
-        bodyText = repr(data)[1:-1].replace('\\r', '').replace('\\n', '\n').replace('\\t', '\t')
+        bodyText = repr(data)[2:-1].replace('\\r', '').replace('\\n', '\n').replace('\\t', '\t')
 
     return bodyText
 
@@ -80,3 +78,14 @@ def combineRaw(headers, data, charset = 'utf-8'):
 
     return (headersText, bodyText, headersText + bodyText)
 
+def convertBytesToDisplayText(b):
+    # TODO: implement hex dump
+    if bytes == type(b):
+        try:
+            s = b.decode('utf-8')
+        except UnicodeDecodeError:
+            s = repr(b)[2:-1].replace('\\r', '').replace('\\n', '\n').replace('\\t', '\t')
+        return s
+    else:
+        return b
+    

@@ -77,10 +77,10 @@ class RequestResponseFactory(QObject):
             responseItems = [m or '' for m in list(row)]
             rr.Id = Id
             rr.responseUrl = str(responseItems[ResponsesTable.URL])
-            rr.requestHeaders = str(responseItems[ResponsesTable.REQ_HEADERS])
-            rr.requestBody = str(responseItems[ResponsesTable.REQ_DATA])
-            rr.responseHeaders = str(responseItems[ResponsesTable.RES_HEADERS])
-            rr.responseBody = str(responseItems[ResponsesTable.RES_DATA])
+            rr.requestHeaders = bytes(responseItems[ResponsesTable.REQ_HEADERS])
+            rr.requestBody = bytes(responseItems[ResponsesTable.REQ_DATA])
+            rr.responseHeaders = bytes(responseItems[ResponsesTable.RES_HEADERS])
+            rr.responseBody = bytes(responseItems[ResponsesTable.RES_DATA])
             rr.responseContentType = str(responseItems[ResponsesTable.RES_CONTENT_TYPE])
             rr.requestHost = str(responseItems[ResponsesTable.REQ_HOST])
             rr.responseStatus = str(responseItems[ResponsesTable.STATUS])
@@ -94,15 +94,17 @@ class RequestResponseFactory(QObject):
 
             # extract request parameters
             # TODO: repeated parameters clobber earlier values
+            # TODO: this should be processed when needed, not everytime
             splitted = urlparse.urlsplit(rr.responseUrl)
             if splitted.query:
-                qs_values = urlparse.parse_qs(splitted.query, True)
+                qs_values = urlparse.parse_qs(splitted.query, True, errors='ignore')
                 for name, value in qs_values.items():
                     rr.requestParams[name] = value
             postDataResults = self.postDataExtractor.process_request(rr.requestHeaders, rr.requestBody)
             if postDataResults:
                 # TODO: support non-name/value pair types
                 for name, value in postDataResults.name_values_dictionary.items():
+                    # XXX: bytes
                     rr.requestParams[name] = value
 
             if not rr.responseContentType:

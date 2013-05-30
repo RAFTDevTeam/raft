@@ -413,7 +413,7 @@ class RaftMain(QMainWindow, RaftMain.Ui_MainWindow):
     def restore_settings(self):
         # TODO: make constants make sense
         settings = QSettings('RaftDev', 'Raft');
-        self.restoreGeometry(settings.value('RaftMain/geometry').toByteArray());
+        self.restoreGeometry(settings.value('RaftMain/geometry'));
 
     def closeEvent(self, event):
         settings = QSettings('RaftDev', 'Raft');
