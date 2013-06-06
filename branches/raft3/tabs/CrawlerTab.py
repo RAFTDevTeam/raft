@@ -93,7 +93,7 @@ class CrawlerTab(QObject):
         self.mainWindow.crawlerSpiderStopButton.setEnabled(True)
         sequenceId = None
         if self.mainWindow.crawlerSpiderSequenceCheckBox.isChecked():
-            sequenceId = int(self.mainWindow.crawlerSpiderSequenceComboBox.itemData(self.mainWindow.crawlerSpiderSequenceComboBox.currentIndex()).toString())
+            sequenceId = int(self.mainWindow.crawlerSpiderSequenceComboBox.itemData(self.mainWindow.crawlerSpiderSequenceComboBox.currentIndex()))
         self.spiderThread.startSpidering(self, sequenceId, self.cookieJar)
 
     def handle_spiderStop_clicked(self):
@@ -146,7 +146,7 @@ class CrawlerTab(QObject):
         self.currentHtmlContent = htmlContent
         self.currentQUrl = qurl
         self.currentDepth = depth
-        self.currentSpiderUrl = str(qurl.toEncoded()).encode('ascii', 'ignore')
+        self.currentSpiderUrl = qurl.toEncoded().data().decode('utf-8')
         self.spiderPageController.reset_state(qurl)
         self.load_html_content()
 
@@ -223,11 +223,11 @@ class CrawlerTab(QObject):
     def extract_frame_content(self, frame):
         parentFrame = frame.parentFrame()
         if parentFrame:
-            referer = str(parentFrame.url().toEncoded()).encode('ascii', 'ignore')
+            referer = parentFrame.url().toEncoded().data().decode('utf-8')
         else:
             referer = self.currentSpiderUrl
         dom = frame.documentElement()
         html = str(dom.toOuterXml().toUtf8()) # TODO: fix encoding issues
-        url = str(frame.url().toEncoded()).encode('ascii', 'ignore')
+        url = frame.url().toEncoded().data().decode('utf-8')
         self.spiderThread.process_page_html_content(html, url, self.currentDepth)
 

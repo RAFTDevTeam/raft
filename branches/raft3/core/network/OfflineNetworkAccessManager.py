@@ -71,7 +71,7 @@ class OfflineNetworkAccessManager(BaseNetworkAccessManager):
             if scheme in ('data', 'about', 'javascript'):
                 reply = QNetworkAccessManager.createRequest(self, operation, request, outgoingData)
             elif scheme in ('http', 'https'):
-                url = str(requestUrl.toEncoded()).encode('ascii', 'ignore')
+                url = requestUrl.toEncoded().data().decode('utf-8')
                 url_response = None
                 if url in self.request_lookaside:
                     url_response = self.request_lookaside[url]

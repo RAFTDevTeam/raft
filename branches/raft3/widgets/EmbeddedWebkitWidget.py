@@ -74,7 +74,7 @@ class EmbeddedWebkitWidget(QObject):
         self.tabWidget.currentChanged.connect(self.current_tab_changed)
 
     def set_url_edit_text(self, browserTab):
-        url = str(browserTab.url().toEncoded())
+        url = browserTab.url().toEncoded().data().decode('utf-8')
         if url == 'about:blank':
             self.urlEntryEdit.setText('')
         else:

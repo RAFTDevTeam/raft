@@ -82,7 +82,7 @@ class DomFuzzerWebPage(BaseWebPage):
         return self.framework.useragent()
 
     def acceptNavigationRequest(self, frame, request, navigationType):
-        print(('navigation request (%s) -> [%s]' % (navigationType, request.url().toEncoded())))
+        print(('navigation request (%s) -> [%s]' % (navigationType, request.url().toEncoded().data().decode('utf-8'))))
         # TODO: should other navigation be accepted ?
         if frame and navigationType == QtWebKit.QWebPage.NavigationTypeOther:
             return True

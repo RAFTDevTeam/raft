@@ -168,7 +168,7 @@ class SequenceDialog(QDialog, SequenceDialog.Ui_seqBuildDialog):
     def handle_deleteSequence_clicked(self):
         sequenceId = self.sequencesComboBox.itemData(self.sequencesComboBox.currentIndex())
         if self.display_confirm_dialog('Delete sequence: %s?' % self.sequencesComboBox.currentText()):
-            self.Data.delete_sequence(self.cursor, int(sequenceId.toString()))
+            self.Data.delete_sequence(self.cursor, int(sequenceId))
             
         self.populate_sequence_combo()
 
@@ -179,7 +179,7 @@ class SequenceDialog(QDialog, SequenceDialog.Ui_seqBuildDialog):
         if -1 == index:
             return
 
-        sequenceId = self.sequencesComboBox.itemData(index).toString()
+        sequenceId = self.sequencesComboBox.itemData(index)
 
         if '-1' != sequenceId:
             self.deleteSequenceButton.setEnabled(True)
@@ -191,7 +191,7 @@ class SequenceDialog(QDialog, SequenceDialog.Ui_seqBuildDialog):
     def handle_saveSequence_clicked(self):
         try:
             currentItem = self.sequencesComboBox.itemData(self.sequencesComboBox.currentIndex())
-            sequenceId = currentItem.toString()
+            sequenceId = currentItem
             if '' == sequenceId:
                 return
             sequenceId = int(sequenceId)
@@ -465,14 +465,14 @@ class SequenceDialog(QDialog, SequenceDialog.Ui_seqBuildDialog):
         try:
             responseId, requestId, xrefId = '', '', ''
             varId = reply.attribute(QNetworkRequest.User)
-            if varId.isValid():
-                responseId = str(varId.toString())
+            if varId is not None:
+                responseId = str(varId)
             varId = reply.attribute(QNetworkRequest.User + 1)
-            if varId.isValid():
-                requestId = str(varId.toString())
+            if varId is not None:
+                requestId = str(varId)
             varId = reply.attribute(QNetworkRequest.User + 2)
-            if varId.isValid():
-                xrefId = str(varId.toString())
+            if varId is not None:
+                xrefId = str(varId)
 
             print(('process_request_finished', responseId, requestId, xrefId))
 
@@ -515,12 +515,12 @@ class SequenceDialog(QDialog, SequenceDialog.Ui_seqBuildDialog):
         if contentType and ';' in contentType:
             contentType = contentType[0:contentType.index(';')]
 
-        reqHeaders = str(responseItems[ResponsesTable.REQ_HEADERS])
-        reqData = str(responseItems[ResponsesTable.REQ_DATA])
+        reqHeaders = bytes(responseItems[ResponsesTable.REQ_HEADERS])
+        reqData = bytes(responseItems[ResponsesTable.REQ_DATA])
         requestHeaders, requestBody, rawRequest = ContentHelper.combineRaw(reqHeaders, reqData)
 
-        resHeaders = str(responseItems[ResponsesTable.RES_HEADERS])
-        resData = str(responseItems[ResponsesTable.RES_DATA])
+        resHeaders = bytes(responseItems[ResponsesTable.RES_HEADERS])
+        resData = bytes(responseItems[ResponsesTable.RES_DATA])
         responseHeaders, responseBody, rawResponse = ContentHelper.combineRaw(resHeaders, resData, charset)
 
         sequence_item = {

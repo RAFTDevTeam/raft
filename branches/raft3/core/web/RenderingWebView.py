@@ -50,6 +50,7 @@ class RenderingWebView(QtWebKit.QWebView):
             lines = headers.splitlines()
             pos = 0
             for line in lines:
+                # XXX: bytes
                 if ':' in line:
                     name, value = [x.strip() for x in line.split(':', 1)]
                     if 'content-type' == name.lower():
@@ -70,10 +71,7 @@ class RenderingWebView(QtWebKit.QWebView):
 
         # TODO: improve setting for non-html content, especially css
 
-        if 'html' in content_type:
-            self.setHtml(body, qurl)
-        else:
-            self.setContent(body, content_type, qurl)
+        self.setContent(body, content_type, qurl)
 
 
 

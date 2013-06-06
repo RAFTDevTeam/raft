@@ -128,7 +128,7 @@ class LocalStorage():
             filename = found_filename
         else:
             qurl = QUrl.fromUserInput(domain)
-            splitted = urlparse.urlsplit(str(qurl.toEncoded()).encode('ascii', 'ignore'))
+            splitted = urlparse.urlsplit(qurl.toEncoded().data().decode('utf-8'))
             scheme = splitted.scheme or 'http'
             domain_name = splitted.hostname or splitted.path
             filename = os.path.join(self.get_base_path(), '%s_%s_0.localstorage' % (scheme, domain_name))

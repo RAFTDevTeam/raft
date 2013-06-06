@@ -46,7 +46,7 @@ class Compressed(object):
         self.value = value
 
     def __str__(self):
-        return str(self.value, 'utf-8') # assume utf-8 for unknown content
+        return str(self.value, 'utf-8', 'ignore') # assume utf-8 for unknown content
 
     def __repr__(self):
         return repr(self.value)

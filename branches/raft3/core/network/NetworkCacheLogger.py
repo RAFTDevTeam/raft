@@ -43,7 +43,7 @@ class NetworkCacheLogger(QtNetwork.QAbstractNetworkCache):
         msg = 'NetworkCache: [%s](%s)' % ('metaData', url)
         r = self.nc.metaData(url)
         print(('%s -> %s, isValid=%s' % (msg, r, r.isValid())))
-        print(('\n'.join(['%s: %s' % (n, v) for n,v in r.rawHeaders()])))
+        print((b'\n'.join([n + b': ' + v for n,v in r.rawHeaders()])))
         return r
 
     def data(self, url):
@@ -70,4 +70,4 @@ class NetworkCacheLogger(QtNetwork.QAbstractNetworkCache):
         msg = 'NetworkCache: [%s](%s)' % ('updateMetaData', metaData)
         r = self.nc.updateMetaData(metaData)
         print(('%s -> %s' % (msg, r)))
-        print(('\n'.join(['%s: %s' % (n, v) for n,v in metaData.rawHeaders()])))
+        print((b'\n'.join([n + b': ' + v for n,v in metaData.rawHeaders()])))

@@ -209,7 +209,7 @@ class NetworkReply(QtNetwork.QNetworkReply):
             # TODO: implement real "sniff" content-type
             if -1 != self.__data.find(b'<html'):
                 contentType = 'text/html'
-                self.setRawHeader('Content-Type', contentType)
+                self.setRawHeader('Content-Type', contentType.encode('utf-8'))
                 reply.setHeader(QtNetwork.QNetworkRequest.ContentTypeHeader, contentType)
 
         self.__finished = True
@@ -255,13 +255,13 @@ class NetworkReply(QtNetwork.QNetworkReply):
         bio.write(b'HTTP/1.1 ')
         bio.write(status.encode('ascii'))
         bio.write(b' ')
-        bio.write(msg.encode('ascii'))
+        bio.write(msg.encode('utf-8'))
         bio.write(b'\r\n')
         for bname in reply.rawHeaderList():
             bvalue = reply.rawHeader(bname)
-            bio.write(bname)
+            bio.write(bname.data())
             bio.write(b': ')
-            bio.write(bvalue)
+            bio.write(bvalue.data())
             bio.write(b'\r\n')
         bio.write(b'\r\n')
         responseHeaders = bio.getvalue()

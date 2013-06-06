@@ -120,6 +120,7 @@ class SearchThread(QThread):
         for row in self.Data.execute_search(self.cursor, self.reqbody or self.resbody):
             if self.canceled:
                 break
+            # XXX: forcing byte data to str
             responseItems = [str(v) for v in [m or '' for m in list(row)]]
             if self.isMatch(responseItems):
                 if not invertSearch:

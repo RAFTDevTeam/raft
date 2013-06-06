@@ -200,7 +200,7 @@ class RequesterTab(QObject):
             return
 
         qurl = QUrl.fromUserInput(self.mainWindow.requesterUrlEdit.text())
-        url = str(qurl.toEncoded())
+        url = qurl.toEncoded().data().decode('utf-8')
         self.mainWindow.requesterUrlEdit.setText(url)
 
         self.framework.set_raft_config_value('requesterUrlEdit', url)
@@ -212,7 +212,7 @@ class RequesterTab(QObject):
 
         sequenceId = None
         if self.mainWindow.requesterSequenceCheckBox.isChecked():
-            sequenceId = str(self.mainWindow.requesterSequenceComboBox.itemData(self.mainWindow.requesterSequenceComboBox.currentIndex()).toString())
+            sequenceId = str(self.mainWindow.requesterSequenceComboBox.itemData(self.mainWindow.requesterSequenceComboBox.currentIndex()))
         self.requestRunner = RequestRunner(self.framework, self)
         if use_global_cookie_jar:
             self.requesterCookieJar = self.framework.get_global_cookie_jar()
@@ -234,11 +234,11 @@ class RequesterTab(QObject):
                 self.requesterHistoryDataModel.append_data([response_item])
 
                 url = str(response_item[ResponsesTable.URL])
-                headers = str(response_item[ResponsesTable.RES_HEADERS])
-                body = str(response_item[ResponsesTable.RES_DATA])
+                headers = bytes(response_item[ResponsesTable.RES_HEADERS])
+                body = bytes(response_item[ResponsesTable.RES_DATA])
                 contentType = str(response_item[ResponsesTable.RES_CONTENT_TYPE])
 
-                self.miniResponseRenderWidget.populate_response_text(url, headers, body, contentType)
+                self.miniResponseRenderWidget.populate_response_content(url, headers, body, contentType)
 
         self.mainWindow.requesterSendButton.setText('Send')
         self.pending_request = None
@@ -269,7 +269,7 @@ class RequesterTab(QObject):
 
         sequenceId = None
         if self.mainWindow.bulkRequestSequenceCheckBox.isChecked():
-            sequenceId = str(self.mainWindow.bulkRequestSequenceComboBox.itemData(self.mainWindow.bulkRequestSequenceComboBox.currentIndex()).toString())
+            sequenceId = str(self.mainWindow.bulkRequestSequenceComboBox.itemData(self.mainWindow.bulkRequestSequenceComboBox.currentIndex()))
 
         first = True
         self.cancel_bulk_requests = False

@@ -114,8 +114,8 @@ class DomFuzzerTab(QObject):
         index = dataModel.index(index.row(), 5) # TODO: use constant
         if index.isValid():
             currentItem = dataModel.data(index)
-            if currentItem.isValid():
-                url = str(currentItem.toString())
+            if currentItem is not None:
+                url = str(currentItem)
                 return url
         return None
 
@@ -152,7 +152,7 @@ class DomFuzzerTab(QObject):
 
     def handle_fuzzItemAvailable(self, fuzzId, htmlContent, qurl):
         self.currentFuzzId = fuzzId
-        self.currentFuzzUrl = str(qurl.toEncoded())
+        self.currentFuzzUrl = qurl.toEncoded().data().decode('utf-8')
         self.callbackLogger.clear_messages()
         self.qtimer.start(3000) # 3 seconds to finish
         self.domFuzzerWebView.setHtml(htmlContent, qurl)
@@ -202,18 +202,18 @@ class DomFuzzerTab(QObject):
         index = self.mainWindow.domFuzzerResultsDataModel.index(index.row(), DomFuzzerResultsTable.ID)
         if index.isValid():
             currentItem = self.mainWindow.domFuzzerResultsDataModel.data(index)
-            if currentItem.isValid():
-                fuzzId = str(currentItem.toString())
+            if currentItem is not None:
+                fuzzId = str(currentItem)
                 self.populate_results_response_render(fuzzId)
 
     def populate_results_response_render(self, fuzzId):
         results = self.Data.read_dom_fuzzer_results_by_id(self.cursor, int(fuzzId))
         if results:
             resultsItems = [m or '' for m in results]
-            self.miniResponseRenderWidget.populate_response_text(
-                str(resultsItems[DomFuzzerResultsTable.URL]),
+            self.miniResponseRenderWidget.populate_response_content(
+                bytes(resultsItems[DomFuzzerResultsTable.URL]),
                 '',
-                str(resultsItems[DomFuzzerResultsTable.RENDERED_DATA]),
+                bytes(resultsItems[DomFuzzerResultsTable.RENDERED_DATA]),
                 ''
                 )
                 

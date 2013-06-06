@@ -63,8 +63,8 @@ class SequenceBuilderWebPage(BaseWebPage):
         self.input_elements(frame)
 
     def do_sequence_transition(self, frame):
-        previousRequestId = str(frame.property('RAFT_requestId').toString())
-        originatingResponseId = str(frame.property('RAFT_responseId').toString())
+        previousRequestId = frame.property('RAFT_requestId')
+        originatingResponseId = frame.property('RAFT_responseId')
         requestId = uuid.uuid4().hex
         self.formCapture.set_sequence_transition(requestId, originatingResponseId, previousRequestId)
         frame.setProperty('RAFT_requestId', requestId)
@@ -74,7 +74,7 @@ class SequenceBuilderWebPage(BaseWebPage):
         self.configure_frame(frame)
 
     def configure_frame(self, frame):
-        print(('frame configured', str(frame.property('RAFT_requestId').toString()), str(frame.property('RAFT_responseId').toString())))
+        print(('frame configured', frame.property('RAFT_requestId'), frame.property('RAFT_responseId')))
         self.add_javascript_window_object(frame)
         QObject.connect(frame, SIGNAL('loadFinished(bool)'), lambda x: self.handle_frame_loadFinished(frame, x))
         QObject.connect(frame, SIGNAL('javaScriptWindowObjectCleared()'), lambda: self.handle_javaScriptWindowObjectCleared(frame))
@@ -88,7 +88,7 @@ class SequenceBuilderWebPage(BaseWebPage):
     def handle_frame_loadFinished(self, frame, ok):
         self.do_sequence_transition(frame)
         self.input_elements(frame)
-        print(('frame [%s] load finished (new) (%s)' % (frame.url().toEncoded(), ok), str(frame.property('RAFT_requestId').toString())))
+        print(('frame [%s] load finished (new) (%s)' % (frame.url().toEncoded().data().decode('utf-8'), ok), str(frame.property('RAFT_requestId'))))
 
     @PyQt4.QtCore.pyqtSlot(QString, int, QVariant, QVariant, QVariant, name='record_input_value')
     def record_input_value(self, requestId, position, name, Type, value):
@@ -110,7 +110,7 @@ class SequenceBuilderWebPage(BaseWebPage):
         request.setAttribute(request.CacheLoadControlAttribute, request.AlwaysNetwork)
 
         if frame:
-            print(('%s->%s' % (frame.property('RAFT_requestId').toString(), request.url().toEncoded())))
+            print(('%s->%s' % (frame.property('RAFT_requestId'), request.url().toEncoded().data().decode('utf-8'))))
 
 #        print(['%s:%s' % (str(n), str(request.rawHeader(n))) for n in request.rawHeaderList()])
 #        if 'Referer' in [str(n) for n in request.rawHeaderList()]:
@@ -124,7 +124,7 @@ class SequenceBuilderWebPage(BaseWebPage):
             self.process_frame_input_elements(child)
 
     def input_elements(self, frame):
-        self.formCapture.set_source_url(str(frame.property('RAFT_requestId').toString()), str(frame.url().toEncoded()))
+        self.formCapture.set_source_url(frame.property('RAFT_requestId'), frame.url().toEncoded().data().decode('utf-8'))
         # TODO: Linux returns the same element repeatedly, so must check processed
         # hopefully gets all of them this way
         processed = []
@@ -132,8 +132,8 @@ class SequenceBuilderWebPage(BaseWebPage):
         position = 0
         requestId = ''
         varId = frame.property('RAFT_requestId')
-        if varId.isValid():
-            requestId = varId.toString()
+        if varId is not None:
+            requestId = str(varId)
         
         for element_name in element_names:
             for input in frame.findAllElements(element_name):

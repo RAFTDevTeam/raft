@@ -67,15 +67,15 @@ class SequenceBuilderNetworkAccessManager(BaseNetworkAccessManager):
             originatingObject = request.originatingObject()
             if originatingObject:
                 varId = originatingObject.property('RAFT_requestId')
-                if varId.isValid():
-                    print(('createRequest', '%s->%s' % (str(varId.toString()), str(request.url().toEncoded()))))
+                if varId is not None:
+                    print(('createRequest', '%s->%s' % (str(varId), request.url().toEncoded().data().decode('utf-8'))))
                     request.setAttribute(QtNetwork.QNetworkRequest.User + 1, varId)
-                    requestId = str(varId.toString())
+                    requestId = str(varId)
                     if requestId not in self.originalRequestIds:
                         self.originalRequestIds.append(requestId)
                         request.setAttribute(QtNetwork.QNetworkRequest.User + 2, varId)
 
-            url = str(request.url().toEncoded()).encode('ascii', 'ignore')
+            url = request.url().toEncoded().data().decode('utf-8')
             if outgoingData is not None and type(outgoingData) == QIODevice:
                 outgoingData = InterceptFormData(outgoingData)
             return StoreNetworkReply(self.framework, url, operation, request, outgoingData, self.cookieJar(),

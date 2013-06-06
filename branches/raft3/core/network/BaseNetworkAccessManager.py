@@ -64,7 +64,7 @@ class BaseNetworkAccessManager(QtNetwork.QNetworkAccessManager):
                 except ValueError:
                     pass
         elif 'use_proxy' == config_name:
-            self.__use_proxy = bool(value.toBool())
+            self.__use_proxy = bool(value)
             self.__setup_network_proxy()
 
     def __setup_network_proxy(self):

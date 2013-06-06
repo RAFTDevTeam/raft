@@ -98,22 +98,22 @@ class DatabaseNetworkCache(QtNetwork.QAbstractNetworkCache):
         if len(responses) > 0:
             metaData = QtNetwork.QNetworkCacheMetaData()
             metaData.setUrl(url)
-            headers = str(responses[-1][ResponsesTable.RES_HEADERS])
+            headers = bytes(responses[-1][ResponsesTable.RES_HEADERS])
             rawHeaders = []
             for line in headers.splitlines():
-                if ':' in line:
-                    name, value = [m.strip() for m in line.split(':', 1)]
+                if b':' in line:
+                    name, value = [m.strip() for m in line.split(b':', 1)]
                     rawHeaders.append((QByteArray(name), QByteArray(value)))
                     try:
-                        if 'last-modified' == name.lower():
-                            metaData.setLastModified(QDateTime.fromString(value))
-                        elif 'expires' == name.lower():
-                            metaData.setExpirationDate(QDateTime.fromString(value))
+                        if b'last-modified' == name.lower():
+                            metaData.setLastModified(QDateTime.fromString(value.decode('utf-8')))
+                        elif b'expires' == name.lower():
+                            metaData.setExpirationDate(QDateTime.fromString(value.decode('utf-8')))
                     except Exception as e:
                         print(('ignoring error: %s' % e))
 
             metaData.setRawHeaders(rawHeaders)
-            buf = QByteArray(str(responses[-1][ResponsesTable.RES_DATA]))
+            buf = QByteArray(bytes(responses[-1][ResponsesTable.RES_DATA]))
             self.cache[k] = [metaData, buf, time.time()]
         else:
             # return non-valid

@@ -37,12 +37,8 @@ def index_to_id(dataModel, index):
     index = dataModel.index(index.row(), ResponsesTable.ID)
     if index.isValid():
         currentItem = dataModel.data(index)
-        if int == type(currentItem):
-            return currentItem
-        elif currentItem.isValid(): #TODO: remove this code
-            print(('FIXME', type(currentItem), 'currentItem', currentItem))
-            Id = str(currentItem.toString())
-            return Id
+        if currentItem is not None:
+            return int(currentItem)
     return None
 
 def index_to_url(dataModel, index):
@@ -51,9 +47,5 @@ def index_to_url(dataModel, index):
         currentItem = dataModel.data(index)
         if str == type(currentItem):
             return currentItem
-        elif currentItem.isValid(): #TODO: remove this code
-            print(('FIXME', type(currentItem), 'currentItem', currentItem))
-            url = str(currentItem.toString())
-            return url
     return None
 

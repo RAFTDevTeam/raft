@@ -368,10 +368,10 @@ def randomize_alert(input):
                 return
             responseItems = [m or '' for m in list(row)]
             url = str(responseItems[ResponsesTable.URL])
-            reqHeaders = str(responseItems[ResponsesTable.RES_HEADERS])
-            reqData = str(responseItems[ResponsesTable.RES_DATA])
+            reqHeaders = bytes(responseItems[ResponsesTable.RES_HEADERS])
+            reqData = bytes(responseItems[ResponsesTable.RES_DATA])
             contentType = str(responseItems[ResponsesTable.RES_CONTENT_TYPE])
-            self.miniResponseRenderWidget.populate_response_text(url, reqHeaders, reqData, contentType)
+            self.miniResponseRenderWidget.populate_response_content(url, reqHeaders, reqData, contentType)
         
     def webfuzzer_populate_response_id(self, Id):
         
@@ -444,10 +444,10 @@ def randomize_alert(input):
         self.framework.set_raft_config_value('WebFuzzer.Standard.Method', method)
 
         self.framework.set_raft_config_value('WebFuzzer.Standard.PreSequenceEnabled', self.mainWindow.wfStdPreChk.isChecked())
-        self.framework.set_raft_config_value('WebFuzzer.Standard.PreSequenceId', str(self.mainWindow.wfStdPreBox.itemData(self.mainWindow.wfStdPreBox.currentIndex()).toString()))
+        self.framework.set_raft_config_value('WebFuzzer.Standard.PreSequenceId', self.mainWindow.wfStdPreBox.itemData(self.mainWindow.wfStdPreBox.currentIndex()))
 
         self.framework.set_raft_config_value('WebFuzzer.Standard.PostSequenceEnabled', self.mainWindow.wfStdPostChk.isChecked())
-        self.framework.set_raft_config_value('WebFuzzer.Standard.PostSequenceId', str(self.mainWindow.wfStdPostBox.itemData(self.mainWindow.wfStdPostBox.currentIndex()).toString()))
+        self.framework.set_raft_config_value('WebFuzzer.Standard.PostSequenceId', self.mainWindow.wfStdPostBox.itemData(self.mainWindow.wfStdPostBox.currentIndex()))
 
     def save_config_configuration(self):
         self.save_config_configuration_item('Payload1', self.mainWindow.wfPay1FuzzRadio, self.mainWindow.wfPay1PayloadBox, self.mainWindow.wfPay1StaticRadio, self.mainWindow.wfPay1DynamicRadio, self.mainWindow.wfPay1StaticEdit)
@@ -487,11 +487,11 @@ def randomize_alert(input):
 
         sequenceId = None
         if self.mainWindow.wfStdPreChk.isChecked():
-            sequenceId = str(self.mainWindow.wfStdPreBox.itemData(self.mainWindow.wfStdPreBox.currentIndex()).toString())
+            sequenceId = self.mainWindow.wfStdPreBox.itemData(self.mainWindow.wfStdPreBox.currentIndex())
 
         postSequenceId = None
         if self.mainWindow.wfStdPostChk.isChecked():
-            postSequenceId = str(self.mainWindow.wfStdPostBox.itemData(self.mainWindow.wfStdPostBox.currentIndex()).toString())
+            postSequenceId = self.mainWindow.wfStdPostBox.itemData(self.mainWindow.wfStdPostBox.currentIndex())
         
         # Fuzzing stuff
         payload_mapping = self.create_payload_map()

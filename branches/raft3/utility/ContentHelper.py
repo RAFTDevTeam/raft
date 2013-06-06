@@ -89,3 +89,14 @@ def convertBytesToDisplayText(b):
     else:
         return b
     
+def getCombinedText(headers, data, content_type):
+    charset = 'utf-8'
+    if content_type:
+        ct = content_type.lower() 
+        n = ct.find('charset=')
+        if n > 0:
+            charset = ct[n+8:]
+            if ';' in charset:
+                charset, junk = charset.split(';',1)
+    headersText, bodyText, combinedText = combineRaw(headers, data, charset)
+    return combinedText
