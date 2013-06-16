@@ -27,6 +27,7 @@ import pkgutil
 import inspect
 import sys
 import os
+import imp
 from .AbstractAnalyzer import AbstractAnalyzer
 
 class AnalyzerList():
@@ -62,7 +63,7 @@ class AnalyzerList():
 
             try:
                 #print 'attempting to reload %s'%modname
-                module=reload(sys.modules[modname])
+                module=imp.reload(sys.modules[modname])
                 #print 'reloaded %s'%module
             except KeyError as e:
                 module = __import__(modname, fromlist="junklist")

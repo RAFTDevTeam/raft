@@ -40,10 +40,10 @@ class Payloads(object):
         vals = list()
         
         for item in f.readlines():
-            if item.startswith("# "):
+            if item.startswith(b"# "):
                 pass
             else:
-                vals.append(item.rstrip())
+                vals.append(str(item.rstrip()))
                 
         f.close()
         
