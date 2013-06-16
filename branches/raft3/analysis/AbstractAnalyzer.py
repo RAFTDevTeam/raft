@@ -115,7 +115,7 @@ class AbstractAnalyzer(object):
         when subclassing a custom AnalysisResults object.
         """
         self.analysisresults=resultsclasses.AnalysisResults.AnalysisResults()
-        self.analysisresults.setAnalyzerInfo(self.desc,self.friendlyname,str(self.__class__).translate(None,'<>'))
+        self.analysisresults.setAnalyzerInfo(self.desc,self.friendlyname,str(self.__class__).translate('<>'))
         
         
     def getResults(self):
@@ -144,6 +144,6 @@ class AbstractAnalyzer(object):
         outstring="""<h1>%s</h1>
         (%s)
         <p>%s</p>
-        """%(self.friendlyname,str(self.__class__).translate(None,'<>'),self.desc)
+        """%(self.friendlyname,str(self.__class__).translate('<>'),self.desc)
         return outstring
     
