@@ -43,7 +43,7 @@ class Payloads(object):
             if item.startswith(b"# "):
                 pass
             else:
-                vals.append(str(item.rstrip()))
+                vals.append(item.rstrip().decode())
                 
         f.close()
         

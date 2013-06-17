@@ -990,6 +990,16 @@
                 <widget class="QComboBox" name="dbankPayloadsBox"/>
                </item>
                <item>
+                <widget class="QPushButton" name="dbankFuzzFileAddButton">
+                 <property name="toolTip">
+                  <string>Add a file with values for fuzzer</string>
+                 </property>
+                 <property name="text">
+                  <string>Add File</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
                 <spacer name="verticalSpacer_2">
                  <property name="orientation">
                   <enum>Qt::Vertical</enum>
@@ -1013,9 +1023,15 @@
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="tab_5">
+         <widget class="QWidget" name="tabDataBankGenerator">
+          <property name="toolTip">
+           <string>Payload Generator</string>
+          </property>
           <attribute name="title">
-           <string>Page</string>
+           <string>Generator</string>
+          </attribute>
+          <attribute name="toolTip">
+           <string>Payload Generator</string>
           </attribute>
          </widget>
         </widget>

@@ -28,6 +28,10 @@ from PyQt4.QtGui import *
 from ui import ConfigDialog
 from tabs import DataBankTab
 
+from core.fuzzer import Payloads
+
+import os
+import shutil
 import json
 
 class ConfigDialog(QDialog, ConfigDialog.Ui_configDialog):
@@ -38,6 +42,7 @@ class ConfigDialog(QDialog, ConfigDialog.Ui_configDialog):
         self.setupUi(self)
 
         self.framework = framework
+        self.payloads_dir = os.path.join(self.framework.get_data_dir(), 'payloads')
 
         self.buttonBox.clicked.connect(self.handle_buttonBox_clicked)
 
@@ -47,6 +52,8 @@ class ConfigDialog(QDialog, ConfigDialog.Ui_configDialog):
         self.framework.subscribe_raft_config_populated(self.configuration_populated)
 
         self.dataBankTab = DataBankTab.DataBankTab(self.framework, self)
+        
+        self.dbankFuzzFileAddButton.clicked.connect(self.add_fuzz_file)
 
     def configuration_populated(self):
         self.fill_values()
@@ -166,3 +173,13 @@ class ConfigDialog(QDialog, ConfigDialog.Ui_configDialog):
         self.framework.set_raft_config_value('browser_auto_load_images', self.browserAutoLoadImagesCheckBox.isChecked())
         self.framework.set_raft_config_value('browser_custom_user_agent', self.browserCustomUserAgentCheckBox.isChecked())
         self.framework.set_raft_config_value('browser_user_agent_value', self.browserUserAgentEdit.text().toUtf8())
+        
+    def add_fuzz_file(self):
+        
+        file = QFileDialog.getOpenFileName(None, "Open file", "")
+        shutil.copy(file, self.payloads_dir)
+        
+        # Refresh the payload list in the interface.
+        # pl = Payloads.Payloads()
+        self.dataBankTab.fill_payload_combo_box()
+    
