@@ -290,7 +290,7 @@ class Framework(QObject):
         return request_response
 
     def report_exception(self, exc):
-        print(('EXCEPTION:\n%s' % traceback.format_exc(exc)))
+        print(('EXCEPTION:\n%s' % traceback.format_exception(type(exc), exc, ecx.__traceback__)))
 
     def subscribe_add_differ_response_id(self, callback):
         QObject.connect(self, SIGNAL('differAddResponseId(int)'), callback, Qt.DirectConnection)
@@ -367,7 +367,7 @@ class Framework(QObject):
         self.emit(SIGNAL('sequencesChanged()'))
 
     def report_implementation_error(self, exc):
-        print(('IMPLEMENTATION ERROR:\n%s' % traceback.format_exc(exc)))
+        print(('IMPLEMENTATION ERROR:\n%s' % traceback.format_exception(type(exc), exc, ecx.__traceback__)))
 
     def log_warning(self, msg):
         print(('WARNING', msg))

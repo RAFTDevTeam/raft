@@ -27,10 +27,11 @@ from PyQt4.QtNetwork import QNetworkCookie
 from core.data.LocalStorage import LocalStorage
 from core.data.FlashCookies import FlashCookies
 
-from io import StringIO
+from io import BytesIO
 import bz2
 import time
 from lxml import etree
+import base64
 
 class CookiesTab(QObject):
     def __init__(self, framework, mainWindow):
@@ -103,22 +104,24 @@ class CookiesTab(QObject):
         # TODO: refactor and move to raftparse routines
         cookieJar = self.framework.get_global_cookie_jar()
         cookieList = cookieJar.allCookies()
-        results = StringIO()
-        results.write('<cookies>\n')
+        results = BytesIO()
+        results.write(b'<cookies>\n')
         for cookie in cookieList:
-            results.write('<cookie>\n')
-            results.write('<raw encoding="base64">%s</raw>\n' % str(cookie.toRawForm().data()).encode('base64'))
-            results.write('</cookie>\n')
-        results.write('</cookies>\n')
+            results.write(b'<cookie>\n')
+            results.write(b'<raw encoding="base64">')
+            results.write(base64.b64encode(cookie.toRawForm().data()))
+            results.write(b'</raw>\n')
+            results.write(b'</cookie>\n')
+        results.write(b'</cookies>\n')
         filename = 'CookieExport-%s' % int(time.time())
         file = QFileDialog.getSaveFileName(None, "Export Cookie Jar to file", filename, "XML File (*.xml);;BZ2 XML File (*.xml.bz2)")
         if file and str(file):
             filename = str(file)
+            filename = filename.replace('.xml.xml', '.xml')
             if filename.endswith('.xml.bz2'):
                 filename = filename.replace('.xml.bz2.xml.bz2', '.xml.bz2')
                 fh = bz2.BZ2File(filename, 'w')
             elif filename.endswith('.xml'):
-                filename = filename.replace('.xml.xml', '.xml')
                 fh = open(filename, 'wb')
             else:
                 raise Exception('unhandled file type: %s' % (filename))
@@ -131,7 +134,7 @@ class CookiesTab(QObject):
         if filename.endswith('.xml.bz2'):
             source = bz2.BZ2File(filename, 'r')
         elif filename.endswith('.xml'):
-            source = open(filename, 'r')
+            source = open(filename, 'rb')
         else:
             raise Exception('unhandled file type: %s' % (filename))
 
@@ -156,7 +159,7 @@ class CookiesTab(QObject):
                     if 'encoding' in elem.attrib:
                         encoding = str(elem.attrib['encoding'])
                     if 'base64' == encoding:
-                        value = value.decode('base64')
+                        value = base64.b64decode(value)
                     cookies = QNetworkCookie.parseCookies(value)
                     for cookie in cookies:
                         cookieList.append(cookie)
@@ -172,7 +175,7 @@ class CookiesTab(QObject):
         return cookieList
 
     def handle_cookiesImportCookieJar_clicked(self):
-        filename = QFileDialog.getOpenFileName(None, "Import Cookies", "", "XML File (*.xml);;BZ2 XML File (*.xml.bz2)")
+        filename = QFileDialog.getOpenFileName(None, "Import Cookies", "", "XML File (*.xml);;BZ2 XML file (*.bz2)")
         if filename and str(filename):
             importCookieList = self.load_cookies_from_file(str(filename))
             cookieJar = self.framework.get_global_cookie_jar()
@@ -235,14 +238,14 @@ class CookiesTab(QObject):
 
     def find_cookie_by_domain_and_name(self, cookieList, domain, name):
         for cookie in cookieList:
-            if str(cookie.domain()) == domain and str(cookie.name()) == name:
+            if str(cookie.domain()) == domain and str(cookie.name(),'utf-8') == name:
                 return cookie
         return None
 
     def populate_cookieJar_edit_fields(self, cookie):
         self.mainWindow.cookiesCookieJarDomainEdit.setText(str(cookie.domain()))
-        self.mainWindow.cookiesCookieJarNameEdit.setText(str(cookie.name()))
-        self.mainWindow.cookiesCookieJarValueEdit.setText(str(cookie.value()))
+        self.mainWindow.cookiesCookieJarNameEdit.setText(str(cookie.name(),'utf-8'))
+        self.mainWindow.cookiesCookieJarValueEdit.setText(str(cookie.value(),'utf-8'))
         self.mainWindow.cookiesCookieJarPathEdit.setText(str(cookie.path()))
         if cookie.isSessionCookie():
             self.mainWindow.cookiesCookieJarExpiryEdit.setDateTime(self.mainWindow.cookiesCookieJarExpiryEdit.dateTimeFromText(''))
@@ -282,8 +285,8 @@ class CookiesTab(QObject):
 
             item = QTreeWidgetItem([
                     str(cookie.domain()),
-                    str(cookie.name()),
-                    str(cookie.value()),
+                    str(cookie.name(), 'utf-8'),
+                    str(cookie.value(), 'utf-8'),
                     str(cookie.path()),
                     str(cookie.expirationDate().toUTC().toString('MM/dd/yyyy hh:mm:ss')),
                     str(cookie.isSessionCookie()),

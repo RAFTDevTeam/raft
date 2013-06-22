@@ -50,8 +50,8 @@ class LocalStorage():
 
     def read_storage(self):
         base_path = self.get_base_path()
-        self.localstorage_files = []
         self.localstorage = {}
+        self.localstorage_files = []
         for dirpath, dirnames, filenames in os.walk(base_path):
             self.visit_localstorage_files(None, dirpath, filenames)
 #        os.path.walk(base_path, self.visit_localstorage_files, None)
@@ -90,7 +90,8 @@ class LocalStorage():
     def delete_storage_entry(self, domain, name):
         base_path = self.get_base_path()
         self.localstorage_files = []
-        os.path.walk(base_path, self.visit_localstorage_files, None)
+        for dirpath, dirnames, filenames in os.walk(base_path):
+            self.visit_localstorage_files(None, dirpath, filenames)
         for item in self.localstorage_files:
             scheme, domain_name, filename = item
             if domain == urlparse.urlunsplit((scheme, domain_name, '', '', '')):
@@ -117,7 +118,8 @@ class LocalStorage():
     def update_storage_entry(self, domain, name, value):
         base_path = self.get_base_path()
         self.localstorage_files = []
-        os.path.walk(base_path, self.visit_localstorage_files, None)
+        for dirpath, dirnames, filenames in os.walk(base_path):
+            self.visit_localstorage_files(None, dirpath, filenames)
         found = False
         for item in self.localstorage_files:
             scheme, domain_name, filename = item
