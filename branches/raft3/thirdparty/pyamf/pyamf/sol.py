@@ -16,13 +16,14 @@ a per-domain basis.
 
 import pyamf
 from pyamf import util
+import sys
 
 #: Magic Number - 2 bytes
-HEADER_VERSION = '\x00\xbf'
+HEADER_VERSION = b'\x00\xbf'
 #: Marker - 10 bytes
-HEADER_SIGNATURE = 'TCSO\x00\x04\x00\x00\x00\x00'
+HEADER_SIGNATURE = b'TCSO\x00\x04\x00\x00\x00\x00'
 #: Padding - 4 bytes
-PADDING_BYTE = '\x00'
+PADDING_BYTE = b'\x00'
 
 
 def decode(stream, strict=True):
@@ -38,7 +39,6 @@ def decode(stream, strict=True):
 
     # read the version
     version = stream.read(2)
-
     if version != HEADER_VERSION:
         raise pyamf.DecodeError('Unknown SOL version in header')
 
@@ -66,7 +66,7 @@ def decode(stream, strict=True):
 
     values = {}
 
-    while 1:
+    while True:
         if stream.at_eof():
             break
 
@@ -74,8 +74,11 @@ def decode(stream, strict=True):
         value = decoder.readElement()
 
         # read the padding
-        if stream.read(1) != PADDING_BYTE:
-            raise pyamf.DecodeError('Missing padding byte')
+        t = stream.read(1) 
+        while t != PADDING_BYTE:
+        #    raise pyamf.DecodeError('Missing padding byte')
+            sys.stderr.write('Bad padding byte: 0x02%x\n' % ord(t))
+            t = stream.read(1) 
 
         values[name] = value
 

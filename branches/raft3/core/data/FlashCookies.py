@@ -85,14 +85,19 @@ class FlashCookies:
         self.flashcookies_files = []
         for base_path in self.get_base_paths():
             user_dir = {}
-            os.path.walk(base_path, self.visit_flashcookies_files, user_dir)
+            for entry in os.listdir(base_path):
+                target = os.path.join(base_path, entry)
+                if os.path.isdir(target):
+                    user_dir['randomized'] = entry
+            for dirpath, dirnames, filenames in os.walk(base_path):
+                self.visit_flashcookies_files(user_dir, dirpath, filenames)
+#            os.path.walk(base_path, self.visit_flashcookies_files, user_dir)
 
         self.flashcookies = {}
         for item in self.flashcookies_files:
             try:
                 dirname, entry, randomized = item
                 filename = os.path.join(dirname, entry)
-                print(filename)
                 n = dirname.find(randomized)
                 if n > -1:
                     domain = dirname[n+len(randomized)+1:]
@@ -108,5 +113,3 @@ class FlashCookies:
         
         return self.flashcookies
             
-
-

@@ -52,7 +52,9 @@ class LocalStorage():
         base_path = self.get_base_path()
         self.localstorage_files = []
         self.localstorage = {}
-        os.path.walk(base_path, self.visit_localstorage_files, None)
+        for dirpath, dirnames, filenames in os.walk(base_path):
+            self.visit_localstorage_files(None, dirpath, filenames)
+#        os.path.walk(base_path, self.visit_localstorage_files, None)
         for item in self.localstorage_files:
             scheme, domain_name, filename = item
             domain = urlparse.urlunsplit((scheme, domain_name, '', '', ''))

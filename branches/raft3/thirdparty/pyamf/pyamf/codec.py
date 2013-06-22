@@ -18,14 +18,6 @@ __all__ = [
     'Encoder'
 ]
 
-try:
-    str
-except NameError:
-    # py3k support
-    str = str
-    str = bytes
-
-
 class IndexedCollection(object):
     """
     Store references to objects and provides an api to query references.
@@ -431,9 +423,9 @@ class Encoder(_Codec):
         t = type(data)
 
         # try types that we know will work
-        if t is str or issubclass(t, str):
+        if t is bytes or issubclass(t, bytes):
             return self.writeBytes
-        if t is str or issubclass(t, str):
+        elif t is str or issubclass(t, str):
             return self.writeString
         elif t is bool:
             return self.writeBoolean
