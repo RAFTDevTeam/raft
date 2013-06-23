@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ConfigDialog.ui'
 #
-# Created: Sun Jun 16 18:19:40 2013
+# Created: Thu Jun 20 13:19:56 2013
 #      by: PyQt4 UI code generator 4.10.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -535,6 +535,9 @@ class Ui_configDialog(object):
         self.dbankFuzzFileAddButton = QtGui.QPushButton(self.verticalLayoutWidget)
         self.dbankFuzzFileAddButton.setObjectName(_fromUtf8("dbankFuzzFileAddButton"))
         self.verticalLayout_60.addWidget(self.dbankFuzzFileAddButton)
+        self.dbankFuzzFileDelButton = QtGui.QPushButton(self.verticalLayoutWidget)
+        self.dbankFuzzFileDelButton.setObjectName(_fromUtf8("dbankFuzzFileDelButton"))
+        self.verticalLayout_60.addWidget(self.dbankFuzzFileDelButton)
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_60.addItem(spacerItem)
         self.dbankFuzzValuesEdit = QtGui.QPlainTextEdit(self.splitter_14)
@@ -649,6 +652,8 @@ class Ui_configDialog(object):
         self.tabDataBank.setTabText(self.tabDataBank.indexOf(self.tabDataBankDataLists), _translate("configDialog", "Data Lists", None))
         self.dbankFuzzFileAddButton.setToolTip(_translate("configDialog", "Add a file with values for fuzzer", None))
         self.dbankFuzzFileAddButton.setText(_translate("configDialog", "Add File", None))
+        self.dbankFuzzFileDelButton.setToolTip(_translate("configDialog", "Delete the selected file", None))
+        self.dbankFuzzFileDelButton.setText(_translate("configDialog", "Delete File", None))
         self.tabDataBank.setTabText(self.tabDataBank.indexOf(self.tabDataBankFuzzPayloads), _translate("configDialog", "Fuzz Payloads", None))
         self.tabDataBankGenerator.setToolTip(_translate("configDialog", "Payload Generator", None))
         self.tabDataBank.setTabText(self.tabDataBank.indexOf(self.tabDataBankGenerator), _translate("configDialog", "Generator", None))

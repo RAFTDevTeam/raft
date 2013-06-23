@@ -54,6 +54,7 @@ class ConfigDialog(QDialog, ConfigDialog.Ui_configDialog):
         self.dataBankTab = DataBankTab.DataBankTab(self.framework, self)
         
         self.dbankFuzzFileAddButton.clicked.connect(self.add_fuzz_file)
+        self.dbankFuzzFileDelButton.clicked.connect(self.del_fuzz_file)
 
     def configuration_populated(self):
         self.fill_values()
@@ -182,4 +183,20 @@ class ConfigDialog(QDialog, ConfigDialog.Ui_configDialog):
         # Refresh the payload list in the interface.
         # pl = Payloads.Payloads()
         self.dataBankTab.fill_payload_combo_box()
+        
+    def del_fuzz_file(self):
+        
+        # Gets the current name of the file selected in the combobox
+        filename = self.dataBankTab.mainWindow.dbankPayloadsBox.currentText()
+        path = self.payloads_dir
+        
+        # WARNING: Currently does not confirm before deletion.
+        #ToDo: Add confirmation dialog
+        os.remove(path + "/" + filename)
+        
+        self.dataBankTab.fill_payload_combo_box()
+        
+        # Clear the items from the textedit
+        self.dataBankTab.mainWindow.dbankFuzzValuesEdit.clear()
+    
     
