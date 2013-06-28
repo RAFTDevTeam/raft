@@ -330,6 +330,8 @@ class raft_parse_xml():
             status = int(cur['status'])
         except ValueError:
             pass
+        except TypeError:
+            pass
         url = cur['url']
         datetime = cur['datetime']
         method = cur['method']

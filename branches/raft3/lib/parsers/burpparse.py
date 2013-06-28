@@ -21,9 +21,13 @@
 # Classes to support parsing Burp logs and state files
 import re, time, struct
 from urllib import parse as urlparse
-import zipfile, string
+import zipfile
+import string
 import logging, traceback
 import base64
+from io import StringIO
+import bz2
+import lzma
 
 class BurpUtil():
     def __init__(self):
@@ -98,7 +102,6 @@ class burp_parse_state():
         self.logger = logging.getLogger(__name__)
         self.logger.info('Parsing Burp state file: %s' % (burpfile))
         self.util = BurpUtil()
-        self.burpfile = burpfile
 
         self.zfile = zipfile.ZipFile(burpfile, 'r')
         for zi in self.zfile.infolist():
@@ -677,7 +680,6 @@ class burp_parse_log():
         self.logger = logging.getLogger(__name__)
         self.logger.info('Parsing Burp log file: %s' % (burpfile))
         self.util = BurpUtil()
-        self.burpfile = burpfile
 
         self.re_burp = re.compile(br'^(\d{1,2}:\d{1,2}:\d{1,2}\s+(?:AM|PM))\s+(https?://(?:\S+\.)*\w+:\d+)(?:\s+\[((?:\d{1,3}\.){3}\d{1,3})\])?\s*$', re.I)
         self.re_content_length = re.compile(br'^Content-Length:\s*(\d+)\s*$', re.I)
@@ -685,7 +687,18 @@ class burp_parse_log():
         self.re_chunked_length = re.compile(b'^[a-f0-9]+$', re.I)
         self.re_date = re.compile(br'^Date:\s*(\w+,.*\w+)\s*$', re.I)
 
-        self.file = open(self.burpfile, 'rb')
+        if isinstance(burpfile, bytes):
+            burpfile = burpfile.decode('utf-8')
+        if isinstance(burpfile, str):
+            if burpfile.endswith('.bz2'):
+                self.file = bz2.BZ2File(burpfile, 'rb')
+            elif burpfile.endswith('.xz'):
+                self.file = lzma.LZMAFile(burpfile, 'rb')
+            else:
+                self.file = open(burpfile, 'rb')
+        else:
+            # assume file like object
+            self.file = burpfile
 
         self.state = self.S_INITIAL
         self.peaked = False
@@ -949,8 +962,21 @@ class burp_parse_xml():
     S_ITEM_XML_ELEMENT = 101
 
     class BurpBrokenXml(object):
-        def __init__(self, filename):
-            self.xmlfile = open(filename, 'rb')
+        def __init__(self, burpfile):
+
+            if isinstance(burpfile, bytes):
+                burpfile = burpfile.decode('utf-8')
+            if isinstance(burpfile, str):
+                if burpfile.endswith('.bz2'):
+                    self.xmlfile = bz2.BZ2File(burpfile, 'rb')
+                elif burpfile.endswith('.xz'):
+                    self.xmlfile = lzma.LZMAFile(burpfile, 'rb')
+                else:
+                    self.xmlfile = open(burpfile, 'rb')
+            else:
+                # assume file-like object
+                self.xmlfile = burpfile
+
             self.buffer = b''
             self.re_nonprintable = re.compile(bytes('[^%s]' % re.escape('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%\'()*+,-./:;<=>?@[\\]^_`{|}~ \t\n\r'),'ascii'))
             self.entity_encode = lambda m: bytes('&#x%02X;' % ord(m.group(0)),'ascii')
@@ -1002,11 +1028,10 @@ class burp_parse_xml():
             
     def __init__(self, burpfile):
 
-        self.burpfile = burpfile
         self.re_encoded = re.compile(r'&#[xX]([0-9a-fA-F]{2});')
         self.decode_entity = lambda m: '%c' % (int(m.group(1),16))
 
-        self.source = burp_parse_xml.BurpBrokenXml(self.burpfile)
+        self.source = burp_parse_xml.BurpBrokenXml(burpfile)
 
         # TODO: lazy ...
         from lxml import etree
@@ -1172,14 +1197,254 @@ class burp_parse_xml():
                 self.source.close()
                 raise Exception('Internal error: state=%s, event=%s, elem=%s\n%s' % (state, event, elem.tag, traceback.format_exc(error)))
 
+class burp_parse_vuln_xml():
+    """ parse Burp broken XML format """
+
+    S_INITIAL = 1
+    S_ISSUES = 2
+    S_ISSUE = 3
+    S_REQUESTRESPONSE = 4
+
+    S_ISSUE_XML_ELEMENT = 101
+    S_REQUESTRESPONSE_XML_ELEMENT = 102
+            
+    def __init__(self, burpfile):
+
+        self.re_encoded = re.compile(r'&#[xX]([0-9a-fA-F]{2});')
+        self.decode_entity = lambda m: '%c' % (int(m.group(1),16))
+
+        self.source = burp_parse_xml.BurpBrokenXml(burpfile)
+
+        # TODO: lazy ...
+        from lxml import etree
+        # http://effbot.org/zone/element-iterparse.htm#incremental-parsing
+        self.context = etree.iterparse(self.source, events=('start', 'end'))
+        self.iterator = iter(self.context)
+        self.root = None
+
+        self.util = BurpUtil()
+
+        self.version = 1
+        self.states = [self.S_INITIAL]
+        self.state_table = {
+            self.S_INITIAL : (
+                ('start', 'issues', self.issues_start),
+                ),
+            self.S_ISSUES : (
+                ('start', 'issue', self.issue_start),
+                ('end', 'issues', self.issues_end),
+                ),
+            self.S_ISSUE : (
+                ('start', 'serialNumber', self.issue_xml_element_start),
+                ('start', 'type', self.issue_xml_element_start),
+                ('start', 'name', self.issue_xml_element_start),
+                ('start', 'host', self.issue_host_start),
+                ('start', 'path', self.issue_xml_element_start),
+                ('start', 'location', self.issue_xml_element_start),
+                ('start', 'severity', self.issue_xml_element_start),
+                ('start', 'confidence', self.issue_xml_element_start),
+                ('start', 'issueBackground', self.issue_xml_element_start),
+                ('start', 'remediationBackground', self.issue_xml_element_start),
+                ('start', 'issueDetail', self.issue_xml_element_start),
+                ('start', 'remediationDetail', self.issue_xml_element_start),
+                ('start', 'requestresponse', self.requestresponse_start),
+                ('end', 'issue', self.issue_end),
+                ),
+            self.S_REQUESTRESPONSE : (
+                ('start', 'request', self.requestresponse_xml_element_start),
+                ('start', 'response', self.requestresponse_xml_element_start),
+                ('start', 'responseRedirected', self.requestresponse_xml_element_start),
+                ('end', 'requestresponse', self.requestresponse_end),
+                ),
+            self.S_ISSUE_XML_ELEMENT : (
+                ('end', 'serialNumber', self.xml_element_end),
+                ('end', 'type', self.xml_element_end),
+                ('end', 'name', self.xml_element_end),
+                ('end', 'host', self.xml_element_end),
+                ('end', 'path', self.xml_element_end),
+                ('end', 'location', self.xml_element_end),
+                ('end', 'severity', self.xml_element_end),
+                ('end', 'confidence', self.xml_element_end),
+                ('end', 'issueBackground', self.xml_element_end),
+                ('end', 'remediationBackground', self.xml_element_end),
+                ('end', 'issueDetail', self.xml_element_end),
+                ('end', 'remediationDetail', self.xml_element_end),
+                ),
+            self.S_REQUESTRESPONSE_XML_ELEMENT : (
+                ('end', 'request', self.xml_element_end_base64),
+                ('end', 'response', self.xml_element_end_base64),
+                ('end', 'responseRedirected', self.xml_element_end),
+                ),
+            }
+        self.default_values = (
+                ('serialNumber', ''),
+                ('type', ''),
+                ('name', ''),
+                ('host', ''),
+                ('hostip', ''),
+                ('path', ''),
+                ('location', ''),
+                ('severity', ''),
+                ('confidence', ''),
+                ('issueBackground', ''),
+                ('remediationBackground', ''),
+                ('issueDetail', ''),
+                ('remediationDetail', ''),
+                ('request', ''),
+                ('response', ''),
+                ('responseRedirected', ''),
+            )
+
+        self.notes_values = ('name', 'severity', 'confidence', 'issueBackground', 'remediationBackground', 'issueDetail', 'remediationDetail')
+
+    def make_results(self):
+        cur = self.current
+
+        host = cur['host']
+        hostip = cur['hostip']
+        status = ''
+        try:
+            status = '' # TODO:
+        except ValueError:
+            pass
+        url_path = cur['path'] or cur['location']
+        url = urlparse.urljoin(host, url_path)
+        datetime = '' # TODO:
+        method = '' # TODO:
+        request = self.util.split_request_block(cur['request'])
+        response = self.util.split_response_block(cur['response'])
+        if response and response[0]:
+            content_type = self.util.get_content_type(response[0])
+        else:
+            content_type = ''
+
+        # TODO: integrate vuln info
+        notes_io = StringIO()
+        for note_item in self.notes_values:
+            if cur[note_item]:
+                notes_io.write('%s: %s\n\n' % (note_item, cur[note_item]))
+        
+        return ('VULNXML', host, hostip, url, status, datetime, request, response, method, content_type, {'notes':notes_io.getvalue()})
+
+    def issues_start(self, elem):
+        self.root = elem
+        self.states.append(self.S_ISSUES)
+
+    def issues_end(self, elem):
+        raise(StopIteration)
+
+    def issue_start(self, elem):
+        self.current = {}
+        for n, v in self.default_values:
+            self.current[n] = v
+        self.states.append(self.S_ISSUE)
+
+    def issue_end(self, elem):
+        elem.clear()
+        self.states.pop()
+        return self.make_results()
+
+    def issue_xml_element_start(self, elem):
+        self.states.append(self.S_ISSUE_XML_ELEMENT)
+
+    def issue_host_start(self, elem):
+        self.states.append(self.S_ISSUE_XML_ELEMENT)
+        if elem.attrib.has_key('ip'):
+            self.current['hostip'] = elem.attrib['ip']
+
+    def requestresponse_start(self, elem):
+        self.states.append(self.S_REQUESTRESPONSE)
+
+    def requestresponse_end(self, elem):
+        self.states.pop()
+        
+    def requestresponse_xml_element_start(self, elem):
+        self.states.append(self.S_REQUESTRESPONSE_XML_ELEMENT)
+
+    def xml_element_end(self, elem):
+        if elem.text is None:
+            self.current[elem.tag] = ''
+        else:
+            self.current[elem.tag] = self.re_encoded.sub(self.decode_entity, elem.text)
+        self.states.pop()
+
+    def xml_element_end_base64(self, elem):
+        if elem.text is None:
+            self.current[elem.tag] = b''
+        elif 'base64' in elem.attrib and 'true' == elem.attrib['base64']:
+            self.current[elem.tag] = base64.b64decode(elem.text)
+        else:
+            self.current[elem.tag] = bytes(self.re_encoded.sub(self.decode_entity, elem.text), 'utf-8') # TODO: or ascii?
+        self.states.pop()
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        event, elem, tag, state = None, None, None, None
+        while True:
+            try:
+                event, elem = next(self.iterator)
+                tag = elem.tag
+                state = self.states[-1]
+                transitions = self.state_table[state]
+                for transition in transitions:
+                    if transition[0] == event and transition[1] == tag:
+                        func = transition[2]
+                        results = func(elem)
+                        if results:
+                            return results
+                        break
+                else:
+                    raise Exception('Invalid element: state=%s, event=%s, elem=%s' % (state, event, elem.tag))
+
+            except StopIteration:
+                self.source.close()
+                raise
+            except Exception as error:
+                print(('***%s***\n^^^%s^^^' % (self.source.last_response, self.source.buffer)))
+                self.source.close()
+                raise Exception('Internal error: state=%s, event=%s, elem=%s\n%s' % (state, event, elem.tag, traceback.format_exc(error)))
+
 if '__main__' == __name__:
     # test code
+
+    def process_file(mode, burpfile):
+        if 'log' == mode:
+            count = 0
+            for result in burp_parse_log(burpfile):
+                print(result)
+                count += 1
+            print(('processed %d records' % (count)))
+        elif 'state' == mode:
+            count = 0
+            for result in burp_parse_state(burpfile):
+                count += 1
+            print(('processed %d records' % (count)))
+        elif 'xml' == mode:
+            count = 0
+            for result in burp_parse_xml(burpfile):
+                print(result)
+                count += 1
+            print(('processed %d records' % (count)))
+        elif 'vulnxml' == mode:
+            count = 0
+            for result in burp_parse_vuln_xml(burpfile):
+                print(result)
+                count += 1
+            print('processed %d records' % (count))
+        elif 'dumpstate' == mode:
+            for result in burp_dump_state(burpfile):
+                print(result)
+        else:
+            raise Exception('unsupported mode: ' + mode)
+
     import sys
     if (len(sys.argv) != 3):
-        sys.stderr.write('usage: %s [log|state|dumpstate|xml] [file]\n' % sys.argv[0])
+        sys.stderr.write('usage: %s [log|state|dumpstate|xml|vulnxml] [file]\n' % sys.argv[0])
         sys.exit(1)
     mode = sys.argv[1]
-    burpfile = sys.argv[2]
+    infile = sys.argv[2]
 
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
@@ -1189,26 +1454,12 @@ if '__main__' == __name__:
     ch.setFormatter(formatter)
     logger.addHandler(ch)
 
-    if 'log' == mode:
-        count = 0
-        for result in burp_parse_log(burpfile):
-            print(result)
-            count += 1
-        print(('processed %d records' % (count)))
-    elif 'state' == mode:
-        count = 0
-        for result in burp_parse_state(burpfile):
-            count += 1
-        print(('processed %d records' % (count)))
-    elif 'xml' == mode:
-        count = 0
-        for result in burp_parse_xml(burpfile):
-            print(result)
-            count += 1
-        print(('processed %d records' % (count)))
-    elif 'dumpstate' == mode:
-        for result in burp_dump_state(burpfile):
-            print(result)
+    if infile.endswith('.zip'):
+        zfile = zipfile.ZipFile(infile, 'r')
+        for zi in zfile.infolist():
+            process_file(mode, zfile.open(zi.filename, 'r'))
     else:
-        raise Exception
+        process_file(mode, infile)
+
+
 
