@@ -1174,7 +1174,7 @@ MAKERNOTE_CANON_TAG_0x004 = {
 def s2n_motorola(str):
     x = 0
     for c in str:
-        x = (x << 8) | ord(c)
+        x = (x << 8) | c
     return x
 
 # extract multibyte integer in Intel format (big endian)
@@ -1182,7 +1182,7 @@ def s2n_intel(str):
     x = 0
     y = 0
     for c in str:
-        x = x | (ord(c) << y)
+        x = x | (c << y)
         y = y + 8
     return x
 
@@ -1255,7 +1255,7 @@ class EXIF_header:
     def s2n(self, offset, length, signed=0):
         self.file.seek(self.offset+offset)
         slice=self.file.read(length)
-        if self.endian == 'I':
+        if self.endian == b'I':
             val=s2n_intel(slice)
         else:
             val=s2n_motorola(slice)
@@ -1270,7 +1270,7 @@ class EXIF_header:
     def n2s(self, offset, length):
         s = ''
         for dummy in range(length):
-            if self.endian == 'I':
+            if self.endian == b'I':
                 s = s + chr(offset & 0xFF)
             else:
                 s = chr(offset & 0xFF) + s
@@ -1354,9 +1354,9 @@ class EXIF_header:
                         values = self.file.read(count)
                         #print values
                         # Drop any garbage after a null.
-                        values = values.split('\x00', 1)[0]
+                        values = values.split(b'\x00', 1)[0]
                     else:
-                        values = ''
+                        values = b''
                 else:
                     values = []
                     signed = (field_type in [6, 8, 9, 10])
@@ -1376,7 +1376,7 @@ class EXIF_header:
                             offset = offset + typelen
                     # The test above causes problems with tags that are 
                     # supposed to have long values!  Fix up one important case.
-                    elif tag_name == 'MakerNote' :
+                    elif tag_name == b'MakerNote' :
                         for dummy in range(count):
                             value = self.s2n(offset, typelen, signed)
                             values.append(value)
@@ -1422,13 +1422,13 @@ class EXIF_header:
     def extract_TIFF_thumbnail(self, thumb_ifd):
         entries = self.s2n(thumb_ifd, 2)
         # this is header plus offset to IFD ...
-        if self.endian == 'M':
-            tiff = 'MM\x00*\x00\x00\x00\x08'
+        if self.endian == b'M':
+            tiff = b'MM\x00*\x00\x00\x00\x08'
         else:
-            tiff = 'II*\x00\x08\x00\x00\x00'
+            tiff = b'II*\x00\x08\x00\x00\x00'
         # ... plus thumbnail IFD data plus a null "next IFD" pointer
         self.file.seek(self.offset+thumb_ifd)
-        tiff += self.file.read(entries*12+2)+'\x00\x00\x00\x00'
+        tiff += self.file.read(entries*12+2)+b'\x00\x00\x00\x00'
 
         # fix up large value offset pointers into data area
         for i in range(entries):
@@ -1606,21 +1606,21 @@ def process_file(f, stop_tag='UNDEF', details=True, strict=False, debug=False):
 
     # determine whether it's a JPEG or TIFF
     data = f.read(12)
-    if data[0:4] in ['II*\x00', 'MM\x00*']:
+    if data[0:4] in [b'II*\x00', b'MM\x00*']:
         # it's a TIFF file
         f.seek(0)
         endian = f.read(1)
         f.read(1)
         offset = 0
-    elif data[0:2] == '\xFF\xD8':
+    elif data[0:2] == b'\xFF\xD8':
         # it's a JPEG file
-        while data[2] == '\xFF' and data[6:10] in ('JFIF', 'JFXX', 'OLYM', 'Phot'):
-            length = ord(data[4])*256+ord(data[5])
+        while data[2] == 0xFF and data[6:10] in (b'JFIF', b'JFXX', b'OLYM', b'Phot'):
+            length = data[4]*256+data[5]
             f.read(length-8)
             # fake an EXIF beginning of file
-            data = '\xFF\x00'+f.read(10)
+            data = b'\xFF\x00'+f.read(10)
             fake_exif = 1
-        if data[2] == '\xFF' and data[6:10] == 'Exif':
+        if data[2] == 0xFF and data[6:10] == b'Exif':
             # detected EXIF header
             offset = f.tell()
             endian = f.read(1)
@@ -1633,7 +1633,8 @@ def process_file(f, stop_tag='UNDEF', details=True, strict=False, debug=False):
 
     # deal with the EXIF info we found
     if debug:
-        print({'I': 'Intel', 'M': 'Motorola'}[endian], 'format')
+        print({b'I': 'Intel', b'M': 'Motorola'}[endian], 'format')
+
     hdr = EXIF_header(f, endian, offset, fake_exif, strict, debug)
     ifd_list = hdr.list_IFDs()
     ctr = 0
