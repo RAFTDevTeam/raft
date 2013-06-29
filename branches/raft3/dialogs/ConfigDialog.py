@@ -27,6 +27,7 @@ from PyQt4.QtGui import *
 
 from ui import ConfigDialog
 from tabs import DataBankTab
+from dialogs import ConfirmDialog
 
 from core.fuzzer import Payloads
 
@@ -190,13 +191,16 @@ class ConfigDialog(QDialog, ConfigDialog.Ui_configDialog):
         filename = self.dataBankTab.mainWindow.dbankPayloadsBox.currentText()
         path = self.payloads_dir
         
-        # WARNING: Currently does not confirm before deletion.
-        #ToDo: Add confirmation dialog
-        os.remove(path + "/" + filename)
+        message = "Are you sure you want to delete: {0}".format(filename)
         
-        self.dataBankTab.fill_payload_combo_box()
+        response = ConfirmDialog.display_confirm_dialog(self, message)
         
-        # Clear the items from the textedit
-        self.dataBankTab.mainWindow.dbankFuzzValuesEdit.clear()
+        if response == True:
+            os.remove(path + "/" + filename)
+            
+            self.dataBankTab.fill_payload_combo_box()
+                    
+            # Clear the items from the textedit
+            self.dataBankTab.mainWindow.dbankFuzzValuesEdit.clear()
     
     
