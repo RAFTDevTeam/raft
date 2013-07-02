@@ -46,8 +46,8 @@ class ScopeController(QObject):
         pass
 
     def configuration_updated(self, name, value):
-        if str(name) == 'SCOPING':
-            self.fill_scoping_configuration(str(value.toString()))
+        if name == 'SCOPING':
+            self.fill_scoping_configuration(value)
 
     def fill_scoping_configuration(self, configuration):
         if configuration:

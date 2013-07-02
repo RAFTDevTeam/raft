@@ -42,8 +42,8 @@ class SpiderConfig(QObject):
         self.fill_spider_configuration(self.framework.get_raft_config_value('SPIDER', str))
 
     def configuration_updated(self, name, value):
-        if str(name) == 'SPIDER':
-            self.fill_spider_configuration(str(value.toString()))
+        if name == 'SPIDER':
+            self.fill_spider_configuration(value)
 
     def config_value_or_default(self, obj, config_name, default_value):
         if config_name in obj:

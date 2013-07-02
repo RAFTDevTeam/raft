@@ -22,7 +22,7 @@
 from PyQt4.QtCore import (Qt, QObject, SIGNAL, QUrl, QByteArray, QIODevice, QMetaType)
 from PyQt4.QtNetwork import *
 
-from io import StringIO
+from io import StringIO, BytesIO
 
 from core.database.constants import ResponsesTable
 
@@ -72,7 +72,7 @@ class NetworkResponse(QObject):
         if not fetched:
             # TODO: refactor this header response construction
             headers_io = BytesIO()
-            message = self.reply.attribute(QNetworkRequest.HttpReasonPhraseAttribute)
+            message = self.reply.attribute(QNetworkRequest.HttpReasonPhraseAttribute) or ''
             content_type = self.reply.header(QNetworkRequest.ContentTypeHeader)
             headers_io.write(b'HTTP/1.1 ')  # TODO: is server HTTP version exposed?
             headers_io.write(str(status).encode('ascii'))

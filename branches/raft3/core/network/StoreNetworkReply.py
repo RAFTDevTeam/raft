@@ -138,7 +138,7 @@ class StoreNetworkReply(QNetworkReply):
             return 'DELETE'
         else:
             # CUSTOM
-            return str(self.__request.attribute(self.__request.CustomVerbAttribute).toString())
+            return self.__request.attribute(self.__request.CustomVerbAttribute).data().decode('ascii','ignore')
 
     def __attr__(self, name):
         ### self.debug_print('__attr__', name)

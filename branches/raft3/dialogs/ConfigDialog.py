@@ -65,6 +65,12 @@ class ConfigDialog(QDialog, ConfigDialog.Ui_configDialog):
         self.checkBoxUseProxy.setChecked(self.framework.get_raft_config_value('use_proxy', bool))
         self.confProxyEdit.setText(self.framework.get_raft_config_value('proxy_host'))
         self.confProxyPort.setText(self.framework.get_raft_config_value('proxy_port'))
+        self.confProxyUsername.setText(self.framework.get_raft_config_value('proxy_username'))
+        self.confProxyPassword.setText(self.framework.get_raft_config_value('proxy_password'))
+        if 'socks5' == self.framework.get_raft_config_value('proxy_type'):
+            self.confProxyProxyType.setCurrentIndex(1)
+        else:
+            self.confProxyProxyType.setCurrentIndex(0)
         self.set_enable_proxy_edits()
         self.fill_browser_edits()
         self.fill_crawler_edits()
@@ -78,8 +84,14 @@ class ConfigDialog(QDialog, ConfigDialog.Ui_configDialog):
     def do_save_config(self):
         self.framework.set_raft_config_value('black_hole_network', bool(self.bhNetworkBox.isChecked()))
         if self.checkBoxUseProxy.isChecked():
-            self.framework.set_raft_config_value('proxy_host', str(self.confProxyEdit.text()))
+            self.framework.set_raft_config_value('proxy_host', self.confProxyEdit.text())
             self.framework.set_raft_config_value('proxy_port', int(self.confProxyPort.text()))
+            self.framework.set_raft_config_value('proxy_username', self.confProxyUsername.text())
+            self.framework.set_raft_config_value('proxy_password', self.confProxyPassword.text())
+            if 'http' in self.confProxyProxyType.currentText().lower():
+                self.framework.set_raft_config_value('proxy_type', 'http')
+            else:
+                self.framework.set_raft_config_value('proxy_type', 'socks5')
             self.framework.set_raft_config_value('use_proxy', True)
         else:
             self.framework.set_raft_config_value('use_proxy', False)
@@ -94,9 +106,15 @@ class ConfigDialog(QDialog, ConfigDialog.Ui_configDialog):
         if self.checkBoxUseProxy.isChecked():
             self.confProxyEdit.setEnabled(True)            
             self.confProxyPort.setEnabled(True)
+            self.confProxyUsername.setEnabled(True)            
+            self.confProxyPassword.setEnabled(True)
+            self.confProxyProxyType.setEnabled(True)
         else:
             self.confProxyEdit.setEnabled(False)            
             self.confProxyPort.setEnabled(False)
+            self.confProxyUsername.setEnabled(False)            
+            self.confProxyPassword.setEnabled(False)
+            self.confProxyProxyType.setEnabled(False)
 
     def fill_crawler_edits(self):
         self.fill_spider_edits()
@@ -129,14 +147,14 @@ class ConfigDialog(QDialog, ConfigDialog.Ui_configDialog):
         self.spiderIterateUserAgentsCheckBox.setChecked(bool(self.value_or_default(obj, 'iterate_user_agents', True)))
         self.spiderRetrieveMediaFilesCheckBox.setChecked(bool(self.value_or_default(obj, 'retrieve_media_files', True)))
         self.spiderExcludeDangerouPathCheckBox.setChecked(bool(self.value_or_default(obj, 'exclude_dangerous_paths', False)))
-        self.spiderDangerousPathEdit.setText(str(self.value_or_default(obj, 'dangerous_path', 'delete|remove|destroy')))
+        self.spiderDangerousPathEdit.setText(self.value_or_default(obj, 'dangerous_path', 'delete|remove|destroy'))
         self.spiderMaxLinksEdit.setText(str(self.value_or_default(obj, 'max_links', 8192)))
         self.spiderMaxLinkDepthEdit.setText(str(self.value_or_default(obj, 'max_link_depth', 5)))
         self.spiderMaxChildrenEdit.setText(str(self.value_or_default(obj, 'max_children', 256)))
         self.spiderMaxUniqueParametersEdit.setText(str(self.value_or_default(obj, 'max_unique_parameters', 16)))
         self.spiderRedundantContentLimit.setText(str(self.value_or_default(obj, 'redundant_content_limit', 128)))
         self.spiderRedundantStructureLimit.setText(str(self.value_or_default(obj, 'redundant_structure_limit', 256)))
-        self.spiderMediaExtensionsEdit.setText(str(self.value_or_default(obj, 'media_extensions', 'wmv,mp3,mp4,mpa,gif,jpg,jpeg,png')))
+        self.spiderMediaExtensionsEdit.setText(self.value_or_default(obj, 'media_extensions', 'wmv,mp3,mp4,mpa,gif,jpg,jpeg,png'))
 
     def save_spider_config(self):
         obj = {}
@@ -147,14 +165,14 @@ class ConfigDialog(QDialog, ConfigDialog.Ui_configDialog):
         obj['iterate_user_agents'] = self.spiderIterateUserAgentsCheckBox.isChecked()
         obj['retrieve_media_files'] = self.spiderRetrieveMediaFilesCheckBox.isChecked()
         obj['exclude_dangerous_paths'] = self.spiderExcludeDangerouPathCheckBox.isChecked()
-        obj['dangerous_path'] = str(self.spiderDangerousPathEdit.text().toUtf8())
-        obj['max_links'] = int(self.spiderMaxLinksEdit.text().toUtf8())
-        obj['max_link_depth'] = int(self.spiderMaxLinkDepthEdit.text().toUtf8())
-        obj['max_children'] = int(self.spiderMaxChildrenEdit.text().toUtf8())
-        obj['max_unique_parameters'] = int(self.spiderMaxUniqueParametersEdit.text().toUtf8())
-        obj['redundant_content_limit'] = int(self.spiderRedundantContentLimit.text().toUtf8())
-        obj['redundant_structure_limit'] = int(self.spiderRedundantStructureLimit.text().toUtf8())
-        obj['media_extensions'] = str(self.spiderMediaExtensionsEdit.text().toUtf8())
+        obj['dangerous_path'] = self.spiderDangerousPathEdit.text()
+        obj['max_links'] = int(self.spiderMaxLinksEdit.text())
+        obj['max_link_depth'] = int(self.spiderMaxLinkDepthEdit.text())
+        obj['max_children'] = int(self.spiderMaxChildrenEdit.text())
+        obj['max_unique_parameters'] = int(self.spiderMaxUniqueParametersEdit.text())
+        obj['redundant_content_limit'] = int(self.spiderRedundantContentLimit.text())
+        obj['redundant_structure_limit'] = int(self.spiderRedundantStructureLimit.text())
+        obj['media_extensions'] = self.spiderMediaExtensionsEdit.text()
         configuration = json.dumps(obj)
         self.framework.set_raft_config_value('SPIDER', configuration)
 
@@ -165,7 +183,7 @@ class ConfigDialog(QDialog, ConfigDialog.Ui_configDialog):
         self.browserEnableJavaCheckBox.setChecked(self.framework.get_raft_config_value('browser_java_enabled', bool, True))
         self.browserAutoLoadImagesCheckBox.setChecked(self.framework.get_raft_config_value('browser_auto_load_images', bool, True))
         self.browserCustomUserAgentCheckBox.setChecked(self.framework.get_raft_config_value('browser_custom_user_agent', bool, False))
-        self.browserUserAgentEdit.setText(str(self.framework.get_raft_config_value('browser_user_agent_value', str, self.framework.useragent())))
+        self.browserUserAgentEdit.setText(self.framework.get_raft_config_value('browser_user_agent_value', str, self.framework.useragent()))
     
     def save_browser_config(self):
         self.framework.set_raft_config_value('browser_javascript_enabled', self.browserEnableJavaScriptCheckBox.isChecked())
@@ -174,7 +192,7 @@ class ConfigDialog(QDialog, ConfigDialog.Ui_configDialog):
         self.framework.set_raft_config_value('browser_java_enabled', self.browserEnableJavaCheckBox.isChecked())
         self.framework.set_raft_config_value('browser_auto_load_images', self.browserAutoLoadImagesCheckBox.isChecked())
         self.framework.set_raft_config_value('browser_custom_user_agent', self.browserCustomUserAgentCheckBox.isChecked())
-        self.framework.set_raft_config_value('browser_user_agent_value', self.browserUserAgentEdit.text().toUtf8())
+        self.framework.set_raft_config_value('browser_user_agent_value', self.browserUserAgentEdit.text())
         
     def add_fuzz_file(self):
         
