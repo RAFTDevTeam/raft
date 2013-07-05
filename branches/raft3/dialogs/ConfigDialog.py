@@ -3,6 +3,7 @@
 #
 # Authors: 
 #          Gregory Fleischer (gfleischer@gmail.com)
+#          Nathan Hamiel
 #
 # Copyright (c) 2011 RAFT Team
 #
@@ -28,6 +29,8 @@ from PyQt4.QtGui import *
 from ui import ConfigDialog
 from tabs import DataBankTab
 from dialogs import ConfirmDialog
+from dialogs.SimpleDialog import SimpleDialog
+from dialogs.ProgressDialog import ProgressDialog
 
 from core.fuzzer import Payloads
 
@@ -44,6 +47,7 @@ class ConfigDialog(QDialog, ConfigDialog.Ui_configDialog):
 
         self.framework = framework
         self.payloads_dir = os.path.join(self.framework.get_data_dir(), 'payloads')
+        self.Progress = ProgressDialog()
 
         self.buttonBox.clicked.connect(self.handle_buttonBox_clicked)
 
@@ -56,6 +60,8 @@ class ConfigDialog(QDialog, ConfigDialog.Ui_configDialog):
         
         self.dbankFuzzFileAddButton.clicked.connect(self.add_fuzz_file)
         self.dbankFuzzFileDelButton.clicked.connect(self.del_fuzz_file)
+        
+        self.dbankGenButton.clicked.connect(self.generate_payload)
 
     def configuration_populated(self):
         self.fill_values()
@@ -220,5 +226,78 @@ class ConfigDialog(QDialog, ConfigDialog.Ui_configDialog):
                     
             # Clear the items from the textedit
             self.dataBankTab.mainWindow.dbankFuzzValuesEdit.clear()
+            
+    def write_payload(self, fullpath, start, stop):
+        
+        step = self.dataBankTab.mainWindow.dbankGenStep.text()
+        prepend = self.dataBankTab.mainWindow.dbankGenPre.text()
+        postpend = self.dataBankTab.mainWindow.dbankGenPost.text()
+        
+        
+        try:
+            f = open(fullpath, "w")
+            self.Progress = ProgressDialog()
+            for item in range(int(start), int(stop), int(step)):
+                f.write(prepend + str(item) + postpend +"\n")   
+        
+            self.dataBankTab.fill_payload_combo_box()
+            
+            # Display a message since small payload generation will not show the progress dialog.
+            message = "Payload Generated"
+            dialog = SimpleDialog(message)
+            dialog.exec_()
+            
+        except Exception as e:
+            message = "An error occured:\n%s" % (e)
+            dialog = SimpleDialog(message)
+            dialog.exec_()
+            
+            # Remove the file created on error so a blank payload is not listed in the payload list
+            os.remove(fullpath)
+        
+        finally:
+            self.Progress.close()
+            
+            
+            
+    def generate_payload(self):
+        """ Generate a payload file and place it in the payloads directory. Payloads will be one item per line. """
+        
+        filename = self.dataBankTab.mainWindow.dbankGenPayloadName.text()
+        start = self.dataBankTab.mainWindow.dbankGenStart.text()
+        stop = self.dataBankTab.mainWindow.dbankGenStop.text()
+        step = self.dataBankTab.mainWindow.dbankGenStep.text()
+        prepend = self.dataBankTab.mainWindow.dbankGenPre.text()
+        postpend = self.dataBankTab.mainWindow.dbankGenPost.text()
+        
+        if filename == "":
+            message = "You didn't specify a filename"
+            dialog = SimpleDialog(message)
+            dialog.exec_()
+            return()
+        if start == "":
+            message = "You didn't specify a start of the range"
+            dialog = SimpleDialog(message)
+            dialog.exec_()
+            return()
+        if stop == "":
+            message = "You didn't specify a end of the range"
+            dialog = SimpleDialog(message)
+            dialog.exec_()
+            return()
+        
+        fullpath = self.payloads_dir + "/" + filename
+        
+        if os.path.exists(fullpath):
+            message = "File already exists. Would you like to overwrite?"
+            response = ConfirmDialog.display_confirm_dialog(self, message)
+            if response == False:
+                return()
+            
+        self.write_payload(fullpath, start, stop)
+            
+            
+        
+    
     
     

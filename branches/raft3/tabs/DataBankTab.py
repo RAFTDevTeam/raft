@@ -198,3 +198,6 @@ class DataBankTab(QObject):
         for item in values:
             self.mainWindow.dbankFuzzValuesEdit.appendPlainText(item)
             
+            
+    
+            
