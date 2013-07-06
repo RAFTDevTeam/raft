@@ -1,7 +1,7 @@
 #
 # Author: Gregory Fleischer (gfleischer@gmail.com)
 #
-# Copyright (c) 2011 RAFT Team
+# Copyright (c) 2011-2013 RAFT Team
 #
 # This file is part of RAFT.
 #
@@ -19,13 +19,15 @@
 # along with RAFT.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import sys, re
-
+import sys
+import re
+sys.path.append('.')
 from raftparse import raft_parse_xml
 import urllib.request, urllib.error, urllib.parse
 from urllib import parse as urlparse
 import hashlib
 import time
+import os
 
 unique_hashes = {}
 status_counts = {}
@@ -51,9 +53,10 @@ re_domain = re.compile(r'(?:^|/)(?:\w+\.)+(?:AC|AD|AE|AERO|AF|AG|AI|AL|AM|AN|AO|
 re_strip_chars = re.compile(r'[\'\"\\()|@+]')
 re_chomp_chars = re.compile(r'[?#;&$%].*$')
 re_remove_junk = re.compile(r'/\w+,\w+/|/com\.\w+(\.\w+)*/')
-re_remove_comments = re.compile(r'#[^\n]*\n')
-re_remove_sitemap = re.compile(r'Sitemap:[^\n]+\n', re.I)
-re_reject_spammer = re.compile(r'Disallow:[^\n]*\b(?:adderall|percocet|cialis|OptionARMCalc|ChicagoExperts|ChicagoSellers|ChicagoBuyers|Win\$\d|Loan-Analysis|RealEstateTips|DreamHome)\b', re.I)
+
+re_remove_comments = re.compile(rb'#[^\n]*\n')
+re_remove_sitemap = re.compile(rb'Sitemap:[^\n]+\n', re.I)
+re_reject_spammer = re.compile(rb'Disallow:[^\n]*\b(?:adderall|percocet|cialis|OptionARMCalc|ChicagoExperts|ChicagoSellers|ChicagoBuyers|Win\$\d|Loan-Analysis|RealEstateTips|DreamHome)\b', re.I)
 
 matchers = [
 #    (re_allow, robot_mappings), 
@@ -186,7 +189,7 @@ def process(files):
             skipcount += tskip
         except Exception as e:
             import traceback
-            sys.stdout.write('ERROR: processing %s\n%s' % (filename, traceback.format_exc(e)))
+            sys.stdout.write('ERROR: processing %s\n%s' % (filename, traceback.format_exc()))
 
 
     sys.stderr.write('\n***processed %d records in %d seconds and ignored %d duplicates and %d skips\n' % (count, int(time.time()-start_time), duplicates, skipcount))
@@ -196,39 +199,46 @@ def process_response(host, body, content_type):
     site_mapping = {}
     initialize_mapcounts(site_mapping)
 
-    charset = ''
+    charset = 'utf-8'
     if content_type and 'charset=' in content_type:
         charset = content_type[content_type.index('charset=')+8:]
-    elif ord(body[0]) > 127:
+    elif body[0] > 127:
         charset = 'UTF-8'
-    elif ord(body[0]) == 0:
+    elif body[0] == 0:
         charset = 'UTF-16'
-    if charset:
-        try:
-            body = body.decode(charset)
-            body = body.encode('ascii', 'ignore')
-        except Exception as e:
-#            sys.stderr.write('ignoring: %s' % (e))
-            pass
-    comments = ''
+
+    if 'utf-8' in charset.lower():
+        charset = 'utf-8'
+
     for line in body.splitlines():
-        line = line.replace('\xa0', ' ')
+        if b'#' in line:
+            line, junk = line.split(b'#', 1)
+        if b'?' in line:
+            line, junk = line.split(b'?', 1)
+        if not line:
+            continue
+        line = line.replace(b'\xa0', b' ')
         line = line.strip()
         if not line:
             continue
-        matched = False
-        ndx = line.find('#')
-        if 0 == ndx:
-            m = re_comment.search(line)
-            if m:
-                matched = True
-                # comments += line + '\n'
-            elif comments:
-                print(comments)
-                comments = ''
-        elif ndx > 0:
-            line = line[0:ndx].strip()
 
+        fallback = False
+        try:
+            line = line.decode(charset)
+        except UnicodeDecodeError as e:
+            fallback = True
+        except LookupError as e:
+#            sys.stderr.write(charset + '\n')
+            fallback = True
+
+        if fallback:
+            try:
+                line = line.decode('utf-8')
+                charset = 'utf-8'
+            except UnicodeDecodeError as e:
+                line = line.decode('ascii', 'ignore')
+
+        matched = False
         for matcher in matchers:
             m = matcher[0].search(line)
             if m:
@@ -346,9 +356,9 @@ def process_file(filename):
                     skipcount += 1
                     continue
                 # normalize and calculate hashval
-                normalized = body.lower().replace(host, '')
-                normalized = re_remove_comments.sub('\n', normalized)
-#                normalized = re_remove_sitemap.sub('\n', normalized)
+                normalized = body.lower().replace(host.encode('utf-8', 'ignore'), b'')
+                normalized = re_remove_comments.sub(b'\n', normalized)
+#                normalized = re_remove_sitemap.sub(b'\n', normalized)
                 sha1 = hashlib.sha1()
                 sha1.update(normalized)
                 hashval = sha1.hexdigest()
@@ -403,8 +413,14 @@ files = []
 for arg in sys.argv[1:]:
     if arg.startswith('-'):
         pass
-    else:
+    elif os.path.isfile(arg):
         files.append(arg)
+    elif os.path.isdir(arg):
+        for file in os.listdir(arg):
+            if '.xml' in file:
+                files.append(os.path.join(arg, file))
+    else:
+        raise Exception('unhandled item: %s' % (arg))
 
 process(files)
 
