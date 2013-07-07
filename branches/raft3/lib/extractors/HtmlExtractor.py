@@ -40,7 +40,7 @@ class HtmlInput():
         self.maxlength = ''
         self.accept = ''
         self.label = ''
-        self.autocomplete = ''
+        self.autocomplete = None
 
     def __eq__(self, other):
         return self.make_input_string() ==  other.make_input_string()
@@ -49,8 +49,12 @@ class HtmlInput():
         return self.make_input_string()
 
     def make_input_string(self):
+        autocomplete = ''
+        if self.autocomplete is not None:
+            autocomplete=' autocomplete="%s"' % (self.autocomplete)
+
         # TODO: finish
-        s = '<input name="%s" id="%s" type="%s" value="%s">' % (self.name, self.Id, self.Type, self.value)
+        s = '<input name="%s" id="%s" type="%s" value="%s"%s>' % (self.name, self.Id, self.Type, self.value, autocomplete)
         if self.label:
             s = '<label>%s%s</label>\n' % (self.label, s)
         else:
@@ -78,8 +82,12 @@ class HtmlForm():
         return self.make_form_string_start() == other.make_form_string_start()
 
     def make_form_string_start(self):
-        return '<form id="%s" class="%s" action="%s" method="%s" enctype="%s" onsubmit="%s" onreset="%s" target="%s" autocomplete="%s">\n' % (
-            self.Id, self.Class, self.action, self.method, self.enctype, self.onsubmit, self.onreset, self.target, self.autocomplete)
+        autocomplete = ''
+        if self.autocomplete is not None:
+            autocomplete=' autocomplete="%s"' % (self.autocomplete)
+
+        return '<form id="%s" class="%s" action="%s" method="%s" enctype="%s" onsubmit="%s" onreset="%s" target="%s"%s>\n' % (
+            self.Id, self.Class, self.action, self.method, self.enctype, self.onsubmit, self.onreset, self.target, autocomplete)
     
     def __str__(self):
         s = StringIO()
