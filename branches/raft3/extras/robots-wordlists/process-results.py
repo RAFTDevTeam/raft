@@ -154,10 +154,10 @@ def add_entry(entry, mapping):
                 ext2 = field[ndx2:]
             if '*' not in field and len(field) < 20 and not filename.endswith('-') and not filename.startswith('-') and not filename.endswith('_'):
                 update_entry_count(mapping['files'], field)
-            if len(ext) > 1 and '*' not in ext:
+            if len(ext) > 1 and '*' not in ext and ext.count('.') < 3:
                 update_entry_count(mapping['extensions'], ext)
             if ext2 != ext:
-                if len(ext2) > 1 and '*' not in ext2:
+                if len(ext2) > 1 and '*' not in ext2 and ext2.count('.') < 3:
                     update_entry_count(mapping['extensions'], ext2)
         else:
             this_field = field
