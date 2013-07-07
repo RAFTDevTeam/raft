@@ -242,7 +242,10 @@ class burp_parse_state():
         elif b'https' == scheme and 443 == port:
             pass
         else:
-            url += b':' + str(port)
+            if bytes == type(port):
+                url += b':' + port
+            else:
+                url += b':' + str(port).encode('ascii')
         if b'/' != path[0]:
             url += b'/'
         url += path

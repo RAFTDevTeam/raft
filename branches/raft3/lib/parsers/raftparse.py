@@ -19,7 +19,10 @@
 # along with RAFT.  If not, see <http://www.gnu.org/licenses/>.
 #
 from lxml import etree
-import sys, bz2, gzip
+import sys
+import bz2
+import gzip
+import lzma
 import re
 from urllib import parse as urlparse
 import logging, traceback
@@ -42,7 +45,11 @@ class ParseAdapter:
             return
         try:
             value = func(value)
-            if str != type(value):
+            if str == type(value):
+                pass
+            elif bytes == type(value):
+                value = value.decode('utf-8', 'ignore')
+            else:
                 value = str(value)
             if self.re_nonprintable_str.search(value):
                 results.write(fmt % re_apply_escape_str.sub(lambda m: '&#x%02X;' % (ord(m.group(0))), value))
@@ -156,11 +163,13 @@ class raft_parse_xml():
     re_status_line = re.compile(br'^(HTTP/\d\.\d)\s+(\d{3})(?:\s+(.*))?$')
 
     def __init__(self, raftfile):
-        if raftfile.endswith('.xml.bz2'):
+        if raftfile.lower().endswith('.xml.bz2'):
             self.source = bz2.BZ2File(raftfile, 'rb')
-        elif raftfile.endswith('.xml.gz'):
+        elif raftfile.lower().endswith('.xml.gz'):
             self.source = gzip.GzipFile(raftfile, 'rb')
-        elif raftfile.endswith('.xml'):
+        elif raftfile.lower().endswith('.xml.xz'):
+            self.source = lzma.LZMAFile(raftfile, 'rb')
+        elif raftfile.lower().endswith('.xml'):
             self.source = open(raftfile, 'rb')
         else:
             raise Exception('Unsupported file type for %s' % (raftfile))
@@ -274,19 +283,19 @@ class raft_parse_xml():
                     m = self.re_request_line.search(line)
                     if m:
                         if not method:
-                            method = str(m.group(1),'utf-8')
+                            method = (m.group(1) or b'').decode('ascii', 'ignore')
                         request_url = m.group(2)
                     elif b':' in line:
                         name, value = line.split(b':', 1)
                         lname = name.lower()
                         if not host and b'host' == lname:
-                            host = str(value.strip(),'utf-8')
+                            host = value.strip().decode('utf-8', 'ignore')
                 if not url:
                     splitted = urlparse.urlsplit(request_url)
                     if not host:
-                        host = str(splitted.hostname, 'utf-8')
-                    scheme = str(splitted.scheme,'utf-8') or 'http'
-                    url = urlparse.urlunsplit((scheme, host, str(splitted.path,'utf-8'), str(splitted.query,'utf-8'), ''))
+                        host = (splitted.hostname or b'').decode('utf-8', 'ignore')
+                    scheme = (splitted.scheme or b'').decode('utf-8', 'ignore') or 'http'
+                    url = urlparse.urlunsplit((scheme, host, (splitted.path or b'').decode('utf-8', 'ignore'), (splitted.query or b'').decode('utf-8', 'ignore'), ''))
 
         if False:
             # TODO: some broken servers send the response headers in the request body :(
@@ -307,14 +316,14 @@ class raft_parse_xml():
                         m = self.re_status_line.search(line)
                         if m:
                             if not status:
-                                status = str(m.group(2), 'utf-8')
+                                status = (m.group(2) or b'').decode('utf-8', 'ignore')
                         elif b':' in line:
                             name, value = line.split(b':', 1)
                             lname = name.lower()
                             if not datetime and b'date' == lname:
-                                datetime = str(value.strip(),'utf-8')
+                                datetime = value.strip().decode('utf-8', 'ignore')
                             elif not content_type and b'content-type' == lname:
-                                content_type = str(value.strip(),'utf-8')
+                                content_type = value.strip().decode('utf-8', 'ignore')
             if status and datetime and content_type:
                 break
 
