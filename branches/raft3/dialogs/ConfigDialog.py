@@ -69,8 +69,8 @@ class ConfigDialog(QDialog, ConfigDialog.Ui_configDialog):
     def fill_values(self):
         self.bhNetworkBox.setChecked(self.framework.get_raft_config_value('black_hole_network', bool))
         self.checkBoxUseProxy.setChecked(self.framework.get_raft_config_value('use_proxy', bool))
-        self.confProxyEdit.setText(self.framework.get_raft_config_value('proxy_host'))
-        self.confProxyPort.setText(self.framework.get_raft_config_value('proxy_port'))
+        self.confProxyEdit.setText(self.framework.get_raft_config_value('proxy_host', default_value = 'localhost'))
+        self.confProxyPort.setText(self.framework.get_raft_config_value('proxy_port', default_value = '8080'))
         self.confProxyUsername.setText(self.framework.get_raft_config_value('proxy_username'))
         self.confProxyPassword.setText(self.framework.get_raft_config_value('proxy_password'))
         if 'socks5' == self.framework.get_raft_config_value('proxy_type'):
@@ -91,7 +91,7 @@ class ConfigDialog(QDialog, ConfigDialog.Ui_configDialog):
         self.framework.set_raft_config_value('black_hole_network', bool(self.bhNetworkBox.isChecked()))
         if self.checkBoxUseProxy.isChecked():
             self.framework.set_raft_config_value('proxy_host', self.confProxyEdit.text())
-            self.framework.set_raft_config_value('proxy_port', int(self.confProxyPort.text()))
+            self.framework.set_raft_config_value('proxy_port', int(self.confProxyPort.text() or '8080'))
             self.framework.set_raft_config_value('proxy_username', self.confProxyUsername.text())
             self.framework.set_raft_config_value('proxy_password', self.confProxyPassword.text())
             if 'http' in self.confProxyProxyType.currentText().lower():
