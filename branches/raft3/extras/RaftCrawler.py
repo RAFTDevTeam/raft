@@ -22,7 +22,8 @@
 
 from xml.sax.saxutils import escape
 from urllib import parse as urlparse
-import sys, logging, os, bz2, time, collections
+import sys, logging, os, time, collections
+import lzma
 import re
 import traceback
 import io
@@ -740,9 +741,9 @@ class WriterThread(QThread):
         QThread.__init__(self)
         now = time.time()
         self.logger = logger
-        self.filename = os.path.join(directory, 'RaftCapture-%d.xml.bz2' % (int(now*1000)))
+        self.filename = os.path.join(directory, 'RaftCapture-%d.xml.xz' % (int(now*1000)))
         self.re_nonprintable = re.compile(bytes('[^%s]' % re.escape('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ \t\n\r'), 'ascii'))
-        self.ofhandle = bz2.BZ2File(self.filename, 'wb')
+        self.ofhandle = lzma.LZMAFile(self.filename, 'wb')
         self.ofhandle.write(b'<raft version="1.0">')
         self.qlock = QMutex()
         self.datalist = collections.deque()
