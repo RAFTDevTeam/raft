@@ -25,6 +25,7 @@
 # along with RAFT.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import sys
 import os
 import hashlib
 import zlib
@@ -74,8 +75,6 @@ class Db:
         sqlite.register_adapter(Compressed, adapt_compressed)
         sqlite.register_converter("compressed", convert_compressed)
 
-        self.conn = self.get_connection(filename, version)
-
         self.filename = filename
         self.threadMutex = QMutex()
         self.threadCursors = []
@@ -83,6 +82,8 @@ class Db:
 
         self.hashval_lookup = {}
         self.hashalgo = hashlib.sha256
+
+        self.conn = self.get_connection(filename, version)
 
         # perform any upgrade now that all internal values are setup
         cursor = self.conn.cursor()
@@ -143,7 +144,7 @@ class Db:
         cursor.execute(""" CREATE TABLE differ_items (response_id INTEGER PRIMARY KEY NOT NULL UNIQUE, time_added INTEGER) """)
 
         cursor.execute(""" CREATE TABLE configuration (
-                       Component TEXTNOT NULL,
+                       Component TEXT NOT NULL,
                        ConfigName TEXT, 
                        ConfigValue compressed,
                        PRIMARY KEY (Component, ConfigName)
@@ -378,7 +379,7 @@ class Db:
                           )
                           """)
 
-        cursor.execute("""INSERT INTO configuration (Component, ConfigName, ConfigValue) values (?, ?, ?)""", ['RAFT', 'black_hole_network', Compressed(bytes(True))])
+        cursor.execute("""INSERT INTO configuration (Component, ConfigName, ConfigValue) values (?, ?, ?)""", ['RAFT', 'black_hole_network', Compressed(b'True')])
 
         conn.commit()
         cursor.close()
@@ -1025,16 +1026,23 @@ class Db:
                 else:
                     value = ''
             else:
-                value = str(bytes(row[0]), 'utf-8')
+                # XXX: should convert bytes(?)
+                value = str(bytes(row[0]), 'utf-8', 'ignore')
+
             if rtype == bool:
                 if not value:
                     return False
-                return value.lower() in ['true', 'yes', 'y', '1']
+                if value.lower() in ['true', 'yes', 'y', '1']:
+                    return True
+                else:
+                    return False
             elif rtype == int:
                 try:
                     return int(value)
                 except ValueError:
                     return 0
+            elif rtype == bytes:
+                return value.encode('utf-8')
             else:
                 # TODO: implement more types
                 return value
@@ -1045,6 +1053,7 @@ class Db:
         if not is_locked:
             self.qlock.lock()
         try:
+            # XXX: need to add correct handling for types instead assuming string conversions
             if type(value) is not bytes:
                 value = bytes(str(value), 'utf-8')
             cursor.execute("UPDATE configuration SET ConfigValue=? WHERE Component=? AND ConfigName=?", [Compressed(value), component, name])
@@ -1060,6 +1069,7 @@ class Db:
             count = int(cursor.fetchone()[0])
             if 0 == count:
                 # TODO: gross
+                # XXX: need to add correct handling for types instead assuming string conversions
                 if type(value) is not bytes:
                     value = bytes(str(value), 'utf-8')
                 cursor.execute("INSERT INTO configuration (Component, ConfigName, ConfigValue) VALUES (?, ?, ?)", [component, name, Compressed(value)])
