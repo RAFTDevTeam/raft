@@ -67,10 +67,9 @@ def add_thirdparty_path(basepath):
     thirdparty_libnames = ('pyamf', 'pdfminer',)
     thirdparty_search_path = os.path.join(basepath, 'thirdparty')
     for thirdparty_lib in thirdparty_libnames:
-        # TODO: append at end of search path assuming that installed version take precedence??
         dirname = os.path.join(thirdparty_search_path, thirdparty_lib)
         if dirname not in sys.path:
-            sys.path.append(dirname)
+            sys.path.insert(0, dirname)
 
 # use application executable path
 executable_path = os.path.abspath(os.path.dirname(sys.argv[0]))

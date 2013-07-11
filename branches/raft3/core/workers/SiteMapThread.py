@@ -105,6 +105,7 @@ class SiteMapThread(QThread):
                 except ValueError:
                     pass
 
+                # XXX: review for bytes usage
                 url = str(rowItems[1])
                 status = str(rowItems[2])
                 response_headers = str(rowItems[3])

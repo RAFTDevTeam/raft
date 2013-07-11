@@ -195,3 +195,5 @@ try:
     datetime.datetime.utcfromtimestamp(-31536000.0)
 except ValueError:
     negative_timestamp_broken = True
+except OSError:
+    negative_timestamp_broken = True

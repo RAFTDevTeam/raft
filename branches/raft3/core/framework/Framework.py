@@ -290,7 +290,7 @@ class Framework(QObject):
         return request_response
 
     def report_exception(self, exc):
-        print(('EXCEPTION:\n%s' % traceback.format_exception(type(exc), exc, ecx.__traceback__)))
+        print(('EXCEPTION:\n%s' % traceback.format_exception(type(exc), exc, exc.__traceback__)))
 
     def subscribe_add_differ_response_id(self, callback):
         QObject.connect(self, SIGNAL('differAddResponseId(int)'), callback, Qt.DirectConnection)
