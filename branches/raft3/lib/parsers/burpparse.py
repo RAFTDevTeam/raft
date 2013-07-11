@@ -354,7 +354,7 @@ class burp_parse_state():
             return None
 
         method, content_type = self.__parse_method_content_type(request, response)
-        return ('TARGET', host, hostip, url, status, datetime, request, response, method, content_type, {})
+        return self.__normalize_results('TARGET', host, hostip, url, status, datetime, request, response, method, content_type, {})
         
     def __process_item(self):
         nextdata = self.__read_next()
@@ -424,7 +424,7 @@ class burp_parse_state():
             return None
 
         method, content_type = self.__parse_method_content_type(request, response)
-        return ('PROXY', host, hostip, url, status, datetime, request, response, method, content_type, {})
+        return self.__normalize_results('PROXY', host, hostip, url, status, datetime, request, response, method, content_type, {})
 
     def __process_repeater_historyItem(self):
 
@@ -473,7 +473,7 @@ class burp_parse_state():
             return None
 
         method, content_type = self.__parse_method_content_type(request, response)
-        return ('REPEATER', host, hostip, url, status, datetime, request, response, method, content_type, {})
+        return self.__normalize_results('REPEATER', host, hostip, url, status, datetime, request, response, method, content_type, {})
 
     def __process_requestPanel(self):
         nextdata = self.__read_next()
@@ -543,7 +543,19 @@ class burp_parse_state():
             return None
 
         method, content_type = self.__parse_method_content_type(request, response)
-        return ('SCANNER', host, hostip, url, status, datetime, request, response, method, content_type, {'notes':notes, 'confirmed':True}) # TODO: confirmed hard-coded
+        return self.__normalize_results('SCANNER', host, hostip, url, status, datetime, request, response, method, content_type, {'notes':notes, 'confirmed':True}) # TODO: confirmed hard-coded
+
+    def __normalize_results(self, origin, host, hostip, url, status, datetime, request, response, method, content_type, extra):
+        host = (host or b'').decode('utf-8', 'ignore')
+        hostip = (hostip or b'').decode('ascii', 'ignore')
+        url = (url or b'').decode('utf-8', 'ignore')
+        method = (method or b'').decode('ascii', 'ignore')
+        content_type = (content_type or b'').decode('ascii', 'ignore')
+        if 'notes' in extra:
+            # TODO: should allow for binary
+            extra['notes'] = (extra['notes'] or b'').decode('utf-8', 'ignore')
+
+        return origin, host, hostip, url, status, datetime, request, response, method, content_type, extra
 
     def __process_hps(self):
         # ignore
