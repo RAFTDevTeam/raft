@@ -1629,8 +1629,8 @@ class Db:
         self.qlock.lock()
         try:
             if not includeBody:
-                cursor.execute("SELECT Id, Url, ReqHeaders, '' ReqData, ResHeaders, \
-                               '' ResContent, Status, Length, ReqTime, ReqDate, Notes, \
+                cursor.execute("SELECT Id, Url, ReqHeaders, null ReqData, ResHeaders, \
+                               null ResContent, Status, Length, ReqTime, ReqDate, Notes, \
                                Results, Confirmed, \
                                ReqMethod, HostIP, ResContentType, DataOrigin, ReqDataHashval, ResContentHashval, ReqHost \
                                FROM responses")
@@ -1642,7 +1642,7 @@ class Db:
                                FROM responses, content_data cd1, content_data cd2 \
                                WHERE \
                                cd1.Hashval = ReqDataHashval and cd2.Hashval = ResContentHashval")
-            return cursor.fetchall()
+            return cursor
         finally:
             self.qlock.unlock()
 
