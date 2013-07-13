@@ -274,7 +274,7 @@ class StoreNetworkReply(QNetworkReply):
             contentType = self.__reply.header(QNetworkRequest.ContentTypeHeader)
             if not contentType:
                 # TODO: implement real "sniff" content-type
-                if -1 != self.response_data.find(b'<html'):
+                if -1 != self.response_data.data().find(b'<html'):
                     contentType = 'text/html'
                     self.setRawHeader('Content-Type', contentType.encode('utf-8'))
                     # reply.setHeader(QNetworkRequest.ContentTypeHeader, contentType)

@@ -105,8 +105,11 @@ class SiteMapThread(QThread):
                 except ValueError:
                     pass
 
-                # XXX: review for bytes usage
-                url = str(rowItems[1])
+                # XXX: review all for bytes usage
+                if isinstance(rowItems[1], bytes):
+                    url = str(rowItems[1], 'utf-8', 'ignore')
+                else:
+                    url = str(rowItems[1])
                 status = str(rowItems[2])
                 response_headers = str(rowItems[3])
                 # TODO: make configurable
