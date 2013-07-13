@@ -865,18 +865,21 @@ class Decoder(codec.Decoder):
         """
         Reads and returns a utf-8 encoded byte array.
         """
-        length, is_reference = self._readLength()
+        # XXX: all logic seems to assume utf-8 strings, not bytes
+        return self.readString()
 
-        if is_reference:
-            return self.context.getString(length)
+#         length, is_reference = self._readLength()
 
-        if length == 0:
-            return ''
+#         if is_reference:
+#             return self.context.getString(length)
 
-        result = self.stream.read(length)
-        self.context.addString(result)
+#         if length == 0:
+#             return b''
 
-        return result
+#         result = self.stream.read(length)
+#         self.context.addString(result)
+
+#         return result
 
     def readString(self):
         """
@@ -886,7 +889,6 @@ class Decoder(codec.Decoder):
 
         if is_reference:
             result = self.context.getString(length)
-
             return self.context.getStringForBytes(result)
 
         if length == 0:

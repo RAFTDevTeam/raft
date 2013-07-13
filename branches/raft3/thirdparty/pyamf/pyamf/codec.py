@@ -213,7 +213,7 @@ class Context(object):
         if u is not None:
             return u
 
-        u = self._unicodes[h] = s.decode('utf-8')
+        u = self._unicodes[h] = s.decode('utf-8', 'ignore')
 
         return u
 

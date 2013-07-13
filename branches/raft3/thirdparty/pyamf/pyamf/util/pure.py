@@ -482,7 +482,7 @@ class DataTypeMixIn(object):
         """
         s = struct.unpack("%s%ds" % (self.endian, length), self.read(length))[0]
 
-        return s.decode('utf-8')
+        return s.decode('utf-8', 'ignore')
 
     def write_utf8_string(self, u):
         """

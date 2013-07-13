@@ -297,7 +297,7 @@ class Decoder(codec.Decoder):
         # XXX: this readString is using bytes, but spec seems to indicate should be UTF-8 (???)
         key = self.readString(True)
         while self.stream.peek() != TYPE_OBJECTTERM:
-            obj_attrs[key] = self.readElement()
+            obj_attrs[key.decode('utf-8', 'ignore')] = self.readElement()
             key = self.readString(True)
 
         # discard the end marker (TYPE_OBJECTTERM)
