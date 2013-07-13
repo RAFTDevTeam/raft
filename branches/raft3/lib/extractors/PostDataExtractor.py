@@ -69,7 +69,7 @@ class PostDataExtractor(BaseExtractor):
             for item in remainder.split(b';'):
                 if b'=' in item:
                     name, value = [v.strip() for v in item.split(b'=', 1)]
-                    ctdict[name.lower()] = value
+                    ctdict[str(name.lower(), 'utf-8', 'ignore')] = value # XXX: could these values be treated as strings?
 
         if b'application/x-www-form-urlencoded' == content_type:
             request_values = request_body.decode('utf-8', 'ignore')
@@ -83,10 +83,11 @@ class PostDataExtractor(BaseExtractor):
             for name, value in qs_values.items():
                 results.add_name_value(name, value)
         elif b'multipart/form-data' == content_type:
+            # TODO: use FieldStorage?
             fp = BytesIO(request_body)
             qs_values = cgi.parse_multipart(fp, ctdict)
             for name, value in qs_values.items():
-                results.add_name_value(name.decode('utf-8','ignore'), value)
+                results.add_name_value(name, value)
         else:
             # TODO: should support more types instead of just name/value pairs
             sys.stderr.write('TODO: unsupport content_type: %s\n' % (content_type))
