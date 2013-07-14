@@ -57,11 +57,30 @@ if 'win32' == sys.platform:
     include_msvcr = True
 elif 'darwin' == sys.platform:
 
-    # exclude: libQsci.dylib
-    # the compiled file is copied from libQsci.dylib to Qsci.so during build process
+    # exclude dylib files from Qt
+    # for example, libQsci.dylib
+    # the compiled files are renamed during the build process
     # this leaves the original library name intact and cx_Freeze cannot detect this
     # so to get this to build cleanly, need to exclude libQsci.dylib file
     bin_excludes.append('libQsci.dylib')
+    for f in '''QtCore
+QtDeclarative
+QtDesigner
+QtGui
+QtHelp
+QtMultimedia
+QtNetwork
+QtOpenGL
+QtScript
+QtScriptTools
+QtSql
+QtSvg
+QtTest
+QtWebKit
+QtXml
+QtXmlPatterns'''.splitlines():
+        f = f.strip()
+        bin_excludes.append('lib%s.dylib' % (f))
 
     targetName = 'RAFT'
 else: # must be linux or other platform
