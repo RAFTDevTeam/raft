@@ -371,46 +371,47 @@ class RequestResponseWidget(QObject):
         rr = self.requestResponse
         scriptsIO, commentsIO, linksIO, formsIO = StringIO(), StringIO(), StringIO(), StringIO()
         try:
+            results = rr.results
             if 'html' == rr.baseType:
                 # Create content for parsing HTML
-                rr.results = self.htmlExtractor.process(body, url, charset, rr.results)
+                self.htmlExtractor.process(body, url, charset, results)
 
                 self.tabwidget.setTabText(self.scriptsTabIndex, 'Scripts')
-                for script in rr.results.scripts:
+                for script in results.scripts:
                     scriptsIO.write('%s\n\n' % self.flat_str(script))
 
                 self.attachLexer(self.commentsScintilla, 'html')
-                for comment in rr.results.comments:
+                for comment in results.comments:
                     commentsIO.write('%s\n\n' % self.flat_str(comment))
 
-                for link in rr.results.links:
+                for link in results.links:
                     linksIO.write('%s\n' % self.flat_str(link))
 
-                for form in rr.results.forms:
+                for form in results.forms:
                     formsIO.write('%s\n' % self.flat_str(form))
 
-                for input in rr.results.other_inputs:
+                for input in results.other_inputs:
                     formsIO.write('%s\n' % self.flat_str(input))
 
             elif 'javascript' == rr.baseType:
 
                 self.tabwidget.setTabText(self.scriptsTabIndex, 'Strings')
-                for script_string in rr.results.strings:
+                for script_string in results.strings:
                     scriptsIO.write('%s\n' % self.flat_str(script_string))
 
                 self.attachLexer(self.commentsScintilla, 'javascript')
-                for comment in rr.results.comments:
+                for comment in results.comments:
                     commentsIO.write('%s\n' % self.flat_str(comment))
 
-                for link in rr.results.links:
+                for link in results.links:
                     linksIO.write('%s\n' % self.flat_str(link))
 
-                for link in rr.results.relative_links:
+                for link in results.relative_links:
                     linksIO.write('%s\n' % self.flat_str(link))
 
         except Exception as e:
             # TODO: log 
-            print(('FIXME:\n error when extracting content:\n %s' % (traceback.format_exc(e))))
+            self.framework.report_exception(e)
 
         self.scriptsScintilla.setText(scriptsIO.getvalue())
         self.commentsScintilla.setText(commentsIO.getvalue())

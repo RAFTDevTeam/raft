@@ -25,6 +25,7 @@
 import traceback
 import os
 import sys
+import functools
 
 from PyQt4.QtCore import (Qt, SIGNAL, QObject, QThread, QMutex, QDir)
 from PyQt4.QtGui import QFont
@@ -47,9 +48,6 @@ class Framework(QObject):
         self._requestResponseFactory = None
         self.zoom_size = 0
         self.base_font = QFont()
-        # Dictionary for RequestResponse objects loaded into cache
-        self.rrd_qlock = QMutex()
-        self._request_response_cache = {}
         self.home_dir = QDir.toNativeSeparators(QDir.homePath())
         self.raft_dir = self.create_raft_directory(self.home_dir, '.raft')
         self.user_db_dir = self.create_raft_directory(self.raft_dir, 'db')
@@ -94,7 +92,6 @@ class Framework(QObject):
         self._db_uuid = self._db.get_db_uuid()
         self.web_db_path = self.create_raft_directory(self.user_web_path, self._db_uuid)
         self._raft_config_cache = {}
-        self._request_response_cache = {}
         self.emit(SIGNAL('raftConfigPopulated()'))
         self.emit(SIGNAL('databaseAttached()'))
 
@@ -278,16 +275,9 @@ class Framework(QObject):
         cursor.close()
         self._db.release_thread_cursor(cursor)
     
+    @functools.lru_cache(maxsize=16, typed=False)
     def get_request_response(self, response_id):
-        self.rrd_qlock.lock()
-        try:
-            if response_id in self._request_response_cache:
-                request_response = self._request_response_cache[response_id]
-            else:
-                request_response = self._request_response_cache[response_id] = self._requestResponseFactory.fill(response_id)
-        finally:
-            self.rrd_qlock.unlock()
-        return request_response
+        return self._requestResponseFactory.fill(response_id)
 
     def report_exception(self, exc):
         print(('EXCEPTION:\n%s' % traceback.format_exception(type(exc), exc, exc.__traceback__)))
