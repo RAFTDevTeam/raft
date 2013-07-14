@@ -1467,6 +1467,24 @@ User-Agent: ${user_agent}</string>
            <attribute name="title">
             <string>CSRF</string>
            </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_34">
+            <item>
+             <widget class="QSplitter" name="splitter_15">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <widget class="QPlainTextEdit" name="csrfReqEdit"/>
+              <widget class="QsciScintilla" name="csrfGenEdit">
+               <property name="toolTip">
+                <string/>
+               </property>
+               <property name="whatsThis">
+                <string/>
+               </property>
+              </widget>
+             </widget>
+            </item>
+           </layout>
           </widget>
           <widget class="QWidget" name="testerClickJackingTab">
            <attribute name="title">
@@ -3398,6 +3416,13 @@ User-Agent: ${user_agent}</string>
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QsciScintilla</class>
+   <extends>QFrame</extends>
+   <header>Qsci/qsciscintilla.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="resources.qrc"/>
  </resources>

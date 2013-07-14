@@ -20,10 +20,15 @@
 # along with RAFT.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import re
+
 import PyQt4
 from PyQt4.QtCore import Qt, QObject, SIGNAL, QUrl
 from PyQt4.QtGui import *
 from PyQt4 import Qsci
+
+from core.database.constants import ResponsesTable
+from core.tester.CSRFTester import CSRFTester
 
 class TesterTab(QObject):
     def __init__(self, framework, mainWindow):
@@ -37,6 +42,9 @@ class TesterTab(QObject):
         self.Data = None
         self.cursor = None
         self.framework.subscribe_database_events(self.db_attach, self.db_detach)
+        
+        lexer = Qsci.QsciLexerHTML()
+        self.mainWindow.csrfGenEdit.setLexer(lexer)
 
     def db_attach(self):
         self.Data = self.framework.getDB()
@@ -53,7 +61,30 @@ class TesterTab(QObject):
             self.cursor = None
 
     def tester_populate_csrf(self, response_id):
-        print(('IMPLEMENT ME: tester csrf', response_id))
+        
+        row = self.Data.read_responses_by_id(self.cursor, response_id)
+        
+        if not row:
+            return
+        
+        responseItems = [m or '' for m in list(row)]
+        
+        url = str(responseItems[ResponsesTable.URL])
+        reqHeaders = str(responseItems[ResponsesTable.REQ_HEADERS])
+        reqData = str(responseItems[ResponsesTable.REQ_DATA])
+        
+        data = reqHeaders + "\n" + reqData
+        
+        # Check to ensure that either a GET or a POST is being used.
+        check = re.compile("^(GET|POST)", re.I)
+        result = check.match(reqHeaders)
+        if not result:
+            return()
+        
+        htmlresult = CSRFTester.generate_csrf_html(self, url, reqHeaders, reqData)
+        self.mainWindow.csrfGenEdit.setText(htmlresult)
+        self.mainWindow.csrfReqEdit.setPlainText(data)
+        
 
     def tester_populate_click_jacking(self, response_id):
         print(('IMPLEMENT ME: tester click jacking', response_id))

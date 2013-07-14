@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'RaftMain.ui'
 #
-# Created: Sat Jul 13 21:23:17 2013
-#      by: PyQt4 UI code generator 4.10.2
+# Created: Sun Jul 14 11:08:29 2013
+#      by: PyQt4 UI code generator 4.10.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -734,6 +734,18 @@ class Ui_MainWindow(object):
         self.testerTabWidget.setObjectName(_fromUtf8("testerTabWidget"))
         self.testerCSRFTab = QtGui.QWidget()
         self.testerCSRFTab.setObjectName(_fromUtf8("testerCSRFTab"))
+        self.verticalLayout_34 = QtGui.QVBoxLayout(self.testerCSRFTab)
+        self.verticalLayout_34.setObjectName(_fromUtf8("verticalLayout_34"))
+        self.splitter_15 = QtGui.QSplitter(self.testerCSRFTab)
+        self.splitter_15.setOrientation(QtCore.Qt.Vertical)
+        self.splitter_15.setObjectName(_fromUtf8("splitter_15"))
+        self.csrfReqEdit = QtGui.QPlainTextEdit(self.splitter_15)
+        self.csrfReqEdit.setObjectName(_fromUtf8("csrfReqEdit"))
+        self.csrfGenEdit = Qsci.QsciScintilla(self.splitter_15)
+        self.csrfGenEdit.setToolTip(_fromUtf8(""))
+        self.csrfGenEdit.setWhatsThis(_fromUtf8(""))
+        self.csrfGenEdit.setObjectName(_fromUtf8("csrfGenEdit"))
+        self.verticalLayout_34.addWidget(self.splitter_15)
         self.testerTabWidget.addTab(self.testerCSRFTab, _fromUtf8(""))
         self.testerClickJackingTab = QtGui.QWidget()
         self.testerClickJackingTab.setObjectName(_fromUtf8("testerClickJackingTab"))
@@ -1908,4 +1920,5 @@ class Ui_MainWindow(object):
         self.actionExport_Settings.setText(_translate("MainWindow", "Export Settings", None))
         self.actionImport_Settings.setText(_translate("MainWindow", "Import Settings", None))
 
+from PyQt4 import Qsci
 from . import resources_rc
