@@ -51,7 +51,7 @@ class TemplateDefinition(object):
                     # finished
                     have_parameter = False
                     current_value = current_io.getvalue()
-                    if current_value in ["method", "request_uri", "global_cookie_jar", "user_agent", "host"]:
+                    if current_value in ["method", "request_uri", "user_agent", "host"]:
                         current_item.append(TemplateItem(current_value, TemplateItem.T_BUILTIN))
                     else:
                         self.parameter_names.add(current_value)

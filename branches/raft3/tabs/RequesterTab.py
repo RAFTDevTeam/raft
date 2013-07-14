@@ -148,9 +148,7 @@ class RequesterTab(QObject):
             if ':' in line:
                 name, value = [v.strip() for v in line.split(':', 1)]
                 lname = name.lower()
-                if 'cookie' == lname:
-                    template.write('${global_cookie_jar}\n')
-                elif 'host' == lname:
+                if 'host' == lname:
                     if splitted.hostname and value == splitted.hostname:
                         template.write('Host: ${host}\n')
                         continue
@@ -207,8 +205,9 @@ class RequesterTab(QObject):
         templateText = str(self.mainWindow.requesterTemplateEdit.toPlainText())
         method = str(self.mainWindow.requesterRequestMethod.currentText())
 
+        use_global_cookie_jar = self.mainWindow.requesterUseGlobalCookieJar.isChecked()
         replacements = self.build_replacements(method, url)
-        (method, url, headers, body, use_global_cookie_jar) = self.process_template(url, templateText, replacements)
+        (method, url, headers, body) = self.process_template(url, templateText, replacements)
 
         sequenceId = None
         if self.mainWindow.requesterSequenceCheckBox.isChecked():
@@ -291,8 +290,9 @@ class RequesterTab(QObject):
                     self.mainWindow.bulkRequestProgressBar.setValue(self.mainWindow.bulkRequestProgressBar.value()+1)
                     continue
                 
+                use_global_cookie_jar = bulkRequestUseGlobalCookieJar.isChecked()
                 replacements = self.build_replacements(method, url)
-                (method, url, headers, body, use_global_cookie_jar) = self.process_template(url, templateText, replacements)
+                (method, url, headers, body) = self.process_template(url, templateText, replacements)
 
                 if first:
                     self.mainWindow.bulkRequestPushButton.setText('Cancel')
@@ -368,7 +368,6 @@ class RequesterTab(QObject):
 
         method, uri = '' ,''
         headers, body = '', ''
-        use_global_cookie_jar = False
 
         # TODO: this allows for missing entries -- is this good?
         func = lambda m: replacements.get(m.group(1))
@@ -401,9 +400,6 @@ class RequesterTab(QObject):
             if not line:
                 break
             if '$' in line:
-                if '${global_cookie_jar}' == line:
-                    use_global_cookie_jar = True
-                    continue
                 line = self.re_replacement.sub(func, line)
             if first:
                 m = self.re_request.match(line)
@@ -423,5 +419,5 @@ class RequesterTab(QObject):
 
         url = urlparse.urljoin(url, uri)
 
-        return (method, url, headers_dict, body, use_global_cookie_jar)
+        return (method, url, headers_dict, body)
 
