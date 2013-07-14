@@ -27,6 +27,7 @@ from PyQt4.QtGui import *
 from PyQt4 import QtWebKit, QtNetwork, Qsci
 
 from io import StringIO
+from urllib import parse as urlparse
 import traceback
 
 from utility import ContentHelper
@@ -363,14 +364,25 @@ class RequestResponseWidget(QObject):
 
         self.attachLexer(self.responseScintilla, rr.responseContentType, rr.responseBody)
         self.responseScintilla.setText(ContentHelper.convertBytesToDisplayText(rr.rawResponse))
-        self.contentResults = self.generateExtractorResults(rr.responseBody, rr.responseUrl, rr.charset)
+        self.contentResults = self.generateExtractorResults(rr.responseHeaders, rr.responseBody, rr.responseUrl, rr.charset)
         self.notesTextEdit.setText(rr.notes)
         self.handle_tab_currentChanged(self.tabwidget.currentIndex())
 
-    def generateExtractorResults(self, body, url, charset):
+    def generateExtractorResults(self, headers, body, url, charset):
         rr = self.requestResponse
         scriptsIO, commentsIO, linksIO, formsIO = StringIO(), StringIO(), StringIO(), StringIO()
         try:
+            # include any Location or Content-Location responses in links
+            # TODO: refactor the extracted content so it is universally available via RequestResponse object
+            # TODO: duplicate links may be output depending on redirect response content
+            for line in headers.splitlines():
+                if b':' in line:
+                    name, value = [m.strip() for m in line.split(b':', 1)]
+                    if name.lower() in (b'location', b'content-location'):
+                        link = value.decode('utf-8', 'ignore')
+                        url = urlparse.urljoin(url, link)
+                        linksIO.write('%s\n' % url)
+
             results = rr.results
             if 'html' == rr.baseType:
                 # Create content for parsing HTML
@@ -471,10 +483,11 @@ class RequestResponseWidget(QObject):
         # TODO: consider merging frames sources?
         # TODO: consider other optimizations
         if self.requestResponse:
+            rr = self.requestResponse
             xhtml = webview.page().mainFrame().documentElement().toOuterXml()
             self.generatedSourceScintilla.setText(xhtml)
             body_bytes = xhtml.encode('utf-8')
-            self.generateExtractorResults(body_bytes, self.requestResponse.responseUrl, self.requestResponse.charset)
+            self.generateExtractorResults(rr.responseHeaders, body_bytes, rr.responseUrl, rr.charset)
 
     def getLexer(self, contentType, data):
         lexerContentType = self.inferContentType(contentType, data)
