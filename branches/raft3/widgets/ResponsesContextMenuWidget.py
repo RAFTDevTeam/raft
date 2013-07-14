@@ -34,6 +34,7 @@ from core.database.constants import ResponsesTable
 from lib.parsers.raftparse import ParseAdapter
 from core.data.RaftDbCapture import RaftDbCapture
 import bz2
+import lzma
 
 class ResponsesContextMenuWidget(QObject):
     def __init__(self, framework, dataModel, treeView, parent = None):
@@ -173,14 +174,17 @@ class ResponsesContextMenuWidget(QObject):
     def export_to_raft_capture(self):
         # TODO: consider implementing a tasklet if this is the entire DB being exported
         filename = 'RaftExport-%s' % int(time.time())
-        file = QFileDialog.getSaveFileName(None, "Save to file", filename, "XML File (*.xml);;BZ2 XML File (*.xml.bz2)")
+        file = QFileDialog.getSaveFileName(None, "Save to file", filename, "XML File (*.xml);;XZ XML File (*.xml.xz)")
         if file:
             adapter = ParseAdapter()
             # TODO: refactor
             filename = str(file)
-            if filename.endswith('.xml.bz2'):
-                filename = filename.replace('.xml.bz2.xml.bz2', '.xml.bz2')
-                fh = bz2.BZ2File(filename, 'w')
+            while '.xml.xml' in filename:
+                filename = filename.replace('.xml.xml', '.xml')
+            if filename.endswith('.xml.xz'):
+                while '.xml.xz.xml.xz' in filename:
+                    filename = filename.replace('.xml.xz.xml.xz', '.xml.xz')
+                fh = lzma.LZMAFile(filename, 'w')
             elif filename.endswith('.xml'):
                 filename = filename.replace('.xml.xml', '.xml')
                 fh = open(filename, 'wb')
@@ -189,13 +193,13 @@ class ResponsesContextMenuWidget(QObject):
             Data = self.framework.getDB()
             cursor = Data.allocate_thread_cursor()
             try:
-                fh.write('<raft version="1.0">\n')
+                fh.write(b'<raft version="1.0">\n')
                 for index in self.treeViewSelectionModel.selectedRows():
                     Id = interface.index_to_id(self.dataModel, index)
                     if Id:
                         capture = RaftDbCapture(self.framework, Data, cursor, Id)
-                        fh.write(adapter.format_as_xml(capture))
-                fh.write('</raft>')
+                        fh.write(adapter.format_as_xml(capture).encode('utf-8'))
+                fh.write(b'</raft>')
                 fh.close()
             finally:
                 cursor.close()

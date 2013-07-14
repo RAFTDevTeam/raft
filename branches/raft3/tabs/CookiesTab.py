@@ -29,6 +29,7 @@ from core.data.FlashCookies import FlashCookies
 
 from io import BytesIO
 import bz2
+import lzma
 import time
 from lxml import etree
 import base64
@@ -114,13 +115,15 @@ class CookiesTab(QObject):
             results.write(b'</cookie>\n')
         results.write(b'</cookies>\n')
         filename = 'CookieExport-%s' % int(time.time())
-        file = QFileDialog.getSaveFileName(None, "Export Cookie Jar to file", filename, "XML File (*.xml);;BZ2 XML File (*.xml.bz2)")
+        file = QFileDialog.getSaveFileName(None, "Export Cookie Jar to file", filename, "XML File (*.xml);;XZ XML File (*.xml.xz)")
         if file and str(file):
             filename = str(file)
-            filename = filename.replace('.xml.xml', '.xml')
-            if filename.endswith('.xml.bz2'):
-                filename = filename.replace('.xml.bz2.xml.bz2', '.xml.bz2')
-                fh = bz2.BZ2File(filename, 'w')
+            while '.xml.xml' in filename:
+                filename = filename.replace('.xml.xml', '.xml')
+            if filename.endswith('.xml.xz'):
+                while '.xml.xz.xml.xz' in filename:
+                    filename = filename.replace('.xml.xz.xml.xz', '.xml.xz')
+                fh = lzma.LZMAFile(filename, 'w')
             elif filename.endswith('.xml'):
                 fh = open(filename, 'wb')
             else:
@@ -133,6 +136,8 @@ class CookiesTab(QObject):
 
         if filename.endswith('.xml.bz2'):
             source = bz2.BZ2File(filename, 'r')
+        elif filename.endswith('.xml.xz'):
+            source = lzma.LZMAFile(filename, 'r')
         elif filename.endswith('.xml'):
             source = open(filename, 'rb')
         else:
