@@ -205,16 +205,6 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QCheckBox" name="requesterUseGlobalCookieJar">
-                    <property name="text">
-                     <string>Global Cookie Jar?</string>
-                    </property>
-                    <property name="checked">
-                     <bool>false</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
                    <spacer name="horizontalSpacer_9">
                     <property name="orientation">
                      <enum>Qt::Horizontal</enum>
@@ -258,7 +248,8 @@
                   <property name="plainText">
                    <string>${method} ${request_uri} HTTP/1.1
 Host: ${host}
-User-Agent: ${user_agent}</string>
+User-Agent: ${user_agent}
+${global_cookie_jar}</string>
                   </property>
                  </widget>
                 </item>
@@ -372,13 +363,6 @@ User-Agent: ${user_agent}</string>
                    </widget>
                   </item>
                   <item>
-                   <widget class="QCheckBox" name="bulkRequestUseGlobalCookieJar">
-                    <property name="text">
-                     <string>Global Cookie Jar?</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
                    <spacer name="horizontalSpacer_2">
                     <property name="orientation">
                      <enum>Qt::Horizontal</enum>
@@ -423,7 +407,8 @@ User-Agent: ${user_agent}</string>
                   <property name="plainText">
                    <string>${method} ${request_uri} HTTP/1.1
 Host: ${host}
-User-Agent: ${user_agent}</string>
+User-Agent: ${user_agent}
+${global_cookie_jar}</string>
                   </property>
                  </widget>
                 </item>
@@ -490,13 +475,6 @@ User-Agent: ${user_agent}</string>
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QCheckBox" name="sequenceRunnerUseGlobalCookieJar">
-                   <property name="text">
-                    <string>Global Cookie Jar?</string>
                    </property>
                   </widget>
                  </item>
@@ -1469,6 +1447,53 @@ User-Agent: ${user_agent}</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_34">
             <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_6">
+              <item>
+               <widget class="QLabel" name="label_21">
+                <property name="text">
+                 <string>URL: </string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="testerCSRFURLEdit"/>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="testerFormGen">
+                <property name="toolTip">
+                 <string>Generate CSRF Form</string>
+                </property>
+                <property name="text">
+                 <string>Form</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="testerImgGen">
+                <property name="toolTip">
+                 <string>Generate CSRF Image Tag</string>
+                </property>
+                <property name="text">
+                 <string>Image</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="testerRegenBtn">
+                <property name="toolTip">
+                 <string>Regenerate CSRF payload based on selection</string>
+                </property>
+                <property name="text">
+                 <string>Regenerate</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
              <widget class="QSplitter" name="splitter_15">
               <property name="orientation">
                <enum>Qt::Vertical</enum>
@@ -1483,6 +1508,30 @@ User-Agent: ${user_agent}</string>
                </property>
               </widget>
              </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_36">
+              <item>
+               <spacer name="horizontalSpacer_8">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QPushButton" name="csrfOpenBtn">
+                <property name="text">
+                 <string>Open In Browser</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
            </layout>
           </widget>

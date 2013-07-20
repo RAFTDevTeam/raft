@@ -28,7 +28,8 @@ from PyQt4.QtGui import *
 from PyQt4 import Qsci
 
 from core.database.constants import ResponsesTable
-from core.tester.CSRFTester import CSRFTester
+# from core.tester.CSRFTester import CSRFTester
+from core.tester import CSRFTester
 
 class TesterTab(QObject):
     def __init__(self, framework, mainWindow):
@@ -45,6 +46,8 @@ class TesterTab(QObject):
         
         lexer = Qsci.QsciLexerHTML()
         self.mainWindow.csrfGenEdit.setLexer(lexer)
+        
+        self.mainWindow.testerRegenBtn.clicked.connect(self.regen_csrf)
 
     def db_attach(self):
         self.Data = self.framework.getDB()
@@ -70,6 +73,7 @@ class TesterTab(QObject):
         responseItems = [m or '' for m in list(row)]
         
         url = str(responseItems[ResponsesTable.URL])
+        # Are reqHeaders necessary?
         reqHeaders = str(responseItems[ResponsesTable.REQ_HEADERS])
         reqData = str(responseItems[ResponsesTable.REQ_DATA])
         
@@ -81,9 +85,21 @@ class TesterTab(QObject):
         if not result:
             return()
         
-        htmlresult = CSRFTester.generate_csrf_html(self, url, reqHeaders, reqData)
+        # htmlresult = CSRFTester.generate_csrf_html(self, url, reqHeaders, reqData)
+        
+        htmlresult = CSRFTester.generate_csrf_html(url, reqData)
+        
+        self.mainWindow.testerCSRFURLEdit.setText(url)
         self.mainWindow.csrfGenEdit.setText(htmlresult)
         self.mainWindow.csrfReqEdit.setPlainText(data)
+        
+    def regen_csrf(self):
+        if self.mainWindow.testerFormGen.isChecked():
+            print("Form")
+        if self.mainWindow.testerImgGen.isChecked():
+            url = self.mainWindow.testerCSRFURLEdit.text()
+            CSRFTester.generate_csrf_img(url, self.mainWindow.csrfGenEdit.text())
+    
         
 
     def tester_populate_click_jacking(self, response_id):
