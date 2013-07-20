@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'RaftMain.ui'
 #
-# Created: Sun Jul 14 11:08:29 2013
-#      by: PyQt4 UI code generator 4.10.1
+# Created: Fri Jul 19 23:22:20 2013
+#      by: PyQt4 UI code generator 4.10.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -1270,9 +1270,11 @@ class Ui_MainWindow(object):
         self.frame_5.setObjectName(_fromUtf8("frame_5"))
         self.verticalLayout_13 = QtGui.QVBoxLayout(self.frame_5)
         self.verticalLayout_13.setObjectName(_fromUtf8("verticalLayout_13"))
-        self.logTableView = QtGui.QTableView(self.frame_5)
-        self.logTableView.setObjectName(_fromUtf8("logTableView"))
-        self.verticalLayout_13.addWidget(self.logTableView)
+        self.logTableWidget = QtGui.QTableWidget(self.frame_5)
+        self.logTableWidget.setObjectName(_fromUtf8("logTableWidget"))
+        self.logTableWidget.setColumnCount(0)
+        self.logTableWidget.setRowCount(0)
+        self.verticalLayout_13.addWidget(self.logTableWidget)
         self.verticalLayout_8.addWidget(self.frame_5)
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
         self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))

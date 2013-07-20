@@ -157,7 +157,7 @@ class SequenceBuilderFormCapture(QObject):
 
 #        print(self.source_parameters)
 
-        response_ids = list(response_ids)
+        response_ids = [int(m) for m in response_ids]
         response_ids.sort()
 
         parameters = []

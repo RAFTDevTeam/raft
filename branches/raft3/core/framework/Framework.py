@@ -185,12 +185,6 @@ class Framework(QObject):
     def signal_responses_cleared(self):
         self.emit(SIGNAL('responsesCleared()'))
 
-    def console_log(self, msg):
-        print(msg)
-
-    def debug_log(self, msg):
-        print(('DEBUG', msg))
-
     def set_global_cookie_jar(self, cookie_jar):
         self._global_cookie_jar = cookie_jar
 
@@ -280,7 +274,21 @@ class Framework(QObject):
         return self._requestResponseFactory.fill(response_id)
 
     def report_exception(self, exc):
-        print(('EXCEPTION:\n%s' % traceback.format_exception(type(exc), exc, exc.__traceback__)))
+        message = traceback.format_exception(type(exc), exc, exc.__traceback__)
+        self.send_log_message('EXCEPTION', '\n'.join(message))
+        print(('EXCEPTION:\n%s' % message))
+
+    def log_warning(self, msg):
+        self.send_log_message('WARNING', msg)
+        print(('WARNING', msg))
+
+    def console_log(self, msg):
+        self.send_log_message('LOG', msg)
+        print(msg)
+
+    def debug_log(self, msg):
+        self.send_log_message('DEBUG', msg)
+        print(('DEBUG', msg))
 
     def subscribe_add_differ_response_id(self, callback):
         QObject.connect(self, SIGNAL('differAddResponseId(int)'), callback, Qt.DirectConnection)
@@ -359,9 +367,6 @@ class Framework(QObject):
     def report_implementation_error(self, exc):
         print(('IMPLEMENTATION ERROR:\n%s' % traceback.format_exception(type(exc), exc, ecx.__traceback__)))
 
-    def log_warning(self, msg):
-        print(('WARNING', msg))
-
     def subscribe_populate_tester_csrf(self, callback):
         QObject.connect(self, SIGNAL('testerPopulateCSRFResponseId(int)'), callback, Qt.DirectConnection)
 
@@ -373,3 +378,10 @@ class Framework(QObject):
 
     def send_to_tester_click_jacking(self, Id):
         self.emit(SIGNAL('testerPopulateClickJackingResponseId(int)'), int(Id))
+
+    def subscribe_log_events(self, callback):
+        QObject.connect(self, SIGNAL('logMessageReceived(QString, QString)'), callback, Qt.DirectConnection)
+
+    def send_log_message(self, message_type, message):
+        self.emit(SIGNAL('logMessageReceived(QString, QString)'), message_type, message)
+        
