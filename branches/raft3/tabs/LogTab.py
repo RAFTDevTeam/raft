@@ -33,6 +33,9 @@ class LogTab(QObject):
         self.tableWidget.setColumnCount(3)
         self.tableWidget.setHorizontalHeaderLabels(['Date', 'Type', 'Message'])
         self.tableWidget.horizontalHeader().setResizeMode(QHeaderView.ResizeToContents)
+
+        self.mainWindow.logTableClearLogButton.clicked.connect(self.handle_logTableClearLogButton_clicked)
+
         self.framework.subscribe_log_events(self.log_message)
 
     def log_message(self, message_type, message):
@@ -44,5 +47,10 @@ class LogTab(QObject):
         self.tableWidget.setItem(row, 1, QTableWidgetItem(message_type))
         self.tableWidget.setItem(row, 2, QTableWidgetItem(message))
         self.tableWidget.resizeRowToContents(row)
-        
+
+    def handle_logTableClearLogButton_clicked(self):
+        # TODO: is clearContents needed?
+        # self.tableWidget.clearContents()
+        while self.tableWidget.rowCount() > 0:
+            self.tableWidget.removeRow(0)
 

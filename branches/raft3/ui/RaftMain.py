@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'RaftMain.ui'
 #
-# Created: Fri Jul 19 23:22:20 2013
+# Created: Sat Jul 20 12:22:53 2013
 #      by: PyQt4 UI code generator 4.10.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -1293,6 +1293,11 @@ class Ui_MainWindow(object):
         self.verticalLayout_8.addLayout(self.horizontalLayout_3)
         self.horizontalLayout_5 = QtGui.QHBoxLayout()
         self.horizontalLayout_5.setObjectName(_fromUtf8("horizontalLayout_5"))
+        spacerItem18 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_5.addItem(spacerItem18)
+        self.logTableClearLogButton = QtGui.QPushButton(self.mainTabLog)
+        self.logTableClearLogButton.setObjectName(_fromUtf8("logTableClearLogButton"))
+        self.horizontalLayout_5.addWidget(self.logTableClearLogButton)
         self.verticalLayout_8.addLayout(self.horizontalLayout_5)
         self.mainTabWidget.addTab(self.mainTabLog, _fromUtf8(""))
         self.tabMainVulnerabilities = QtGui.QWidget()
@@ -1406,8 +1411,8 @@ class Ui_MainWindow(object):
         self.verticalLayout_20.addLayout(self.formLayout_2)
         self.horizontalLayout_14 = QtGui.QHBoxLayout()
         self.horizontalLayout_14.setObjectName(_fromUtf8("horizontalLayout_14"))
-        spacerItem18 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_14.addItem(spacerItem18)
+        spacerItem19 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_14.addItem(spacerItem19)
         self.pushButtonVulnerabilityAddParameter = QtGui.QPushButton(self.tab_14)
         self.pushButtonVulnerabilityAddParameter.setObjectName(_fromUtf8("pushButtonVulnerabilityAddParameter"))
         self.horizontalLayout_14.addWidget(self.pushButtonVulnerabilityAddParameter)
@@ -1423,8 +1428,8 @@ class Ui_MainWindow(object):
         self.verticalLayout_24.addLayout(self.formLayout)
         self.horizontalLayout_12 = QtGui.QHBoxLayout()
         self.horizontalLayout_12.setObjectName(_fromUtf8("horizontalLayout_12"))
-        spacerItem19 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_12.addItem(spacerItem19)
+        spacerItem20 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_12.addItem(spacerItem20)
         self.pushButtonVulnerabilitySave = QtGui.QPushButton(self.frame)
         self.pushButtonVulnerabilitySave.setObjectName(_fromUtf8("pushButtonVulnerabilitySave"))
         self.horizontalLayout_12.addWidget(self.pushButtonVulnerabilitySave)
@@ -1440,8 +1445,8 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.mainTabWidget)
         self.horizontalLayout_4 = QtGui.QHBoxLayout()
         self.horizontalLayout_4.setObjectName(_fromUtf8("horizontalLayout_4"))
-        spacerItem20 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_4.addItem(spacerItem20)
+        spacerItem21 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_4.addItem(spacerItem21)
         self.quitButton = QtGui.QPushButton(self.centralwidget)
         self.quitButton.setObjectName(_fromUtf8("quitButton"))
         self.horizontalLayout_4.addWidget(self.quitButton)
@@ -1837,6 +1842,7 @@ class Ui_MainWindow(object):
         self.label_15.setText(_translate("MainWindow", "Search:", None))
         self.logSearchRECheckbox.setText(_translate("MainWindow", "RE", None))
         self.logSearchFindButton.setText(_translate("MainWindow", "Find", None))
+        self.logTableClearLogButton.setText(_translate("MainWindow", "Clear Log", None))
         self.mainTabWidget.setTabText(self.mainTabWidget.indexOf(self.mainTabLog), _translate("MainWindow", "Log", None))
         self.treeWidgetVulnerabilities.headerItem().setText(0, _translate("MainWindow", "#", None))
         self.treeWidgetVulnerabilities.headerItem().setText(1, _translate("MainWindow", "Hostname", None))
