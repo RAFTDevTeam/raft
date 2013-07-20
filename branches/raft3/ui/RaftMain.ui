@@ -205,6 +205,16 @@
                    </widget>
                   </item>
                   <item>
+                   <widget class="QCheckBox" name="requesterUseGlobalCookieJar">
+                    <property name="text">
+                     <string>Global Cookie Jar?</string>
+                    </property>
+                    <property name="checked">
+                     <bool>false</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
                    <spacer name="horizontalSpacer_9">
                     <property name="orientation">
                      <enum>Qt::Horizontal</enum>
@@ -248,8 +258,7 @@
                   <property name="plainText">
                    <string>${method} ${request_uri} HTTP/1.1
 Host: ${host}
-User-Agent: ${user_agent}
-${global_cookie_jar}</string>
+User-Agent: ${user_agent}</string>
                   </property>
                  </widget>
                 </item>
@@ -363,6 +372,13 @@ ${global_cookie_jar}</string>
                    </widget>
                   </item>
                   <item>
+                   <widget class="QCheckBox" name="bulkRequestUseGlobalCookieJar">
+                    <property name="text">
+                     <string>Global Cookie Jar?</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
                    <spacer name="horizontalSpacer_2">
                     <property name="orientation">
                      <enum>Qt::Horizontal</enum>
@@ -407,8 +423,7 @@ ${global_cookie_jar}</string>
                   <property name="plainText">
                    <string>${method} ${request_uri} HTTP/1.1
 Host: ${host}
-User-Agent: ${user_agent}
-${global_cookie_jar}</string>
+User-Agent: ${user_agent}</string>
                   </property>
                  </widget>
                 </item>
@@ -475,6 +490,13 @@ ${global_cookie_jar}</string>
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="sequenceRunnerUseGlobalCookieJar">
+                   <property name="text">
+                    <string>Global Cookie Jar?</string>
                    </property>
                   </widget>
                  </item>

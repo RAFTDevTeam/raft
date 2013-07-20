@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'RaftMain.ui'
 #
-# Created: Sat Jul 20 16:55:45 2013
-#      by: PyQt4 UI code generator 4.10.2
+# Created: Sat Jul 20 17:52:05 2013
+#      by: PyQt4 UI code generator snapshot-4.10.2-ffcf323516fc
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -130,6 +130,10 @@ class Ui_MainWindow(object):
         self.requesterSequenceComboBox.setSizePolicy(sizePolicy)
         self.requesterSequenceComboBox.setObjectName(_fromUtf8("requesterSequenceComboBox"))
         self.horizontalLayout_7.addWidget(self.requesterSequenceComboBox)
+        self.requesterUseGlobalCookieJar = QtGui.QCheckBox(self.requestor_request_frame)
+        self.requesterUseGlobalCookieJar.setChecked(False)
+        self.requesterUseGlobalCookieJar.setObjectName(_fromUtf8("requesterUseGlobalCookieJar"))
+        self.horizontalLayout_7.addWidget(self.requesterUseGlobalCookieJar)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_7.addItem(spacerItem)
         self.requesterSendButton = QtGui.QPushButton(self.requestor_request_frame)
@@ -206,6 +210,9 @@ class Ui_MainWindow(object):
         self.bulkRequestSequenceComboBox.setSizePolicy(sizePolicy)
         self.bulkRequestSequenceComboBox.setObjectName(_fromUtf8("bulkRequestSequenceComboBox"))
         self.horizontalLayout.addWidget(self.bulkRequestSequenceComboBox)
+        self.bulkRequestUseGlobalCookieJar = QtGui.QCheckBox(self.frame_2)
+        self.bulkRequestUseGlobalCookieJar.setObjectName(_fromUtf8("bulkRequestUseGlobalCookieJar"))
+        self.horizontalLayout.addWidget(self.bulkRequestUseGlobalCookieJar)
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem1)
         self.bulkRequestPushButton = QtGui.QPushButton(self.frame_2)
@@ -265,6 +272,9 @@ class Ui_MainWindow(object):
         self.sequenceRunnerSequenceComboBox.setSizePolicy(sizePolicy)
         self.sequenceRunnerSequenceComboBox.setObjectName(_fromUtf8("sequenceRunnerSequenceComboBox"))
         self.horizontalLayout_20.addWidget(self.sequenceRunnerSequenceComboBox)
+        self.sequenceRunnerUseGlobalCookieJar = QtGui.QCheckBox(self.frame_10)
+        self.sequenceRunnerUseGlobalCookieJar.setObjectName(_fromUtf8("sequenceRunnerUseGlobalCookieJar"))
+        self.horizontalLayout_20.addWidget(self.sequenceRunnerUseGlobalCookieJar)
         spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_20.addItem(spacerItem2)
         self.sequenceRunnerRunButton = QtGui.QPushButton(self.frame_10)
@@ -1657,13 +1667,13 @@ class Ui_MainWindow(object):
         self.requesterRequestMethod.setItemText(3, _translate("MainWindow", "PUT", None))
         self.requesterRequestMethod.setItemText(4, _translate("MainWindow", "DELETE", None))
         self.requesterSequenceCheckBox.setText(_translate("MainWindow", "Run with Sequence:", None))
+        self.requesterUseGlobalCookieJar.setText(_translate("MainWindow", "Global Cookie Jar?", None))
         self.requesterSendButton.setText(_translate("MainWindow", "Send", None))
         self.label_requestUrlEdit.setText(_translate("MainWindow", "URL:", None))
         self.requesterTemplateEdit.setToolTip(_translate("MainWindow", "Add method, headers, and associated data", None))
         self.requesterTemplateEdit.setPlainText(_translate("MainWindow", "${method} ${request_uri} HTTP/1.1\n"
 "Host: ${host}\n"
-"User-Agent: ${user_agent}\n"
-"${global_cookie_jar}", None))
+"User-Agent: ${user_agent}", None))
         self.reqTabWidget.setTabText(self.reqTabWidget.indexOf(self.tab_7), _translate("MainWindow", "Request", None))
         self.label_3.setText(_translate("MainWindow", "Method:", None))
         self.bulkRequestMethodEdit.setItemText(0, _translate("MainWindow", "GET", None))
@@ -1672,16 +1682,17 @@ class Ui_MainWindow(object):
         self.bulkRequestMethodEdit.setItemText(3, _translate("MainWindow", "PUT", None))
         self.bulkRequestMethodEdit.setItemText(4, _translate("MainWindow", "DELETE", None))
         self.bulkRequestSequenceCheckBox.setText(_translate("MainWindow", "Run with Sequence:", None))
+        self.bulkRequestUseGlobalCookieJar.setText(_translate("MainWindow", "Global Cookie Jar?", None))
         self.bulkRequestPushButton.setText(_translate("MainWindow", "Send", None))
         self.label_44.setText(_translate("MainWindow", "URL:", None))
         self.bulkRequestUrlEdit.setText(_translate("MainWindow", "${url}", None))
         self.bulkRequestTemplateEdit.setPlainText(_translate("MainWindow", "${method} ${request_uri} HTTP/1.1\n"
 "Host: ${host}\n"
-"User-Agent: ${user_agent}\n"
-"${global_cookie_jar}", None))
+"User-Agent: ${user_agent}", None))
         self.label_14.setText(_translate("MainWindow", "URLs:", None))
         self.reqTabWidget.setTabText(self.reqTabWidget.indexOf(self.tab), _translate("MainWindow", "Bulk Request", None))
         self.label_2.setText(_translate("MainWindow", "Run Sequence:", None))
+        self.sequenceRunnerUseGlobalCookieJar.setText(_translate("MainWindow", "Global Cookie Jar?", None))
         self.sequenceRunnerRunButton.setText(_translate("MainWindow", "Run", None))
         self.reqTabWidget.setTabText(self.reqTabWidget.indexOf(self.requesterSequenceRunnerTab), _translate("MainWindow", "Sequence Runner", None))
         self.reqTabWidget.setTabText(self.reqTabWidget.indexOf(self.reqTabRawRequestTab), _translate("MainWindow", "Raw Request", None))
