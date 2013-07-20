@@ -39,6 +39,7 @@ from core.fuzzer.RequestRunner import RequestRunner
 from core.data import ResponsesDataModel
 from widgets.ResponsesContextMenuWidget import ResponsesContextMenuWidget
 from widgets.MiniResponseRenderWidget import MiniResponseRenderWidget
+from widgets.RequestResponseWidget import RequestResponseWidget
 from core.network.InMemoryCookieJar import InMemoryCookieJar
 
 class RequesterTab(QObject):
@@ -86,10 +87,14 @@ class RequesterTab(QObject):
 
     def setup_requester_tab(self):
 
+        self.historyRequestResponse = RequestResponseWidget(self.framework, self.mainWindow.requesterHistoryTabWidget, self.mainWindow.requesterHistorySearchResultsPlaceholder, self)
         self.requesterHistoryDataModel = ResponsesDataModel.ResponsesDataModel(self.framework, self)
         self.mainWindow.requesterHistoryTreeView.setModel(self.requesterHistoryDataModel)
+        self.mainWindow.requesterHistoryTreeView.activated.connect(self.fill_history_request_response)
+        self.mainWindow.requesterHistoryTreeView.clicked.connect(self.fill_history_request_response)
         self.mainWindow.requesterHistoryTreeView.doubleClicked.connect(self.requester_history_item_double_clicked)
-        self.responsesContextMenu = ResponsesContextMenuWidget(self.framework, self.requesterHistoryDataModel, self.mainWindow.requesterHistoryTreeView, self)
+        self.historyResponsesContextMenu = ResponsesContextMenuWidget(self.framework, self.requesterHistoryDataModel, self.mainWindow.requesterHistoryTreeView, self)
+        self.historyResponsesContextMenu.set_currentChanged_callback(self.fill_history_request_response)
 
         self.miniResponseRenderWidget = MiniResponseRenderWidget(self.framework, self.mainWindow.reqRespTabWidget, self)
 
@@ -101,6 +106,11 @@ class RequesterTab(QObject):
             dialog = RequestResponseDetailDialog(self.framework, Id, self.mainWindow)
             dialog.show()
             dialog.exec_()
+
+    def fill_history_request_response(self, index):
+        Id = interface.index_to_id(self.requesterHistoryDataModel, index)
+        if Id:
+            self.historyRequestResponse.fill(Id)
 
     def fill_requesters(self):
         # requesters

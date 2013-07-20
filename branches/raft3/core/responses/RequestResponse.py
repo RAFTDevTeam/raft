@@ -58,7 +58,7 @@ class RequestResponse(object):
         self.charset = ''
         self.baseType = ''
         ######
-    
+
     @property
     def results(self):
         """ Get the extracted data results"""

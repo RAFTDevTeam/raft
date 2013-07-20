@@ -258,7 +258,7 @@ class RequestResponseWidget(QObject):
 
     def confirmedButtonStateChanged(self, state):
         # self.emit(SIGNAL('confirmedButtonSet(int)'), state)
-        pass
+        self.confirmedCheckBox.setChecked(state)
 
     def makeConfirmedUpdateWidget(self, parentWidget):
         self.confirmedUpdateWidget = QWidget(parentWidget)
@@ -285,10 +285,16 @@ class RequestResponseWidget(QObject):
         if self.responseId is not None:
             quickNotes = str(self.quickNotesEdit.text()).strip()
             notes = str(self.notesTextEdit.toPlainText())
+            confirmed = str(self.confirmedCheckBox.isChecked())
             if len(quickNotes) > 0:
                 notes = quickNotes + '\n' + notes
-            self.Data.update_responses(self.cursor, notes, '', self.confirmedCheckBox.isChecked(), self.responseId)
+            self.Data.update_responses(self.cursor, notes, '', confirmed, self.responseId)
             self.quickNotesEdit.setText('')
+            self.notesTextEdit.setText(notes)
+            # update request response state
+            self.requestResponse.confirmed = confirmed
+            self.requestResponse.notes = notes
+            # TODO: update in datamodel
 
     def searchTextEdit(self, targetWidget):
         # TODO: simulate regex searching
