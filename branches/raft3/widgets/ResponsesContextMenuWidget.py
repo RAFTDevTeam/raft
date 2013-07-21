@@ -232,10 +232,12 @@ class ResponsesContextMenuWidget(QObject):
         for index in self.treeViewSelectionModel.selectedRows():
             Id = interface.index_to_id(self.dataModel, index)
             if Id:
-                id_list.append(Id)
+                id_list.append(int(Id))
 
         if 1 == len(id_list):
             self.framework.send_response_id_to_requester(id_list[0])
+        else:
+            self.framework.send_responses_to_bulk_requester(id_list)
 
     def responses_data_context_menu(self, point):
         """ Display the context menu for the TreeView """

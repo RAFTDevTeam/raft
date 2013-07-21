@@ -64,6 +64,7 @@ class RequesterTab(QObject):
         self.re_replacement = re.compile(r'\$\{(\w+)\}')
 
         self.framework.subscribe_populate_requester_response_id(self.requester_populate_response_id)
+        self.framework.subscribe_populate_bulk_requester_responses(self.bulk_requester_populate_responses)
         self.framework.subscribe_sequences_changed(self.fill_sequences)
 
         self.setup_requester_tab()
@@ -159,12 +160,41 @@ class RequesterTab(QObject):
         if not row:
             return
 
-        responseItems = [m or '' for m in list(row)]
+        responseItems = interface.data_row_to_response_items(row)
 
-        url = str(responseItems[ResponsesTable.URL])
-        reqHeaders = str(responseItems[ResponsesTable.REQ_HEADERS])
-        reqData = str(responseItems[ResponsesTable.REQ_DATA])
-        method = str(responseItems[ResponsesTable.REQ_METHOD])
+        method, url, template_text = self.generate_template_for_response_item(responseItems)
+
+        self.set_combo_box_text(self.mainWindow.requesterRequestMethod, method.upper())
+        self.mainWindow.requesterUrlEdit.setText(url)
+        self.mainWindow.requesterTemplateEdit.setPlainText(template_text)
+
+    def bulk_requester_populate_responses(self, id_list):
+
+        url_list = []
+        first = True
+        for Id in id_list:
+            row = self.Data.read_responses_by_id(self.cursor, Id)
+            if not row:
+                continue
+
+            responseItems = interface.data_row_to_response_items(row)
+            url = responseItems[ResponsesTable.URL]
+            if url not in url_list:
+                url_list.append(url)
+
+            if first:
+                method, url, template_text = self.generate_template_for_response_item(responseItems)
+                self.set_combo_box_text(self.mainWindow.bulkRequestMethodEdit, method.upper())
+                self.mainWindow.bulkRequestTemplateEdit.setPlainText(template_text)
+                first = False
+
+        self.mainWindow.bulkRequestUrlListEdit.setPlainText('\n'.join(url_list))
+
+    def generate_template_for_response_item(self, responseItems):
+        url = responseItems[ResponsesTable.URL]
+        reqHeaders = str(responseItems[ResponsesTable.REQ_HEADERS], 'utf-8', 'ignore')
+        reqData = str(responseItems[ResponsesTable.REQ_DATA], 'utf-8', 'ignore')
+        method = responseItems[ResponsesTable.REQ_METHOD]
         splitted = urlparse.urlsplit(url)
 
         useragent = self.framework.useragent()
@@ -194,17 +224,14 @@ class RequesterTab(QObject):
         template.write('\n')
         template.write(reqData)
 
-        self.set_combo_box_text(self.mainWindow.requesterRequestMethod, method.upper())
-        self.mainWindow.requesterUrlEdit.setText(url)
-        self.mainWindow.requesterTemplateEdit.setPlainText(template.getvalue())
+        return method, url, template.getvalue()
 
     def set_combo_box_text(self, comboBox, selectedText):
         index = comboBox.findText(selectedText)
-        if -1 != index:
-            comboBox.setCurrentIndex(index)
-        else:
-            index = comboBox.addItem(selectedText)
-            comboBox.setCurrentIndex(index)
+        if -1 == index:
+            comboBox.addItem(selectedText)
+            index = comboBox.findText(selectedText)
+        comboBox.setCurrentIndex(index)
 
     def handle_requesterSequenceCheckBox_stateChanged(self, state):
         self.mainWindow.requesterSequenceComboBox.setEnabled(self.mainWindow.requesterSequenceCheckBox.isChecked())
@@ -323,7 +350,7 @@ class RequesterTab(QObject):
                     self.mainWindow.bulkRequestProgressBar.setValue(self.mainWindow.bulkRequestProgressBar.value()+1)
                     continue
                 
-                use_global_cookie_jar = bulkRequestUseGlobalCookieJar.isChecked()
+                use_global_cookie_jar = self.mainWindow.bulkRequestUseGlobalCookieJar.isChecked()
                 replacements = self.build_replacements(method, url)
                 (method, url, headers, body) = self.process_template(url, templateText, replacements)
 

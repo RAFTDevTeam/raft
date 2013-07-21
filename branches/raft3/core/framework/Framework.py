@@ -319,6 +319,9 @@ class Framework(QObject):
     def subscribe_populate_requester_response_id(self, callback):
         QObject.connect(self, SIGNAL('requesterPopulateResponseId(int)'), callback, Qt.DirectConnection)
         
+    def subscribe_populate_bulk_requester_responses(self, callback):
+        QObject.connect(self, SIGNAL('bulkRequesterPopulateResponses(QList<int>)'), callback, Qt.DirectConnection)
+        
     def subscribe_populate_webfuzzer_response_id(self, callback):
         QObject.connect(self, SIGNAL('webfuzzerPopulateResponseId(int)'), callback, Qt.DirectConnection)
 
@@ -336,6 +339,9 @@ class Framework(QObject):
 
     def send_response_id_to_requester(self, Id):
         self.emit(SIGNAL('requesterPopulateResponseId(int)'), int(Id))
+
+    def send_responses_to_bulk_requester(self, ids):
+        self.emit(SIGNAL('bulkRequesterPopulateResponses(QList<int>)'), ids)
         
     def send_response_id_to_webfuzzer(self, Id):
         self.emit(SIGNAL('webfuzzerPopulateResponseId(int)'), int(Id))
