@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'RaftMain.ui'
 #
-# Created: Sat Jul 20 21:09:13 2013
+# Created: Sat Jul 20 22:25:16 2013
 #      by: PyQt4 UI code generator 4.10.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(1169, 738)
+        MainWindow.resize(1207, 738)
         MainWindow.setStyleSheet(_fromUtf8(""))
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
@@ -1233,12 +1233,22 @@ class Ui_MainWindow(object):
         self.horizontalLayout_8.addWidget(self.frame_6)
         spacerItem15 = QtGui.QSpacerItem(404, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_8.addItem(spacerItem15)
-        self.cookiesCookieExportCookieJarButton = QtGui.QPushButton(self.frame_7)
+        self.frame_8 = QtGui.QFrame(self.frame_7)
+        self.frame_8.setFrameShape(QtGui.QFrame.StyledPanel)
+        self.frame_8.setFrameShadow(QtGui.QFrame.Raised)
+        self.frame_8.setObjectName(_fromUtf8("frame_8"))
+        self.gridLayout = QtGui.QGridLayout(self.frame_8)
+        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
+        self.cookiesCookieExportCookieJarButton = QtGui.QPushButton(self.frame_8)
         self.cookiesCookieExportCookieJarButton.setObjectName(_fromUtf8("cookiesCookieExportCookieJarButton"))
-        self.horizontalLayout_8.addWidget(self.cookiesCookieExportCookieJarButton)
-        self.cookiesCookieImportCookieJarButton = QtGui.QPushButton(self.frame_7)
+        self.gridLayout.addWidget(self.cookiesCookieExportCookieJarButton, 0, 0, 1, 1)
+        self.cookiesCookieImportCookieJarButton = QtGui.QPushButton(self.frame_8)
         self.cookiesCookieImportCookieJarButton.setObjectName(_fromUtf8("cookiesCookieImportCookieJarButton"))
-        self.horizontalLayout_8.addWidget(self.cookiesCookieImportCookieJarButton)
+        self.gridLayout.addWidget(self.cookiesCookieImportCookieJarButton, 0, 1, 1, 1)
+        self.cookiesCookieClearCookieJarButton = QtGui.QPushButton(self.frame_8)
+        self.cookiesCookieClearCookieJarButton.setObjectName(_fromUtf8("cookiesCookieClearCookieJarButton"))
+        self.gridLayout.addWidget(self.cookiesCookieClearCookieJarButton, 1, 0, 1, 1)
+        self.horizontalLayout_8.addWidget(self.frame_8)
         self.verticalLayout_15.addWidget(self.frame_7)
         self.cookiesTabWidget.addTab(self.cookiesCookieJarTab, _fromUtf8(""))
         self.cookiesFlashCookiesTab = QtGui.QWidget()
@@ -1510,7 +1520,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.addLayout(self.horizontalLayout_4)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1169, 22))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1207, 22))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
@@ -1890,6 +1900,7 @@ class Ui_MainWindow(object):
         self.cookiesCookieJarDeleteButton.setText(_translate("MainWindow", "Delete", None))
         self.cookiesCookieExportCookieJarButton.setText(_translate("MainWindow", "Export Cookie Jar", None))
         self.cookiesCookieImportCookieJarButton.setText(_translate("MainWindow", "Import Cookie Jar", None))
+        self.cookiesCookieClearCookieJarButton.setText(_translate("MainWindow", "Clear Cookie Jar", None))
         self.cookiesTabWidget.setTabText(self.cookiesTabWidget.indexOf(self.cookiesCookieJarTab), _translate("MainWindow", "Cookie Jar", None))
         self.cookiesFlashCookiesTreeWidget.headerItem().setText(0, _translate("MainWindow", "Domain", None))
         self.cookiesFlashCookiesTreeWidget.headerItem().setText(1, _translate("MainWindow", "Name", None))

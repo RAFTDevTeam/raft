@@ -64,8 +64,9 @@ def convert_compressed(blob):
 class Db:
     """ Db database class """
 
-    def __init__(self, version):
+    def __init__(self, version, exception_reporter = None):
         self.version = version
+        self.exception_reporter = exception_reporter
 
     def connect(self, filename):
 
@@ -692,7 +693,10 @@ class Db:
                              ?, ?, ?, ?, ?, ?, ?, ?
                            )""", insertlist)
         except Exception as error:
-            print(('FIX ME! ERROR: %s' % (traceback.format_exc(error))))
+            if self.exception_reporter is not None:
+                self.exception_reporter(error)
+            message = traceback.format_exception(type(error), error, error.__traceback__)
+            print(('FIX ME! ERROR:\n%s' % (message)))
             for i in range(0, len(insertlist)):
                 if i not in [SequenceSourceParameters.INPUT_VALUE]:
                     print(('[%d] %s' % (i, insertlist[i])))
@@ -715,7 +719,10 @@ class Db:
                              ?, ?, ?, ?, ?, ?, ?
                            )""", insertlist)
         except Exception as error:
-            print(('FIX ME! ERROR: %s' % (traceback.format_exc(error))))
+            if self.exception_reporter is not None:
+                self.exception_reporter(error)
+            message = traceback.format_exception(type(error), error, error.__traceback__)
+            print(('FIX ME! ERROR:\n%s' % (message)))
             for i in range(0, len(insertlist)):
                 if i not in [SequenceTargetParameters.INPUT_VALUE]:
                     print(('[%d] %s' % (i, insertlist[i])))
@@ -937,7 +944,10 @@ class Db:
             return rowid
 
         except Exception as error:
-            print(('FIX ME! ERROR: %s' % (traceback.format_exc(error))))
+            if self.exception_reporter is not None:
+                self.exception_reporter(error)
+            message = traceback.format_exception(type(error), error, error.__traceback__)
+            print(('FIX ME! ERROR:\n%s' % (message)))
             for i in range(0, len(values)):
                 if i not in [ResponsesTable.REQ_DATA, ResponsesTable.RES_DATA]:
                     print(('[%d] %s' % (i, values[i])))

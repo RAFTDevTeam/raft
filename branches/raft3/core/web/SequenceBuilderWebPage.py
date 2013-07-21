@@ -92,7 +92,7 @@ class SequenceBuilderWebPage(BaseWebPage):
 
     @PyQt4.QtCore.pyqtSlot(QString, int, QVariant, QVariant, QVariant, name='record_input_value')
     def record_input_value(self, requestId, position, name, Type, value):
-        self.formCapture.store_source_parameter(str(requestId), position, str(name.toString().toUtf8()), str(Type.toString().toUtf8()), str(value.toString().toUtf8()))
+        self.formCapture.store_source_parameter(str(requestId), position, name, Type, value)
 
     def handle_contentsChanged(self):
 #        print('contents changed', str(self.mainFrame().property('RAFT_requestId').toString()))

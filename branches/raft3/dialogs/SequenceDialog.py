@@ -261,8 +261,8 @@ class SequenceDialog(QDialog, SequenceDialog.Ui_seqBuildDialog):
                 self.Data.insert_sequence_cookie(self.cursor, [
                         sequenceId,
                         str(cookie.domain()),
-                        str(cookie.name()),
-                        str(cookie.toRawForm()),
+                        str(cookie.name(), 'utf-8'),
+                        cookie.toRawForm().data(),
                         True
                         ])
 

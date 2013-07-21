@@ -293,7 +293,7 @@ class RaftMain(QMainWindow, RaftMain.Ui_MainWindow):
 
         self.Progress.show()
         # Set initial temp.raftdb file for storage of imported data.
-        self.Data = database.Db(__version__)
+        self.Data = database.Db(__version__, self.framework.report_exception)
         self.db = self.dbfilename
         self.databaseThread = DatabaseThread.DatabaseThread(self.framework, self.Data, self)
         self.connect(self, SIGNAL('connectDbFinished()'), self.connectDbFinishedHandler, Qt.QueuedConnection)

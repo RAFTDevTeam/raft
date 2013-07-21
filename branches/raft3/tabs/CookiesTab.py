@@ -46,6 +46,7 @@ class CookiesTab(QObject):
         self.mainWindow.cookiesCookieJarDeleteButton.clicked.connect(self.handle_cookiesDelete_clicked)
         self.mainWindow.cookiesCookieExportCookieJarButton.clicked.connect(self.handle_cookiesExportCookieJar_clicked)
         self.mainWindow.cookiesCookieImportCookieJarButton.clicked.connect(self.handle_cookiesImportCookieJar_clicked)
+        self.mainWindow.cookiesCookieClearCookieJarButton.clicked.connect(self.handle_cookiesCookieClearCookieJarButton_clicked)
 
         self.mainWindow.cookiesLocalStorageTreeWidget.itemClicked.connect(self.handle_localStorageTreeWidget_itemClicked)
         self.mainWindow.cookiesLocalStorageSaveButton.clicked.connect(self.handle_localStorageSave_clicked)
@@ -193,6 +194,11 @@ class CookiesTab(QObject):
             cookieJar.setAllCookies(cookieList)
             self.populate_cookie_jar_tree()
 
+    def handle_cookiesCookieClearCookieJarButton_clicked(self):
+        cookieJar = self.framework.get_global_cookie_jar()
+        cookieJar.setAllCookies([])
+        self.populate_cookie_jar_tree()
+
     def handle_cookiesDelete_clicked(self):
         cookieJar = self.framework.get_global_cookie_jar()
         cookieList = cookieJar.allCookies()
@@ -274,6 +280,7 @@ class CookiesTab(QObject):
     def populate_cookie_jar_tree(self):
         cookieJar = self.framework.get_global_cookie_jar()
         cookieList = cookieJar.allCookies()
+        cookieList = sorted(cookieList, key=lambda cookie: str(cookie.domain()))
         self.mainWindow.cookiesCookieJarTreeWidget.clear()
         for cookie in cookieList:
             domain = str(cookie.domain())

@@ -264,12 +264,12 @@ class StoreNetworkReply(QNetworkReply):
             # no status means no response that can be stored
             status = self.response_status
 
-            requestContent = ''
+            requestContent = b''
             if self.requestContent is not None:
                 if hasattr(self.requestContent, 'get_intercepted_data'):
                     requestContent = self.requestContent.get_intercepted_data()
                 elif hasattr(self.requestContent, 'data'):
-                    requestContent = self.requestContent.data()
+                    requestContent = self.requestContent.data().data()
 
             contentType = self.__reply.header(QNetworkRequest.ContentTypeHeader)
             if not contentType:

@@ -273,6 +273,11 @@ class Framework(QObject):
     def get_request_response(self, response_id):
         return self._requestResponseFactory.fill(response_id)
 
+    def report_implementation_error(self, exc):
+        message = traceback.format_exception(type(exc), exc, exc.__traceback__)
+        self.send_log_message('INTERNAL ERROR', '\n'.join(message))
+        print(('INTERNAL ERROR:\n%s' % message))
+
     def report_exception(self, exc):
         message = traceback.format_exception(type(exc), exc, exc.__traceback__)
         self.send_log_message('EXCEPTION', '\n'.join(message))
@@ -363,9 +368,6 @@ class Framework(QObject):
 
     def signal_sequences_changed(self):
         self.emit(SIGNAL('sequencesChanged()'))
-
-    def report_implementation_error(self, exc):
-        print(('IMPLEMENTATION ERROR:\n%s' % traceback.format_exception(type(exc), exc, ecx.__traceback__)))
 
     def subscribe_populate_tester_csrf(self, callback):
         QObject.connect(self, SIGNAL('testerPopulateCSRFResponseId(int)'), callback, Qt.DirectConnection)

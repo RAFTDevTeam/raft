@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1169</width>
+    <width>1207</width>
     <height>738</height>
    </rect>
   </property>
@@ -2579,17 +2579,36 @@ User-Agent: ${user_agent}</string>
                 </spacer>
                </item>
                <item>
-                <widget class="QPushButton" name="cookiesCookieExportCookieJarButton">
-                 <property name="text">
-                  <string>Export Cookie Jar</string>
+                <widget class="QFrame" name="frame_8">
+                 <property name="frameShape">
+                  <enum>QFrame::StyledPanel</enum>
                  </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="cookiesCookieImportCookieJarButton">
-                 <property name="text">
-                  <string>Import Cookie Jar</string>
+                 <property name="frameShadow">
+                  <enum>QFrame::Raised</enum>
                  </property>
+                 <layout class="QGridLayout" name="gridLayout">
+                  <item row="0" column="0">
+                   <widget class="QPushButton" name="cookiesCookieExportCookieJarButton">
+                    <property name="text">
+                     <string>Export Cookie Jar</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QPushButton" name="cookiesCookieImportCookieJarButton">
+                    <property name="text">
+                     <string>Import Cookie Jar</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="0">
+                   <widget class="QPushButton" name="cookiesCookieClearCookieJarButton">
+                    <property name="text">
+                     <string>Clear Cookie Jar</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
                 </widget>
                </item>
               </layout>
@@ -3229,7 +3248,7 @@ User-Agent: ${user_agent}</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1169</width>
+     <width>1207</width>
      <height>22</height>
     </rect>
    </property>
