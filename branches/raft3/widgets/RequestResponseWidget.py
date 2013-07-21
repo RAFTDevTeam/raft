@@ -258,7 +258,8 @@ class RequestResponseWidget(QObject):
 
     def confirmedButtonStateChanged(self, state):
         # self.emit(SIGNAL('confirmedButtonSet(int)'), state)
-        self.confirmedCheckBox.setChecked(state)
+        if hasattr(self, 'confirmedCheckBox'):
+            self.confirmedCheckBox.setChecked(state)
 
     def makeConfirmedUpdateWidget(self, parentWidget):
         self.confirmedUpdateWidget = QWidget(parentWidget)

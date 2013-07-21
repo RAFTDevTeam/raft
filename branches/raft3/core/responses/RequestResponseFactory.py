@@ -26,6 +26,7 @@ from PyQt4.QtCore import QObject, QMutex
 
 from core.database.constants import ResponsesTable
 from core.responses.RequestResponse import RequestResponse
+from actions import interface
 
 import re
 from urllib import parse as urlparse
@@ -73,13 +74,8 @@ class RequestResponseFactory(QObject):
             row = self.Data.read_responses_by_id(self.cursor, Id)
             if not row:
                 return False
-            datarow = list(row)
-            responseItems = []
-            for ndx in range(len(datarow)):
-                if ndx in (ResponsesTable.REQ_HEADERS, ResponsesTable.REQ_DATA, ResponsesTable.RES_HEADERS, ResponsesTable.RES_DATA):
-                    responseItems.append(bytes(datarow[ndx] or b''))
-                else:
-                    responseItems.append(str(datarow[ndx] or ''))
+
+            responseItems = interface.data_row_to_response_items(row)
 
             rr.Id = Id
             rr.responseUrl = responseItems[ResponsesTable.URL]

@@ -54,8 +54,10 @@ class RequesterTab(QObject):
         self.mainWindow.reqTabWidget.currentChanged.connect(self.handle_tab_currentChanged)
         self.mainWindow.requesterSequenceCheckBox.stateChanged.connect(self.handle_requesterSequenceCheckBox_stateChanged)
         self.mainWindow.bulkRequestSequenceCheckBox.stateChanged.connect(self.handle_bulkRequestSequenceCheckBox_stateChanged)
+        self.mainWindow.sequenceRunnerRunButton.clicked.connect(self.handle_sequenceRunnerRunButton_clicked)
         self.pending_request = None
         self.pending_bulk_requests = None
+        self.pending_sequence_requests = None
 
         self.re_request = re.compile(r'^(\S+)\s+((?:https?://(?:\S+\.)+\w+(?::\d+)?)?/.*)\s+HTTP/\d+\.\d+\s*$', re.I)
         self.re_request_cookie = re.compile(r'^Cookie:\s*(\S+)', re.I|re.M)
@@ -96,6 +98,15 @@ class RequesterTab(QObject):
         self.historyResponsesContextMenu = ResponsesContextMenuWidget(self.framework, self.requesterHistoryDataModel, self.mainWindow.requesterHistoryTreeView, self)
         self.historyResponsesContextMenu.set_currentChanged_callback(self.fill_history_request_response)
 
+        self.sequenceRunnerRequestResponse = RequestResponseWidget(self.framework, self.mainWindow.sequenceRunnerTabWidget, self.mainWindow.sequenceRunnerSearchResultsPlaceholder, self)
+        self.sequenceRunnerDataModel = ResponsesDataModel.ResponsesDataModel(self.framework, self)
+        self.mainWindow.sequenceRunnerTreeView.setModel(self.sequenceRunnerDataModel)
+        self.mainWindow.sequenceRunnerTreeView.activated.connect(self.fill_sequence_runner_request_response)
+        self.mainWindow.sequenceRunnerTreeView.clicked.connect(self.fill_sequence_runner_request_response)
+        self.mainWindow.sequenceRunnerTreeView.doubleClicked.connect(self.requester_sequence_runner_item_double_clicked)
+        self.sequence_runnerResponsesContextMenu = ResponsesContextMenuWidget(self.framework, self.sequenceRunnerDataModel, self.mainWindow.sequenceRunnerTreeView, self)
+        self.sequence_runnerResponsesContextMenu.set_currentChanged_callback(self.fill_sequence_runner_request_response)
+
         self.miniResponseRenderWidget = MiniResponseRenderWidget(self.framework, self.mainWindow.reqRespTabWidget, self)
 
         self.scopeController = self.framework.getScopeController()
@@ -112,12 +123,24 @@ class RequesterTab(QObject):
         if Id:
             self.historyRequestResponse.fill(Id)
 
+    def requester_sequence_runner_item_double_clicked(self, index):
+        Id = interface.index_to_id(self.sequenceRunnerDataModel, index)
+        if Id:
+            dialog = RequestResponseDetailDialog(self.framework, Id, self.mainWindow)
+            dialog.show()
+            dialog.exec_()
+
+    def fill_sequence_runner_request_response(self, index):
+        Id = interface.index_to_id(self.sequenceRunnerDataModel, index)
+        if Id:
+            self.sequenceRunnerRequestResponse.fill(Id)
+
     def fill_requesters(self):
         # requesters
         self.requesterHistoryDataModel.clearModel()
         history_items = []
         for row in self.Data.get_all_requester_history(self.cursor):
-            response_item = [m or '' for m in row]
+            response_item = interface.data_row_to_response_items(row)
             history_items.append(response_item)
         self.requesterHistoryDataModel.append_data(history_items)
 
@@ -238,7 +261,7 @@ class RequesterTab(QObject):
         if 0 != response_id:
             row = self.Data.read_responses_by_id(self.cursor, response_id)
             if row:
-                response_item = [m or '' for m in row]
+                response_item = interface.data_row_to_response_items(row)
                 self.Data.insert_requester_history(self.cursor, response_id)
                 self.requesterHistoryDataModel.append_data([response_item])
 
@@ -310,11 +333,11 @@ class RequesterTab(QObject):
                         self.bulkRequesterCookieJar = self.framework.get_global_cookie_jar()
                     else:
                         self.bulkRequesterCookieJar = InMemoryCookieJar(self.framework, self)
-                    self.requestRunner = RequestRunner(self.framework, self)
-                    self.requestRunner.setup(self.requester_bulk_response_received, self.bulkRequesterCookieJar, sequenceId)
+                    self.bulk_requestRunner = RequestRunner(self.framework, self)
+                    self.bulk_requestRunner.setup(self.requester_bulk_response_received, self.bulkRequesterCookieJar, sequenceId)
                     first = False
 
-                self.pending_bulk_requests[context] = self.requestRunner.queue_request(method, url, headers, body, context)
+                self.pending_bulk_requests[context] = self.bulk_requestRunner.queue_request(method, url, headers, body, context)
 
     def requester_bulk_response_received(self, response_id, context):
         self.mainWindow.bulkRequestProgressBar.setValue(self.mainWindow.bulkRequestProgressBar.value()+1)
@@ -327,7 +350,7 @@ class RequesterTab(QObject):
         if 0 != response_id:
             row = self.Data.read_responses_by_id(self.cursor, response_id)
             if row:
-                response_item = [m or '' for m in row]
+                response_item = interface.data_row_to_response_items(row)
                 self.Data.insert_requester_history(self.cursor, response_id)
                 self.requesterHistoryDataModel.append_data([response_item])
 
@@ -339,6 +362,49 @@ class RequesterTab(QObject):
             finished = True
         if finished:
             self.mainWindow.bulkRequestPushButton.setText('Send')
+
+    def handle_sequenceRunnerRunButton_clicked(self):
+        """ Run a sequence """
+        if 'Cancel' == self.mainWindow.sequenceRunnerRunButton.text() and self.pending_sequence_requests is not None:
+            self.cancel_sequence_requests = True
+            for context, pending_request in self.pending_sequence_requests.items():
+                pending_request.cancel()
+            self.pending_sequence_requests = None
+            self.mainWindow.sequenceRunnerButton.setText('Send')
+            self.mainWindow.sequenceRunnerButton.setValue(0)
+            return
+
+        self.sequenceRunnerDataModel.clearModel()
+
+        sequenceId = str(self.mainWindow.sequenceRunnerSequenceComboBox.itemData(self.mainWindow.sequenceRunnerSequenceComboBox.currentIndex()))
+        use_global_cookie_jar = self.mainWindow.sequenceRunnerUseGlobalCookieJar.isChecked()
+        if use_global_cookie_jar:
+            self.sequenceRunnerCookieJar = self.framework.get_global_cookie_jar()
+        else:
+            self.sequenceRunnerCookieJar = InMemoryCookieJar(self.framework, self)
+
+        self.sequence_requestRunner = RequestRunner(self.framework, self)
+        self.sequence_requestRunner.setup(self.sequence_runner_response_received, self.sequenceRunnerCookieJar, sequenceId)
+        self.pending_sequence_requests = self.sequence_requestRunner.run_sequence()
+        self.mainWindow.sequenceRunnerRunButton.setText('Cancel')
+
+    def sequence_runner_response_received(self, response_id, context):
+        context = str(context)
+        if self.pending_sequence_requests is not None:
+            try:
+                self.pending_sequence_requests.pop(context)
+            except KeyError as e:
+                print((e))
+                pass
+
+        if 0 != response_id:
+            row = self.Data.read_responses_by_id(self.cursor, response_id)
+            if row:
+                response_item = interface.data_row_to_response_items(row)
+                self.sequenceRunnerDataModel.append_data([response_item])
+
+        if self.pending_sequence_requests is None or len(self.pending_sequence_requests) == 0:
+            self.mainWindow.sequenceRunnerRunButton.setText('Send')
 
     def requester_history_clear_button_clicked(self):
         self.Data.clear_requester_history(self.cursor)

@@ -25,6 +25,7 @@ from PyQt4.QtCore import Qt, QObject, SIGNAL, QThread, QTimer, QMutex
 from PyQt4.QtGui import QTreeWidgetItem
 
 from core.database.constants import ResponsesTable
+from actions import interface
 
 class SearchThread(QThread):
     def __init__(self, framework, treeViewModel):
@@ -128,14 +129,7 @@ class SearchThread(QThread):
         for row in self.Data.execute_search(self.cursor, self.reqbody or self.resbody):
             if self.canceled:
                 break
-            datarow = list(row)
-            responseItems = []
-            for ndx in range(len(datarow)):
-                if ndx in (ResponsesTable.REQ_HEADERS, ResponsesTable.REQ_DATA, ResponsesTable.RES_HEADERS, ResponsesTable.RES_DATA):
-                    responseItems.append(bytes(datarow[ndx] or b''))
-                else:
-                    responseItems.append(str(datarow[ndx] or ''))
-
+            responseItems = interface.data_row_to_response_items(row)
             if self.isMatch(responseItems):
                 if not invertSearch:
                     self.fill(responseItems)

@@ -5,7 +5,7 @@
 #          Nathan Hamiel
 #          Gregory Fleischer
 #
-# Copyright (c) 2011 RAFT Team
+# Copyright (c) 2011-2013 RAFT Team
 #
 # This file is part of RAFT.
 #
@@ -49,3 +49,13 @@ def index_to_url(dataModel, index):
             return currentItem
     return None
 
+def data_row_to_response_items(row):
+    datarow = list(row)
+    responseItems = []
+    for ndx in range(len(datarow)):
+        if ndx in (ResponsesTable.REQ_HEADERS, ResponsesTable.REQ_DATA, ResponsesTable.RES_HEADERS, ResponsesTable.RES_DATA):
+            responseItems.append(bytes(datarow[ndx] or b''))
+        else:
+            responseItems.append(str(datarow[ndx] or ''))
+
+    return responseItems

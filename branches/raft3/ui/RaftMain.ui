@@ -533,20 +533,21 @@ User-Agent: ${user_agent}</string>
               <property name="frameShadow">
                <enum>QFrame::Raised</enum>
               </property>
+              <layout class="QVBoxLayout" name="verticalLayout_16">
+               <item>
+                <widget class="QSplitter" name="splitter_17">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <widget class="QTreeView" name="sequenceRunnerTreeView"/>
+                 <widget class="QTabWidget" name="sequenceRunnerTabWidget"/>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="sequenceRunnerSearchResultsPlaceholder" native="true"/>
+               </item>
+              </layout>
              </widget>
-            </item>
-            <item>
-             <spacer name="verticalSpacer">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>20</width>
-                <height>40</height>
-               </size>
-              </property>
-             </spacer>
             </item>
            </layout>
           </widget>
