@@ -98,7 +98,8 @@ class TesterTab(QObject):
             print("Form")
         if self.mainWindow.testerImgGen.isChecked():
             url = self.mainWindow.testerCSRFURLEdit.text()
-            CSRFTester.generate_csrf_img(url, self.mainWindow.csrfGenEdit.text())
+            htmlresult = CSRFTester.generate_csrf_img(url, self.mainWindow.csrfGenEdit.text())
+            self.mainWindow.csrfGenEdit.setText(htmlresult)
     
         
 

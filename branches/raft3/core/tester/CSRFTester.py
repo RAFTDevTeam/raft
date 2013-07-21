@@ -21,7 +21,9 @@
 
 import lxml
 from urllib.parse import parse_qs
+from xml.sax.saxutils import escape
 from lxml.html import builder as E
+
 
 from actions import encoderlib
 
@@ -37,9 +39,11 @@ def form_to_get(url, html):
         
         query_params += item[0] + "=" + item[1]
         
-    full_url = url + "/" + query_params
-    encoded_url = encoderlib.url_encode(full_url)
-    print(encoded_url)
+    enc_params = encoderlib.url_encode(query_params)
+        
+    full_url = url + "/" + enc_params
+    
+    return full_url
     
     
 
@@ -76,8 +80,22 @@ def generate_csrf_form(url, reqData):
     return lxml.html.tostring(eval(HTML), pretty_print=True).decode("utf8") 
 
 def generate_csrf_img(url, html):
+    """ Create a piece of HTML that contains an image tag with the CSRF values """
     
-    form_to_get(url, html)
+    img_url = form_to_get(url, html)
+    
+    # Create an img tag that is 1x1 pixel
+    HTML = E.HTML(
+        E.HEAD(),
+        E.BODY(
+            E.IMG(src=img_url, height="1", width="1")
+        )
+    )
+    
+    # print(lxml.html.tostring(HTML).decode("utf8"))
+    return lxml.html.tostring(HTML, pretty_print=True).decode("utf8")
+    
+    
 
 def generate_csrf_html(url, reqData):
     """ Generate the initial response for the CSRF tester """
