@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'RaftMain.ui'
 #
-# Created: Sat Jul 20 20:47:33 2013
+# Created: Sat Jul 20 21:09:13 2013
 #      by: PyQt4 UI code generator 4.10.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -1647,8 +1647,8 @@ class Ui_MainWindow(object):
         self.toolBar.addAction(self.actionConfig)
 
         self.retranslateUi(MainWindow)
-        self.mainTabWidget.setCurrentIndex(2)
-        self.reqTabWidget.setCurrentIndex(2)
+        self.mainTabWidget.setCurrentIndex(0)
+        self.reqTabWidget.setCurrentIndex(0)
         self.reqRespTabWidget.setCurrentIndex(-1)
         self.requesterHistoryTabWidget.setCurrentIndex(-1)
         self.webFuzzTab.setCurrentIndex(0)
