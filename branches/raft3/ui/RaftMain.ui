@@ -1368,6 +1368,13 @@ User-Agent: ${user_agent}</string>
                   </spacer>
                  </item>
                  <item>
+                  <widget class="QPushButton" name="wfFunctionsDeleteButton">
+                   <property name="text">
+                    <string>Delete</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
                   <widget class="QPushButton" name="wfFunctionsSaveButton">
                    <property name="text">
                     <string>Save</string>

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'RaftMain.ui'
 #
-# Created: Mon Jul 22 15:25:03 2013
+# Created: Mon Jul 22 16:16:36 2013
 #      by: PyQt4 UI code generator 4.10.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -693,6 +693,9 @@ class Ui_MainWindow(object):
         self.horizontalLayout_33.addWidget(self.wfFunctionsComboBox)
         spacerItem6 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_33.addItem(spacerItem6)
+        self.wfFunctionsDeleteButton = QtGui.QPushButton(self.widget)
+        self.wfFunctionsDeleteButton.setObjectName(_fromUtf8("wfFunctionsDeleteButton"))
+        self.horizontalLayout_33.addWidget(self.wfFunctionsDeleteButton)
         self.wfFunctionsSaveButton = QtGui.QPushButton(self.widget)
         self.wfFunctionsSaveButton.setObjectName(_fromUtf8("wfFunctionsSaveButton"))
         self.horizontalLayout_33.addWidget(self.wfFunctionsSaveButton)
@@ -1781,6 +1784,7 @@ class Ui_MainWindow(object):
         self.wfPay5DynamicRadio.setText(_translate("MainWindow", "dynamic", None))
         self.webFuzzTab.setTabText(self.webFuzzTab.indexOf(self.tab_18), _translate("MainWindow", "Payload Config", None))
         self.label_50.setText(_translate("MainWindow", "Function:", None))
+        self.wfFunctionsDeleteButton.setText(_translate("MainWindow", "Delete", None))
         self.wfFunctionsSaveButton.setText(_translate("MainWindow", "Save", None))
         self.webFuzzTab.setTabText(self.webFuzzTab.indexOf(self.wfFunctionsTab), _translate("MainWindow", "Functions", None))
         self.mainTabWidget.setTabText(self.mainTabWidget.indexOf(self.tabMainWebFuzzer), _translate("MainWindow", "Web Fuzzer", None))

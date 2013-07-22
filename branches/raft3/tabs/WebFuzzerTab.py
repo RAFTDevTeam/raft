@@ -282,8 +282,10 @@ class WebFuzzerTab(QObject):
         
         functions = self.Attacks.list_function_files()
         for item in functions:
-            comboBox.addItem(item)
-        
+            if item.startswith("."):
+                pass
+            else:
+                comboBox.addItem(item)
     
         
     def create_payload_map(self):
@@ -389,7 +391,28 @@ def randomize_alert(input):
         self.mainWindow.wfPay5PayloadBox.setEnabled(self.mainWindow.wfPay5FuzzRadio.isChecked() or self.mainWindow.wfPay5DynamicRadio.isChecked())
         self.mainWindow.wfPay5StaticEdit.setEnabled(self.mainWindow.wfPay5StaticRadio.isChecked()) 
         
-        
+        # Determine if fuzz or dynamic is selected and change combo box items
+        if self.mainWindow.wfPay1FuzzRadio.isChecked():
+            self.fill_payload_combo_box(self.mainWindow.wfPay1PayloadBox)
+        if self.mainWindow.wfPay1DynamicRadio.isChecked():
+            self.fill_payload_combo_box_function(self.mainWindow.wfPay1PayloadBox)
+        if self.mainWindow.wfPay2FuzzRadio.isChecked():
+            self.fill_payload_combo_box(self.mainWindow.wfPay2PayloadBox)
+        if self.mainWindow.wfPay2DynamicRadio.isChecked():
+            self.fill_payload_combo_box_function(self.mainWindow.wfPay2PayloadBox)
+        if self.mainWindow.wfPay3FuzzRadio.isChecked():
+            self.fill_payload_combo_box(self.mainWindow.wfPay3PayloadBox)
+        if self.mainWindow.wfPay3DynamicRadio.isChecked():
+            self.fill_payload_combo_box_function(self.mainWindow.wfPay3PayloadBox)
+        if self.mainWindow.wfPay4FuzzRadio.isChecked():
+            self.fill_payload_combo_box(self.mainWindow.wfPay4PayloadBox)
+        if self.mainWindow.wfPay4DynamicRadio.isChecked():
+            self.fill_payload_combo_box_function(self.mainWindow.wfPay4PayloadBox)
+        if self.mainWindow.wfPay5FuzzRadio.isChecked():
+            self.fill_payload_combo_box(self.mainWindow.wfPay5PayloadBox)
+        if self.mainWindow.wfPay5DynamicRadio.isChecked():
+            self.fill_payload_combo_box_function(self.mainWindow.wfPay5PayloadBox)
+            
 
     def handle_fuzzer_history_clicked(self):
         index = self.mainWindow.fuzzerHistoryTreeView.currentIndex()
