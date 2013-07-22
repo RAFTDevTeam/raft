@@ -31,7 +31,7 @@ from analysis.AbstractAnalyzer import AbstractAnalyzer
 
 class GIFComments(AbstractAnalyzer):
     
-    ContentTypeRegex = re.compile("content-type\:.*image\/([gif]\w+)",re.I)
+    ContentTypeRegex = re.compile(b"content-type\:.*image\/([gif]\w+)",re.I)
     
     def __init__(self):
         self.desc="Determine existence of and display GIF Image comments"

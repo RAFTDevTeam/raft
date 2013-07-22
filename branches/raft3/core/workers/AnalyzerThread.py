@@ -135,14 +135,14 @@ class AnalyzerThread(QThread):
             
             #dbconfig=self.Data.get_config_value(self.read_cursor, 'ANALYSIS', str(x.__class__))
             #print "dbconfig=%s"%dbconfig
-            #print "class=%s"%x.__class__
+            print("class=%s"%x.__class__)
             #x.setConfiguration(dbconfig)
             x.preanalysis()
             x.initResultsData()
             resultinstance=x.getResults()
             x.analyzerinstanceid=self.Data.analysis_add_analyzer_instance(self.cursor, 
                                                                           analysisrunid,
-                                                                          str(x.__class__).translate(None,'<>'),
+                                                                          str(x.__class__).translate('<>'),
                                                                           x.friendlyname,x.desc, self.result_type_to_string(resultinstance))     
         
         fullanalysistext=StringIO()
@@ -176,7 +176,7 @@ class AnalyzerThread(QThread):
                             self.Data.analysis_add_stat(self.cursor, pageresultset, key, value)
                 except Exception as e:
                     # TODO: add real debugging support
-                    self.framework.debug_log(transaction)
+                    self.framework.debug_log('Transaction ID: ' + str(transaction.responseId))
                     self.framework.report_exception(e)
                     
         #Post Analysis

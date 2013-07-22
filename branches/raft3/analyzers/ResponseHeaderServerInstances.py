@@ -27,7 +27,7 @@ class ResponseHeaderServerInstances(AbstractAnalyzer):
         self.desc = "Detect instances of Web servers based on response headers"
         self.friendlyname = "Response Headers Server Instances"
         self.unique_server_headers = {}
-        self.re_server_pattern = re.compile('^Server:\s*(.+)$', re.I)
+        self.re_server_pattern = re.compile(b'^Server:\s*(.+)$', re.I)
         
     def preanalysis(self):
         pass

@@ -114,7 +114,7 @@ class AbstractAnalyzer(object):
         Analyzer writers shouldn't need to override this function except for special cases, like
         when subclassing a custom AnalysisResults object.
         """
-        self.analysisresults=resultsclasses.AnalysisResults.AnalysisResults()
+        self.analysisresults=AnalysisResults.AnalysisResults()
         self.analysisresults.setAnalyzerInfo(self.desc,self.friendlyname,str(self.__class__).translate('<>'))
         
         

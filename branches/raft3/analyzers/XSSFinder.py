@@ -25,7 +25,7 @@ import urllib.request, urllib.error, urllib.parse
 from analysis.AbstractAnalyzer import AbstractAnalyzer
 
 class XSSFinder(AbstractAnalyzer):
-    AlertRegex = re.compile(r'(?<!&gt;)(?<!3[eE])(alert\((.+?)\))')
+    AlertRegex = re.compile(b'(?<!&gt;)(?<!3[eE])(alert\((.+?)\))')
     
     def __init__(self):
         self.desc="Identification of successful XSS attacks."

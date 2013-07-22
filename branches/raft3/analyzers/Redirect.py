@@ -29,7 +29,7 @@ class Redirect(AbstractAnalyzer):
     
     #Class variables shared across all instances
     data = {}
-    LocationRegex = re.compile('Location:\s+(\S+)',re.I)
+    LocationRegex = re.compile(b'Location:\s+(\S+)',re.I)
     
     
     def __init__(self):

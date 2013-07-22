@@ -29,7 +29,7 @@ from analysis.AbstractAnalyzer import AbstractAnalyzer
 class Timing(AbstractAnalyzer):
     
     #Class variables shared across all instances
-    ResponseDateRegex = re.compile("Date:\ (.*)")
+    ResponseDateRegex = re.compile(b"Date:\ (.*)")
     #ReqDateRegex matching format: Mon Jul  4 23:55:11 2011 GMT
     ReqDateRegex = re.compile("\w{3}\s\w{3}\s+\d+\s\d\d:\d\d:\d\d\s\d{4}\s\w{3}")
     URLRegex = re.compile("\/\/(.*?)(\/.*)$")
@@ -69,7 +69,8 @@ class Timing(AbstractAnalyzer):
             responsedate = None
             m = Timing.ResponseDateRegex.search(responseheaders)
             if (m != None):
-                resdate = m.group(1).rstrip()
+                restemp = m.group(1).rstrip()
+                resdate = restemp.decode('utf-8')
                 try:
                     responsedate = time.strptime(resdate, '%a, %d %b %Y %H:%M:%S %Z')
                 except ValueError:

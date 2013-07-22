@@ -42,7 +42,7 @@ class RegexFinder(AbstractAnalyzer):
         
         for main,sub in list(self.regex.items()):
             for regexName,regexValue in list(sub.items()):
-                compiledRegex = re.compile(regexValue)
+                compiledRegex = re.compile(regexValue.encode('utf-8'))
                 for found in compiledRegex.finditer(responseBody):
                     founddata=found.group(1)
                     results.addPageResult(pageid=target.responseId, 

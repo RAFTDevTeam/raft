@@ -29,7 +29,7 @@ class ASPNETApplicationServerErrors(AbstractAnalyzer):
         self.desc = 'Find unique application instances based on server error'
         self.friendlyname = 'ASP.NET Application Server Error'
 
-        self.re_server_error = re.compile(r'Server Error in \'(.*?)\' Application.')
+        self.re_server_error = re.compile(b'Server Error in \'(.*?)\' Application.')
         self.applications = {}
         self.all_urls = {}
     

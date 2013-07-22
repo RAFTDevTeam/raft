@@ -29,7 +29,7 @@ from . import ExifExtractorSingleResult
 
 class ExifExtractor(AbstractAnalyzer):
     
-    ContentTypeRegex = re.compile("content-type\:.*image\/([j|t]\w+)",re.I)
+    ContentTypeRegex = re.compile(b"content-type\:.*image\/([j|t]\w+)",re.I)
     
     def __init__(self):
         self.desc="EXIF data from JPG/TIFF image files may contain sensitive personal information (including location)"

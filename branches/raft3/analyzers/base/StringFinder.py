@@ -45,7 +45,7 @@ class StringFinder(AbstractAnalyzer):
         
         for stringtype,stringlist in list(self.searchstrings.items()):
             for ident,searchstring in list(stringlist.items()):
-                startindex=responsedata.find(str(searchstring))
+                startindex=responsedata.find(searchstring.encode('utf-8'))
        
                 if startindex > -1:
                     endindex=startindex+len(searchstring)
