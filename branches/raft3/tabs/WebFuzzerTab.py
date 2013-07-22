@@ -108,10 +108,15 @@ class WebFuzzerTab(QObject):
         # Fill the payloads combo boxes on init
         self.fill_payloads()
         self.pending_fuzz_requests = None
+        
+        # Fill the functions combo box on init
+        self.fill_function_combo_box()
 
         self.Data = None
         self.cursor = None
         self.framework.subscribe_database_events(self.db_attach, self.db_detach)
+        
+        
 
     def db_attach(self):
         self.Data = self.framework.getDB()
@@ -148,10 +153,13 @@ class WebFuzzerTab(QObject):
         self.functionsEditScintilla.setFont(self.framework.get_font())
         self.functionsEditScintilla.setWrapMode(1)
         self.functionsEditScintilla.setMarginWidth(1, '1000')
+        self.functionsEditScintilla.setAutoIndent(True)
         self.functionsLayout.addWidget(self.functionsEditScintilla)
         self.functionsEditScintilla.zoomTo(self.framework.get_zoom_size()+5) # TODO: hack
         self.framework.subscribe_zoom_in(self.edit_function_zoom_in)
         self.framework.subscribe_zoom_out(self.edit_function_zoom_out)
+        
+        
 
     def edit_function_zoom_in(self):
         self.functionsEditScintilla.zoomIn()
@@ -247,8 +255,6 @@ class WebFuzzerTab(QObject):
         
         selectedText = comboBox.currentText()
         comboBox.clear()
-        # comboBox.addItem("SQLi")
-        # comboBox.addItem("XSS")
         
         payloads = self.Attacks.list_files()
         for item in payloads:
@@ -256,6 +262,29 @@ class WebFuzzerTab(QObject):
                 pass
             else:
                 comboBox.addItem(item)
+                
+    def fill_payload_combo_box_function(self, comboBox):
+        
+        selectedText = comboBox.currentText()
+        comboBox.clear()
+        
+        functions = self.Attacks.list_function_files()
+        for item in functions:
+            if item.startswith("."):
+                pass
+            else:
+                comboBox.addItem(item)
+    
+                
+    def fill_function_combo_box(self):
+        comboBox = self.mainWindow.wfFunctionsComboBox
+        comboBox.clear()
+        
+        functions = self.Attacks.list_function_files()
+        for item in functions:
+            comboBox.addItem(item)
+        
+    
         
     def create_payload_map(self):
         # create payload map from configuration tab
@@ -348,16 +377,19 @@ def randomize_alert(input):
         self.mainWindow.wfStdBox.setEnabled(self.mainWindow.wfTempSeqChk.isChecked())
         
     def handle_payload_toggled(self):
-        self.mainWindow.wfPay1PayloadBox.setEnabled(self.mainWindow.wfPay1FuzzRadio.isChecked())
-        self.mainWindow.wfPay1StaticEdit.setEnabled(self.mainWindow.wfPay1StaticRadio.isChecked() or self.mainWindow.wfPay1DynamicRadio.isChecked())
-        self.mainWindow.wfPay2PayloadBox.setEnabled(self.mainWindow.wfPay2FuzzRadio.isChecked())
-        self.mainWindow.wfPay2StaticEdit.setEnabled(self.mainWindow.wfPay2StaticRadio.isChecked() or self.mainWindow.wfPay2DynamicRadio.isChecked())
-        self.mainWindow.wfPay3PayloadBox.setEnabled(self.mainWindow.wfPay3FuzzRadio.isChecked())
-        self.mainWindow.wfPay3StaticEdit.setEnabled(self.mainWindow.wfPay3StaticRadio.isChecked() or self.mainWindow.wfPay3DynamicRadio.isChecked())
-        self.mainWindow.wfPay4PayloadBox.setEnabled(self.mainWindow.wfPay4FuzzRadio.isChecked())
-        self.mainWindow.wfPay4StaticEdit.setEnabled(self.mainWindow.wfPay4StaticRadio.isChecked() or self.mainWindow.wfPay4DynamicRadio.isChecked())
-        self.mainWindow.wfPay5PayloadBox.setEnabled(self.mainWindow.wfPay5FuzzRadio.isChecked())
-        self.mainWindow.wfPay5StaticEdit.setEnabled(self.mainWindow.wfPay5StaticRadio.isChecked() or self.mainWindow.wfPay5DynamicRadio.isChecked())
+        self.mainWindow.wfPay1PayloadBox.setEnabled(self.mainWindow.wfPay1FuzzRadio.isChecked() or self.mainWindow.wfPay1DynamicRadio.isChecked())
+        self.mainWindow.wfPay1StaticEdit.setEnabled(self.mainWindow.wfPay1StaticRadio.isChecked()) 
+        # self.mainWindow.wfPay1PayloadBox.setEnabled(self.mainWindow.wfPay1DynamicRadio.isChecked()) or self.fill_payload_combo_box_function(self.mainWindow.wfPay1PayloadBox)
+        self.mainWindow.wfPay2PayloadBox.setEnabled(self.mainWindow.wfPay2FuzzRadio.isChecked() or self.mainWindow.wfPay2DynamicRadio.isChecked())
+        self.mainWindow.wfPay2StaticEdit.setEnabled(self.mainWindow.wfPay2StaticRadio.isChecked()) 
+        self.mainWindow.wfPay3PayloadBox.setEnabled(self.mainWindow.wfPay3FuzzRadio.isChecked() or self.mainWindow.wfPay3DynamicRadio.isChecked())
+        self.mainWindow.wfPay3StaticEdit.setEnabled(self.mainWindow.wfPay3StaticRadio.isChecked()) 
+        self.mainWindow.wfPay4PayloadBox.setEnabled(self.mainWindow.wfPay4FuzzRadio.isChecked() or self.mainWindow.wfPay4DynamicRadio.isChecked())
+        self.mainWindow.wfPay4StaticEdit.setEnabled(self.mainWindow.wfPay4StaticRadio.isChecked()) 
+        self.mainWindow.wfPay5PayloadBox.setEnabled(self.mainWindow.wfPay5FuzzRadio.isChecked() or self.mainWindow.wfPay5DynamicRadio.isChecked())
+        self.mainWindow.wfPay5StaticEdit.setEnabled(self.mainWindow.wfPay5StaticRadio.isChecked()) 
+        
+        
 
     def handle_fuzzer_history_clicked(self):
         index = self.mainWindow.fuzzerHistoryTreeView.currentIndex()

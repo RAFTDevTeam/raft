@@ -27,6 +27,7 @@ class Payloads(object):
     def __init__(self, framework):
         self.framework = framework
         self.payloads_dir = os.path.join(self.framework.get_data_dir(), 'payloads')
+        self.functions_dir = os.path.join(self.framework.get_data_dir(), 'functions')
     
     def list_files(self):
         
@@ -48,3 +49,26 @@ class Payloads(object):
         f.close()
         
         return vals
+    
+    def list_function_files(self):
+        
+        function_listing = os.listdir(self.functions_dir)
+        
+        return function_listing
+    
+    def read_function(self, function_file):
+        
+        #ToDo: Check to make sure this properly displays Python files
+        f = open(os.path.join(self.functions_dir, function_file), "rb")
+        vals = list()
+        
+        for item in f.readlines():
+            vals.append(item)
+            
+        f.close()
+        
+        return vals
+        
+    
+    
+    

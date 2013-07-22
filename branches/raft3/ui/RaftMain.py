@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'RaftMain.ui'
 #
-# Created: Sat Jul 20 22:25:16 2013
+# Created: Mon Jul 22 15:25:03 2013
 #      by: PyQt4 UI code generator 4.10.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -1661,7 +1661,7 @@ class Ui_MainWindow(object):
         self.reqTabWidget.setCurrentIndex(0)
         self.reqRespTabWidget.setCurrentIndex(-1)
         self.requesterHistoryTabWidget.setCurrentIndex(-1)
-        self.webFuzzTab.setCurrentIndex(0)
+        self.webFuzzTab.setCurrentIndex(2)
         self.stdFuzzTab.setCurrentIndex(0)
         self.stdFuzzResultsTabWidget.setCurrentIndex(-1)
         self.domFuzzerTabWidget.setCurrentIndex(0)
