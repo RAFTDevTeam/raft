@@ -236,17 +236,18 @@ class burp_parse_state():
         self.logger.debug('read burp state version: %d', version)
 
     def __make_url(self, scheme, host, port, path):
+        # TODO: consider replacing with urlunsplit
         url = scheme + b'://' + host
         if b'http' == scheme and 80 == port:
             pass
         elif b'https' == scheme and 443 == port:
             pass
         else:
-            if bytes == type(port):
+            if isinstance(port, bytes):
                 url += b':' + port
             else:
                 url += b':' + str(port).encode('ascii')
-        if b'/' != path[0]:
+        if not path.startswith(b'/'):
             url += b'/'
         url += path
         return url
