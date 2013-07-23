@@ -341,12 +341,12 @@ class WebFuzzerTab(QObject):
         self.local_ns = None
         functions = [
 '''
-import urllib2
+import urllib.parse
 import re
 import random
 
 def url_encode(input):
-   return urllib2.quote(input)
+   return urllib.parse.quote(input)
 
 re_alert_mangler = re.compile(r'alert\([^(]+\)', re.I)
 
