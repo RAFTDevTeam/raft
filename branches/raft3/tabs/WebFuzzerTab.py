@@ -31,6 +31,7 @@ from urllib import parse as urlparse
 import uuid
 import re
 import json
+import os
 
 from actions import interface
 
@@ -46,6 +47,7 @@ from widgets.ResponsesContextMenuWidget import ResponsesContextMenuWidget
 from widgets.MiniResponseRenderWidget import MiniResponseRenderWidget
 from core.network.InMemoryCookieJar import InMemoryCookieJar
 from core.fuzzer import Payloads
+from dialogs import ConfirmDialog
 
 from core.fuzzer.TemplateDefinition import TemplateDefinition
 from core.fuzzer.TemplateItem import TemplateItem
@@ -91,6 +93,10 @@ class WebFuzzerTab(QObject):
         self.framework.subscribe_populate_webfuzzer_response_id(self.webfuzzer_populate_response_id)
         self.framework.subscribe_sequences_changed(self.fill_sequences)
         
+        self.mainWindow.wfFunctionsComboBox.activated.connect(self.fill_function_edit)
+        
+        self.mainWindow.wfFunctionsDeleteButton.clicked.connect(self.del_function_file)
+        
         self.miniResponseRenderWidget = MiniResponseRenderWidget(self.framework, self.mainWindow.stdFuzzResultsTabWidget, self)
         
         self.re_request = re.compile(r'^(\S+)\s+((?:https?://(?:\S+\.)+\w+(?::\d+)?)?/.*)\s+HTTP/\d+\.\d+\s*$', re.I)
@@ -101,6 +107,8 @@ class WebFuzzerTab(QObject):
         self.setup_fuzzer_tab()
 
         self.setup_functions_tab()
+        
+        self.functions_dir = os.path.join(self.framework.get_data_dir(), 'functions')
         
         self.Attacks = Payloads.Payloads(self.framework)
         self.Attacks.list_files()
@@ -286,6 +294,37 @@ class WebFuzzerTab(QObject):
                 pass
             else:
                 comboBox.addItem(item)
+                
+    def fill_function_edit(self):
+        
+        filename = self.mainWindow.wfFunctionsComboBox.currentText()
+        
+        func = self.Attacks.read_function(filename)
+        
+        # Clear the Scintilla widget
+        self.functionsEditScintilla.clear()
+        
+        for line in func:
+            self.functionsEditScintilla.append(line.decode("utf8"))
+            
+    def del_function_file(self):
+        
+        # Gets the current name of the file selected in the combobox
+        filename = self.mainWindow.wfFunctionsComboBox.currentText()
+        path = self.functions_dir
+        
+        message = "Are you sure you want to delete: {0}".format(filename)
+        
+        response = ConfirmDialog.display_confirm_dialog(self.mainWindow, message)
+        
+        if response == True:
+            os.remove(path + "/" + filename)
+            
+            self.fill_function_combo_box()
+                    
+            # Clear the items from the scintilla widget
+            #ToDo: This should be the default data for the function
+            self.functionsEditScintilla.clear()
     
         
     def create_payload_map(self):
