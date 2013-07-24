@@ -48,13 +48,45 @@ for f in ('RaftCapture.dtd', 'RaftCaptureProcessor.py'):
 
 bin_excludes = []
 
+bdist_msi_options = {}
+
+raft_ico = os.path.join('ui', os.path.join('icons', 'RAFT.ico'))
+raft_icon_target = None
+
 base = None
 include_msvcr = False
 if 'win32' == sys.platform:
     base = 'Win32GUI'
-    base = None # TODO: remove once log messages are correctly routed for Gui
     targetName = 'raft.exe'
     include_msvcr = True
+
+    raft_icon_target = raft_ico
+
+    # for MSI, need to add shortcut to program menu or desktop (http://stackoverflow.com/questions/15734703/use-cx-freeze-to-create-an-msi-that-adds-a-shortcut-to-the-desktop)
+
+    # http://msdn.microsoft.com/en-us/library/windows/desktop/aa371847(v=vs.85).aspx
+    shortcut_table = [
+        ("DesktopShortcut",        # Shortcut
+         "DesktopFolder",          # Directory_
+         "RAFT",                   # Name
+         "TARGETDIR",              # Component_
+         "[TARGETDIR]"+targetName, # Target
+         None,                     # Arguments
+         None,                     # Description
+         None,                     # Hotkey
+         'RAFT.exe',               # Icon_
+         0,                     # IconIndex
+         None,                     # ShowCmd
+         'TARGETDIR'               # WkDir
+         )
+        ]
+
+    # Now create the table dictionary
+    msi_data = {"Shortcut": shortcut_table}
+
+    # Change some default MSI options and specify the use of the above defined tables
+    bdist_msi_options = {'data': msi_data}
+
 elif 'darwin' == sys.platform:
 
     # exclude dylib files from Qt
@@ -89,21 +121,23 @@ else: # must be linux or other platform
 exe = Executable(
     script = 'raft.py',
     base = base,
-    targetName = targetName
+    targetName = targetName,
+    icon = raft_icon_target,
     )
-
-# TODO: for MSI, need to add shortcut to program menu or desktop (http://stackoverflow.com/questions/15734703/use-cx-freeze-to-create-an-msi-that-adds-a-shortcut-to-the-desktop)
 
 setup(
     name = 'RAFT',
     version = '3.0.1', # TODO: determine method to expose version between setup and raft proper
     description = 'RAFT - Response Analysis and Further Testing',
-    options = {'build_exe': {
+    options = {
+        'build_exe': {
             'includes' : includes,  
             'include_files' : include_files, 
             'zip_includes' : zip_includes, 
             'include_msvcr' : include_msvcr,
             'bin_excludes' : bin_excludes,
-            } },
+            } ,
+        'bdist_msi': bdist_msi_options,
+        },
     executables = [exe]
     )

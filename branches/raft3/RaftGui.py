@@ -869,7 +869,10 @@ def main():
     # https://bugs.launchpad.net/ubuntu/+source/python-qt4/+bug/561303
 
     app = QApplication(sys.argv)
-    raft_icon = QIcon(":images/RAFT_app_icon.png")
+    if 'win32' == sys.platform:
+        raft_icon = QIcon(":icons/RAFT.ico")
+    else:
+        raft_icon = QIcon(":images/RAFT_app_icon.png")
     app.setWindowIcon(raft_icon)
     arguments = app.arguments()
 
