@@ -869,6 +869,8 @@ def main():
     # https://bugs.launchpad.net/ubuntu/+source/python-qt4/+bug/561303
 
     app = QApplication(sys.argv)
+    raft_icon = QIcon(":images/RAFT_app_icon.png")
+    app.setWindowIcon(raft_icon)
     arguments = app.arguments()
 
     dbfilename = None
@@ -883,6 +885,7 @@ def main():
     sys.excepthook = exception_hook
 
     mainWindow = RaftMain(dbfilename)
+    mainWindow.setWindowIcon(raft_icon)
 
     # check screen layout and geometry
     screenGeometry = app.desktop().screenGeometry()
