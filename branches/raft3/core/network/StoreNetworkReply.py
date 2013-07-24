@@ -58,7 +58,7 @@ class StoreNetworkReply(QNetworkReply):
         QObject.connect(self.__reply, SIGNAL('metaDataChanged()'), self.handle_metaDataChanged)
         QObject.connect(self.__reply, SIGNAL('finished()'), self.handle_finished)
 
-        ### self.debug_print('__init__')
+        self.debug_print('__init__')
         self.setOperation(self.__reply.operation())
         self.setReadBufferSize(self.__reply.readBufferSize())
         self.setRequest(self.__reply.request())
@@ -141,12 +141,13 @@ class StoreNetworkReply(QNetworkReply):
             return self.__request.attribute(self.__request.CustomVerbAttribute).data().decode('ascii','ignore')
 
     def __attr__(self, name):
-        ### self.debug_print('__attr__', name)
+        self.debug_print('__attr__', name)
         r = attr(self.__reply, name)
         return r
 
     def debug_print(self, *args):
-        print((args, self.__url))
+#        print((args, self.__url))
+        pass
 
     def manager(self):
         return self.__reply.manager()
@@ -158,29 +159,29 @@ class StoreNetworkReply(QNetworkReply):
         return not self.is_finished
 
     def handle_errors(self, code):
-        ### self.debug_print('error: %d' % (code))
+        self.debug_print('error: %d' % (code))
         self.emit(SIGNAL('error(QNetworkReply::NetworkError)'), code)
 
     def handle_sslErrors(self, list):
         # TODO: should check
-        ### self.debug_print('ignoring ssl errors', list)
+        self.debug_print('ignoring ssl errors', list)
         self.__reply.ignoreSslErrors()
         self.setSslConfiguration(self.__reply.sslConfiguration())
         self.emit(SIGNAL('sslErrors(const QList<QSslError> &)'), list)
 
     def handle_readyRead(self):
-        ### self.debug_print('handling read ready', self.__reply.bytesAvailable())
+        self.debug_print('handling read ready', self.__reply.bytesAvailable())
         self.emit(SIGNAL('readyRead()'))
 
     def handle_metaDataChanged(self):
-        ### self.debug_print('handling meta data changed')
+        self.debug_print('handling meta data changed')
 
         # initialize our state based on child reply
         reply = self.__reply
 
         redirectTarget = reply.attribute(QNetworkRequest.RedirectionTargetAttribute)
         if redirectTarget is not None and type(redirectTarget) == QUrl:
-            ### self.debug_print('redirectTarget received', redirectTarget.toUrl().toEncoded().data().decode('utf-8'))
+            self.debug_print('redirectTarget received', redirectTarget.toEncoded().data().decode('utf-8'))
             # TODO: validate we want to do this
             self.setAttribute(QNetworkRequest.RedirectionTargetAttribute, redirectTarget)
 
@@ -224,18 +225,18 @@ class StoreNetworkReply(QNetworkReply):
         self.emit(SIGNAL('metaDataChanged()'))
 
     def handle_uploadProgress(self, bytesSent, bytesTotal):
-        ### self.debug_print('handling uploadProgress', bytesSent, bytesTotal)
+        self.debug_print('handling uploadProgress', bytesSent, bytesTotal)
         self.emit(SIGNAL('uploadProgress(qint64, qint64)'), bytesSent, bytesTotal)
 
     def handle_downloadProgress(self, bytesReceived, bytesTotal):
-        ### self.debug_print('handling downloadProgress', bytesReceived, bytesTotal)
+        self.debug_print('handling downloadProgress', bytesReceived, bytesTotal)
         self.emit(SIGNAL('downloadProgress(qint64, qint64)'), bytesReceived, bytesTotal)
 
     def calculate_redirect(self, redirectTarget):
         pass
 
     def handle_finished(self):
-        ### self.debug_print('handling finished', self.__url)
+        self.debug_print('handling finished', self.__url)
 
         finishTime = time.time()
         elapsed = int((finishTime - self.requestTime)*1000) # TODO: verify
@@ -305,7 +306,7 @@ class StoreNetworkReply(QNetworkReply):
 
     def abort(self):
         try:
-            ### self.debug_print('abort')
+            self.debug_print('abort')
             self.__reply.abort()
         except AttributeError as e:
             # TODO: determine where corruption is occuring
@@ -321,7 +322,7 @@ class StoreNetworkReply(QNetworkReply):
                 available = len(self.pendingData)
             else:
                 available = self.__reply.bytesAvailable()
-            ### self.debug_print('bytes available', available)
+            self.debug_print('bytes available', available)
             return available
         except AttributeError as e:
             # TODO: determine where corruption is occuring
@@ -329,11 +330,11 @@ class StoreNetworkReply(QNetworkReply):
             return 0
 
     def canReadLine(self):
-        ### self.debug_print('canReadLine', self.__reply.canReadLine())
+        self.debug_print('canReadLine', self.__reply.canReadLine())
         return self.__reply.canReadLine()
 
     def readData(self, maxSize):
-        ### self.debug_print('readData', maxSize)
+        self.debug_print('readData', maxSize, self.is_finished, self.pendingData)
         if self.is_finished and self.pendingData:
             if len(self.pendingData) > maxSize:
                 data = self.pendingData[0:maxSize]
@@ -345,7 +346,10 @@ class StoreNetworkReply(QNetworkReply):
             data = self.__reply.read(maxSize)
             if data:
                 self.data_io.write(data)
+
+        self.debug_print('returning data', len(data), data)
         return data
     
     def readAll(self):
+        self.debug_print('readAll', self.response_data)
         return QByteArray(self.response_data)

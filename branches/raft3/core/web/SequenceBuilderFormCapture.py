@@ -64,12 +64,13 @@ class SequenceBuilderFormCapture(QObject):
             return
         self.qlock.lock()
         try:
-            self.source_urls[request_id] = url
+            request_id = str(request_id)
 
+            self.source_urls[request_id] = url
             if request_id not in self.source_parameters:
                 self.source_parameters[request_id] = {}
 
-            self.process_url(url, self.source_parameters[request_id])
+            self.source_parameters[request_id] = self.process_url(url, self.source_parameters[request_id])
         finally:
             self.qlock.unlock()
 
@@ -88,16 +89,17 @@ class SequenceBuilderFormCapture(QObject):
                 position += 1
                 parameters[SequenceParameter(url, 'Fragment', name, '', position)] = value
 
+        return parameters
+
     def store_source_parameter(self, request_id, position, name, Type, value):
         if not self.is_tracking:
             return
         self.qlock.lock()
         try:
+            request_id = str(request_id)
             url = self.source_urls[request_id]
-            parameters = self.source_parameters[request_id]
             sequenceParameter = SequenceParameter(url, 'Form', name, Type, position)
-            print(('store_source', request_id, sequenceParameter, value))
-            parameters[sequenceParameter] = [value]
+            self.source_parameters[request_id][sequenceParameter] = [value]
         finally:
             self.qlock.unlock()
         
@@ -106,12 +108,15 @@ class SequenceBuilderFormCapture(QObject):
             return
         self.qlock.lock()
         try:
+            response_id = str(response_id)
+            originating_request_id = str(originating_request_id)
+
             self.targets[response_id] = originating_request_id
 
             if response_id not in self.target_parameters:
                 self.target_parameters[response_id] = {}
 
-            self.process_url(url, self.target_parameters[response_id])
+            self.target_parameters[response_id] = self.process_url(url, self.target_parameters[response_id])
 
             results = self.postDataExtractor.process_request(request_headers, request_body)
             if results:
@@ -157,11 +162,13 @@ class SequenceBuilderFormCapture(QObject):
 
 #        print(self.source_parameters)
 
-        response_ids = [int(m) for m in response_ids]
+        response_ids = [str(m) for m in response_ids]
         response_ids.sort()
 
         parameters = []
         source_parameters_for_response = {}
+
+        print(('targets', self.targets))
 
         for response_id in response_ids:
             request_id = self.targets.get(response_id)

@@ -703,6 +703,22 @@ class Db:
         finally:
             self.qlock.unlock()
 
+    def get_sequence_source_parameter_by_id(self, cursor, sequence_id):
+        self.qlock.lock()
+        try:
+            cursor.execute("""SELECT
+                              Sequence_Id, 
+                              Response_Id, 
+                              Input_Location,
+                              Input_Position,
+                              Input_Name,
+                              Input_Value,
+                              Is_Dynamic
+                          FROM sequence_source_parameters WHERE Sequence_Id=?""", [int(sequence_id)])
+            return cursor
+        finally:
+            self.qlock.unlock()
+
     def insert_sequence_target_parameter(self, cursor, insertlist):
         self.qlock.lock()
         try:
@@ -729,6 +745,22 @@ class Db:
         finally:
             self.qlock.unlock()
 
+    def get_sequence_target_parameter_by_id(self, cursor, sequence_id):
+        self.qlock.lock()
+        try:
+            cursor.execute("""SELECT
+                              Sequence_Id, 
+                              Response_Id, 
+                              Input_Location,
+                              Input_Position,
+                              Input_Name,
+                              Input_Value,
+                              Is_Dynamic
+                          FROM sequence_target_parameters WHERE Sequence_Id=?""", [int(sequence_id)])
+            return cursor
+        finally:
+            self.qlock.unlock()
+
     def insert_sequence_cookie(self, cursor, insertlist):
         self.qlock.lock()
         try:
@@ -742,6 +774,20 @@ class Db:
                            ) values (
                              ?, ?, ?, ?, ?
                            )""", insertlist)
+        finally:
+            self.qlock.unlock()
+
+    def get_sequence_cookies_by_id(self, cursor, sequence_id):
+        self.qlock.lock()
+        try:
+            cursor.execute("""SELECT 
+                              Sequence_Id, 
+                              Cookie_Domain,
+                              Cookie_Name,
+                              Cookie_Raw_Value,
+                              Is_Dynamic
+                           FROM sequence_cookies WHERE Sequence_Id=?""", [int(sequence_id)])
+            return cursor
         finally:
             self.qlock.unlock()
 

@@ -27,13 +27,14 @@ from PyQt4.QtCore import *
 
 from core.web.BaseWebPage import BaseWebPage
 
-class StandardWebPage(BaseWebPage):
-    def __init__(self, framework, parent = None):
+class TesterWebPage(BaseWebPage):
+    def __init__(self, framework, console, parent = None):
         BaseWebPage.__init__(self, framework, parent)
         self.framework = framework
         self.loadFinished.connect(self.handle_loadFinished)
         self.contentsChanged.connect(self.handle_contentsChanged)
         self.unsupportedContent.connect(self.handle_unsupportedContent)
+        self.console = console
         self.setForwardUnsupportedContent(True)
 
     def set_page_settings(self, settings):
@@ -41,7 +42,7 @@ class StandardWebPage(BaseWebPage):
         settings.setAttribute(QtWebKit.QWebSettings.JavascriptCanOpenWindows, True)
             
     def javaScriptConsoleMessage(self, message, lineNumber, sourceID):
-        self.framework.console_log('console log from [%s / %s]: %s' % (lineNumber, sourceID, message))
+        self.console('javaScriptConsoleMessage', (lineNumber, sourceID, message))
 
     def userAgentForUrl(self, url):
         return self.framework.useragent()

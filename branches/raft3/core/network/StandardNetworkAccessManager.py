@@ -53,7 +53,6 @@ class StandardNetworkAccessManager(BaseNetworkAccessManager):
                                      QNetworkAccessManager.createRequest(self, operation, request, outgoingData), self)
         except Exception as error:
             # exceptions will cause a segfault
-            import traceback
-            print(('--->FIX ME:\n%s' % traceback.format_exc(error)))
+            self.framework.report_exception(error)
             request.setUrl(QUrl('about:blank'))
             return QNetworkAccessManager.createRequest(self, operation, request, outgoingData)
