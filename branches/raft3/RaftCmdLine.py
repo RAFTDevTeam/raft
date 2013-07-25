@@ -1,14 +1,9 @@
-#!/usr/bin/env python3.3
 #
-# RAFT - Response Analysis and Further Testing
+# Class that exposes the command line functionality
 #
-# Authors: 
-#          Nathan Hamiel
-#          Gregory Fleischer (gfleischer@gmail.com)
-#          Justin Engler
-#          Seth Law
+# Author: Gregory Fleischer (gfleischer@gmail.com)
 #
-# Copyright (c) 2011-2013, RAFT Team
+# Copyright (c) 2013 RAFT Team
 #
 # This file is part of RAFT.
 #
@@ -27,28 +22,10 @@
 #
 import sys
 
-__version__ = "3.0.1-pre"
-
-__all__ = ['__version__']
+from raft import __version__
 
 def main():
-
-    # for now, just to maintain compatibility
-    gui = True
-    if gui:
-        launch_gui()
-    else:
-        launch_cmd_line()
-
-def launch_gui():
-    import RaftGui
-    RaftGui.main()
-
-def launch_cmd_line():
-    import RaftCmdLine
-    RaftCmdLine.main()
+    sys.stdout.write('RaftCmdLine - version: %s\n' %  (__version__))
 
 if '__main__' == __name__:
     main()
-
-
