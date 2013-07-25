@@ -58,6 +58,7 @@ class TesterTab(QObject):
         
         self.setScintillaProperties(self.mainWindow.csrfGenEdit)
         self.mainWindow.testerRegenBtn.clicked.connect(self.regen_csrf)
+        self.mainWindow.csrfOpenBtn.clicked.connect(self.handle_csrfOpenBtn_clicked)
 
         self.setScintillaProperties(self.mainWindow.testerClickjackingEditHtml)
         self.mainWindow.testerClickjackingSimulateButton.clicked.connect(self.handle_testerClickjackingSimulateButton_clicked)
@@ -120,9 +121,14 @@ class TesterTab(QObject):
             url = self.mainWindow.testerCSRFURLEdit.text()
             htmlresult = CSRFTester.generate_csrf_img(url, self.mainWindow.csrfGenEdit.text())
             self.mainWindow.csrfGenEdit.setText(htmlresult)
+
+    def handle_csrfOpenBtn_clicked(self):
+        url = 'http://attacker.example.com/csrf.html' # TODO: exposed this (?)
+        body = self.mainWindow.csrfGenEdit.text()
+        content_type = 'text/html'
+        self.framework.open_content_in_browser(url, body, content_type)
     
     def tester_populate_click_jacking(self, response_id):
-    
         row = self.Data.read_responses_by_id(self.cursor, response_id)
         if not row:
             return
@@ -156,7 +162,10 @@ class TesterTab(QObject):
         self.setup_clickjacking_url(url)
 
     def handle_testerClickjackingOpenInBrowserButton_clicked(self):
-        pass
+        url = self.clickjackingRenderWebView.url().toEncoded().data().decode('utf-8')
+        body = self.mainWindow.testerClickjackingEditHtml.text()
+        content_type = 'text/html'
+        self.framework.open_content_in_browser(url, body, content_type)
 
     def handle_clickjackingRenderWebView_loadFinished(self):
         self.console_log('info', 'Page load finished')

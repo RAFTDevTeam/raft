@@ -62,6 +62,9 @@ class Framework(QObject):
         self._raft_config_cache = {}
         # configuration defaults
         self._default_useragent = 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_7; en-us) AppleWebKit/533.21.1 (KHTML, like Gecko) Version/5.0.5 Safari/533.21.1'
+        # callbacks
+        self._open_url_in_browser = None
+        self._open_content_in_browser = None
         
     def create_raft_directory(self, basepath, dirname):
         dirtarget = os.path.join(basepath, dirname)
@@ -273,6 +276,10 @@ class Framework(QObject):
     def get_request_response(self, response_id):
         return self._requestResponseFactory.fill(response_id)
 
+    def report_implementation_issue(self, message):
+        self.send_log_message('INTERNAL ERROR', '\n'.join(message))
+        print(('INTERNAL ERROR:\n%s' % message))
+
     def report_implementation_error(self, exc):
         message = traceback.format_exception(type(exc), exc, exc.__traceback__)
         self.send_log_message('INTERNAL ERROR', '\n'.join(message))
@@ -392,4 +399,23 @@ class Framework(QObject):
 
     def send_log_message(self, message_type, message):
         self.emit(SIGNAL('logMessageReceived(QString, QString)'), message_type, message)
-        
+
+    def register_browser_openers(self, open_url, open_content):
+        if self._open_url_in_browser is None:
+            self._open_url_in_browser = open_url
+            QObject.connect(self, SIGNAL('openUrlInBrowser(QString)'), self._open_url_in_browser, Qt.DirectConnection)
+
+        if self._open_content_in_browser is None:
+            self._open_content_in_browser = open_content
+            QObject.connect(self, SIGNAL('openContentInBrowser(QString, QByteArray, QString)'), self._open_content_in_browser, Qt.DirectConnection)
+
+    def open_url_in_browser(self, url):
+        self.emit(SIGNAL('openUrlInBrowser(QString)'), url)
+
+    def open_content_in_browser(self, url, body, mimetype=''):
+        if isinstance(body, str):
+            data = body.encode('utf-8') # TODO: vary based on mimetype ?
+        else:
+            data = body
+        self.emit(SIGNAL('openContentInBrowser(QString, QByteArray, QString)'), url, data, mimetype)
+

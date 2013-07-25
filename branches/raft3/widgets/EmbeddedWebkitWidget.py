@@ -136,6 +136,25 @@ class EmbeddedWebkitWidget(QObject):
             self.currentTab.setUrl(qurl)
             self.actionButton.setText('Stop')
 
+    def _open_with_data(self, url, body, mimetype):
+        if 0 != len(self.tabs):
+            self.framework.report_implementation_error('EmbeddedWebkitWiget already opened; called to open with data [%s] [%s]' % (url, body[0:128]))
+            return
+        self.currentTab = self.add_browser_tab()
+        qurl = QUrl.fromUserInput(url)
+        if qurl.isValid():
+            if body:
+                self.currentTab.setContent(body, mimetype, qurl)
+            else:
+                self.currentTab.setUrl(qurl)
+            self.actionButton.setText('Stop')
+        
+    def open_with_content(self, url, body, mimetype = ''):
+        self._open_with_data(url, body, mimetype)
+
+    def open_with_url(self, url):
+        self._open_with_data(url, b'', '')
+
     def browser_load_started(self, tab_id):
         browserTab = self.browserTabs[tab_id]
         if browserTab == self.currentTab:

@@ -397,6 +397,9 @@ class RaftMain(QMainWindow, RaftMain.Ui_MainWindow):
         self.spiderThread.start(QThread.LowestPriority)
         self.crawlerTab.set_spider_thread(self.spiderThread)
 
+        # handlers
+        self.framework.register_browser_openers(self.open_url_in_browser, self.open_content_in_browser)
+
         self.do_db_connect()
 
     def fillResponses(self, fillAll = False):
@@ -841,6 +844,18 @@ class RaftMain(QMainWindow, RaftMain.Ui_MainWindow):
 
     def launch_browser(self):
         dialog = RaftBrowserDialog(self.framework, self)
+        dialog.show()
+        dialog.exec_()
+
+    def open_url_in_browser(self, url):
+        options = {'url':url}
+        dialog = RaftBrowserDialog(self.framework, self, options)
+        dialog.show()
+        dialog.exec_()
+
+    def open_content_in_browser(self, url, body, mimetype = ''):
+        options = {'url':url, 'body':body, 'mimetype':mimetype}
+        dialog = RaftBrowserDialog(self.framework, self, options)
         dialog.show()
         dialog.exec_()
         

@@ -252,7 +252,9 @@ class StoreNetworkReply(QNetworkReply):
 
         data_bytes = self.data_io.getvalue()
         if 0 == len(data_bytes):
-            data_bytes = self.__reply.readAll()
+            dbytes = self.__reply.readAll()
+            if dbytes is not None:
+                data_bytes = dbytes.data()
 
         self.response_data = data_bytes
         self.datalen = len(data_bytes)
@@ -275,7 +277,7 @@ class StoreNetworkReply(QNetworkReply):
             contentType = self.__reply.header(QNetworkRequest.ContentTypeHeader)
             if not contentType:
                 # TODO: implement real "sniff" content-type
-                if -1 != self.response_data.data().find(b'<html'):
+                if -1 != self.response_data.find(b'<html'):
                     contentType = 'text/html'
                     self.setRawHeader('Content-Type', contentType.encode('utf-8'))
                     # reply.setHeader(QNetworkRequest.ContentTypeHeader, contentType)
