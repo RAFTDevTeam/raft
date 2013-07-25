@@ -1,7 +1,7 @@
 #
 # Author: Gregory Fleischer (gfleischer@gmail.com)
 #
-# Copyright (c) 2011 RAFT Team
+# Copyright (c) 2011-2013 RAFT Team
 #
 # This file is part of RAFT.
 #
@@ -21,10 +21,11 @@
 # This is a module that handles the importing of various formats in to the RAFT tool
 # project database format.
 
-from lib.parsers.burpparse import burp_parse_log, burp_parse_state, burp_parse_xml
+from lib.parsers.burpparse import burp_parse_log, burp_parse_state, burp_parse_xml, burp_parse_vuln_xml
 from lib.parsers.webscarabparse import webscarab_parse_conversation
 from lib.parsers.parosparse import paros_parse_message
 from lib.parsers.raftparse import raft_parse_xml
+from lib.parsers.appscanparse import appscan_parse_xml
 
 def process_import(proxy_log, framework, source):
     """ Performs the importing of log in to the RAFT database """
@@ -39,12 +40,16 @@ def process_import(proxy_log, framework, source):
         func = burp_parse_log
     elif 'burp_xml' == source:
         func = burp_parse_xml
+    elif 'burp_vuln_xml' == source:
+        func = burp_parse_vuln_xml
     elif 'paros_message' == source:
         func = paros_parse_message
     elif 'webscarab' == source:
         func = webscarab_parse_conversation
     elif 'raft_capture_xml' == source:
         func = raft_parse_xml
+    elif 'appscan_xml' == source:
+        func = appscan_parse_xml
     else:
         raise Exception
 

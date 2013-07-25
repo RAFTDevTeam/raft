@@ -1228,13 +1228,14 @@ class burp_parse_vuln_xml():
 
         self.re_encoded = re.compile(r'&#[xX]([0-9a-fA-F]{2});')
         self.decode_entity = lambda m: '%c' % (int(m.group(1),16))
+        self.re_clean_host = re.compile(r'^https?://')
 
         self.source = burp_parse_xml.BurpBrokenXml(burpfile)
 
         # TODO: lazy ...
         from lxml import etree
         # http://effbot.org/zone/element-iterparse.htm#incremental-parsing
-        self.context = etree.iterparse(self.source, events=('start', 'end'))
+        self.context = etree.iterparse(self.source, events=('start', 'end'), huge_tree = True)
         self.iterator = iter(self.context)
         self.root = None
 
@@ -1306,8 +1307,8 @@ class burp_parse_vuln_xml():
                 ('remediationBackground', ''),
                 ('issueDetail', ''),
                 ('remediationDetail', ''),
-                ('request', ''),
-                ('response', ''),
+                ('request', b''),
+                ('response', b''),
                 ('responseRedirected', ''),
             )
 
@@ -1317,6 +1318,7 @@ class burp_parse_vuln_xml():
         cur = self.current
 
         host = cur['host']
+        clean_host = self.re_clean_host.sub('', host)
         hostip = cur['hostip']
         status = ''
         try:
@@ -1340,7 +1342,7 @@ class burp_parse_vuln_xml():
             if cur[note_item]:
                 notes_io.write('%s: %s\n\n' % (note_item, cur[note_item]))
         
-        return ('VULNXML', host, hostip, url, status, datetime, request, response, method, content_type, {'notes':notes_io.getvalue()})
+        return ('VULNXML', clean_host, hostip, url, status, datetime, request, response, method, content_type, {'notes':notes_io.getvalue()})
 
     def issues_start(self, elem):
         self.root = elem
@@ -1420,7 +1422,7 @@ class burp_parse_vuln_xml():
             except Exception as error:
                 print(('***%s***\n^^^%s^^^' % (self.source.last_response, self.source.buffer)))
                 self.source.close()
-                raise Exception('Internal error: state=%s, event=%s, elem=%s\n%s' % (state, event, elem.tag, traceback.format_exc(error)))
+                raise Exception('Internal error: state=%s, event=%s, elem=%s\n%s' % (state, event, elem.tag, traceback.format_exc()))
 
 if '__main__' == __name__:
     # test code
@@ -1446,7 +1448,7 @@ if '__main__' == __name__:
         elif 'vulnxml' == mode:
             count = 0
             for result in burp_parse_vuln_xml(burpfile):
-                print(result)
+#                print(result)
                 count += 1
             print('processed %d records' % (count))
         elif 'dumpstate' == mode:

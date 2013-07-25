@@ -252,6 +252,8 @@ class RaftMain(QMainWindow, RaftMain.Ui_MainWindow):
         self.actionImport_BurpLog.triggered.connect(lambda x: self.import_burp('burp_log'))
         self.actionImport_BurpState.triggered.connect(lambda x: self.import_burp('burp_state'))
         self.actionImport_BurpXml.triggered.connect(lambda x: self.import_burp('burp_xml'))
+        self.actionImport_Burp_Vuln_XML.triggered.connect(lambda x: self.import_burp('burp_vuln_xml'))
+        self.actionImport_AppScan_XML.triggered.connect(lambda x: self.import_appscan('appscan_xml'))
         self.actionImport_WebScarab.triggered.connect(self.import_webscarab)
         self.actionImport_ParosMessages.triggered.connect(lambda x: self.import_paros('paros_message'))
         self.actionRefresh_Responses.triggered.connect(self.refresh_responses)
@@ -521,6 +523,12 @@ class RaftMain(QMainWindow, RaftMain.Ui_MainWindow):
 
     def import_burp(self, source):
         """ Import a Burp proxy log """
+        files = QFileDialog.getOpenFileNames(None, "Open file", "")
+        if files is not None:
+            self.import_proxy_files(files, source)
+
+    def import_appscan(self, source):
+        """ Import an AppScan XML file """
         files = QFileDialog.getOpenFileNames(None, "Open file", "")
         if files is not None:
             self.import_proxy_files(files, source)

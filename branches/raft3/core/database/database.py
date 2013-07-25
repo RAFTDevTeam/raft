@@ -47,6 +47,7 @@ class Compressed(object):
         self.value = value
 
     def __str__(self):
+        # TODO: should warn
         return str(self.value, 'utf-8', 'ignore') # assume utf-8 for unknown content
 
     def __repr__(self):
@@ -539,7 +540,7 @@ class Db:
     def get_sitemap_info(self, cursor, lastId):
         self.qlock.lock()
         try:
-            cursor.execute("SELECT Id, Url, Status, ResHeaders FROM responses where Id > ?", [int(lastId)])
+            cursor.execute("SELECT Id, Url, Status, ResHeaders, ReqHeaders FROM responses where Id > ?", [int(lastId)])
             return cursor
         finally:
             self.qlock.unlock()
