@@ -25,7 +25,22 @@ import sys
 from raft import __version__
 
 def main():
-    sys.stdout.write('RaftCmdLine - version: %s\n' %  (__version__))
+    sys.stdout.write('\nRaftCmdLine - version: %s\n' %  (__version__))
+    sys.stdout.write('''
+    
+    Howdy!
+
+    Thanks for trying RAFT 3.
+
+    You'll want to know this is a special pre-release version for the Arsenal at Blackhat USA 2013.
+    Some of the features are not implemented, or have compatibility issues we are working to fix.
+
+    Before you start doing any real work, you'll want to get the latest version of the tool from:
+    http://code.google.com/p/raft/
+
+    Have Fun!
+
+''')
 
 if '__main__' == __name__:
     main()
