@@ -258,6 +258,7 @@ class RaftMain(QMainWindow, RaftMain.Ui_MainWindow):
         self.actionImport_WebScarab.triggered.connect(self.import_webscarab)
         self.actionImport_ParosMessages.triggered.connect(lambda x: self.import_paros('paros_message'))
         self.actionRefresh_Responses.triggered.connect(self.refresh_responses)
+        self.actionClear_Responses.triggered.connect(self.clear_responses)
         self.actionExport_Settings.triggered.connect(self.export_settings)
         self.actionImport_Settings.triggered.connect(self.import_settings)
 
@@ -478,7 +479,6 @@ class RaftMain(QMainWindow, RaftMain.Ui_MainWindow):
             self.Progress.show()
             try:
                 # Reinitialize with the database value set from new db name
-                self.Progress.show()
                 self.framework.closeDB()
 
                 # 5 seconds to settle
@@ -495,6 +495,18 @@ class RaftMain(QMainWindow, RaftMain.Ui_MainWindow):
 
     def refresh_responses(self):
         self.fillResponses(True)
+
+    def clear_responses(self):
+        response = self.display_confirm_dialog('Clear All Responses?\n\nAll response data will be permanently removed from the project database!')
+        if response:
+            self.Progress.show()
+            try:
+                # Truncate existing response values
+                self.Data.truncate_response_data(self.cursor)
+                self.framework.closeDB()
+                self.databaseThread.connectDb(self.db, self)
+            finally:
+                self.Progress.close()
 
     def export_settings(self):
         filename = QFileDialog.getSaveFileName(None, "Export RAFT Settings", "", "RAFT Settings File (*.raftsettings)")

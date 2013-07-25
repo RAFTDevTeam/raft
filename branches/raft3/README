@@ -25,4 +25,12 @@ For example, on Ubuntu 13.04 it is generally enough to use apt-get:
 On Mac OS X, the following ports are available:
 
    python33
-   
+   qt4-mac
+   py33-pyqt4
+   py33-qscintilla
+   py33-pip
+
+Then to install lxml:
+
+  sudo pip-3.3 install lxml
+

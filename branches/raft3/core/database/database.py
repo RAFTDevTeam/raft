@@ -922,6 +922,7 @@ class Db:
         self.qlock.lock()
         try:
             """ Truncate the responses table. """
+            # TODO: clear additional locations
             cursor.execute("DELETE FROM differ_items")
             cursor.execute("DELETE FROM responses")
             cursor.execute("DELETE FROM content_data")
