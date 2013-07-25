@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'RaftMain.ui'
 #
-# Created: Wed Jul 24 22:58:59 2013
+# Created: Thu Jul 25 13:05:34 2013
 #      by: PyQt4 UI code generator 4.10.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -1758,6 +1758,8 @@ class Ui_MainWindow(object):
         self.actionImport_Burp_Vuln_XML.setObjectName(_fromUtf8("actionImport_Burp_Vuln_XML"))
         self.actionImport_AppScan_XML = QtGui.QAction(MainWindow)
         self.actionImport_AppScan_XML.setObjectName(_fromUtf8("actionImport_AppScan_XML"))
+        self.actionClear_Responses = QtGui.QAction(MainWindow)
+        self.actionClear_Responses.setObjectName(_fromUtf8("actionClear_Responses"))
         self.menuFile.addAction(self.actionNew_Project)
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addAction(self.actionSave_As)
@@ -1770,7 +1772,9 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.actionImport_AppScan_XML)
         self.menuFile.addAction(self.actionImport_WebScarab)
         self.menuFile.addAction(self.actionImport_ParosMessages)
+        self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionRefresh_Responses)
+        self.menuFile.addAction(self.actionClear_Responses)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionExport_Settings)
         self.menuFile.addAction(self.actionImport_Settings)
@@ -2151,6 +2155,7 @@ class Ui_MainWindow(object):
         self.actionImport_Settings.setText(_translate("MainWindow", "Import Settings", None))
         self.actionImport_Burp_Vuln_XML.setText(_translate("MainWindow", "Import Burp Vuln XML", None))
         self.actionImport_AppScan_XML.setText(_translate("MainWindow", "Import AppScan XML", None))
+        self.actionClear_Responses.setText(_translate("MainWindow", "Clear Responses", None))
 
 from PyQt4 import Qsci
 from . import resources_rc

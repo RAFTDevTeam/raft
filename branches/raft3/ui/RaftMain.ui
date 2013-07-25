@@ -3489,7 +3489,9 @@ User-Agent: ${user_agent}</string>
     <addaction name="actionImport_AppScan_XML"/>
     <addaction name="actionImport_WebScarab"/>
     <addaction name="actionImport_ParosMessages"/>
+    <addaction name="separator"/>
     <addaction name="actionRefresh_Responses"/>
+    <addaction name="actionClear_Responses"/>
     <addaction name="separator"/>
     <addaction name="actionExport_Settings"/>
     <addaction name="actionImport_Settings"/>
@@ -3787,6 +3789,11 @@ User-Agent: ${user_agent}</string>
   <action name="actionImport_AppScan_XML">
    <property name="text">
     <string>Import AppScan XML</string>
+   </property>
+  </action>
+  <action name="actionClear_Responses">
+   <property name="text">
+    <string>Clear Responses</string>
    </property>
   </action>
  </widget>
