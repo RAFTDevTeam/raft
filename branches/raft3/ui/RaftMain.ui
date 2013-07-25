@@ -1635,12 +1635,12 @@ User-Agent: ${user_agent}</string>
                <property name="frameShadow">
                 <enum>QFrame::Raised</enum>
                </property>
-               <widget class="QWidget" name="">
+               <widget class="QWidget" name="layoutWidget">
                 <property name="geometry">
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>610</width>
+                  <width>612</width>
                   <height>270</height>
                  </rect>
                 </property>
@@ -3485,6 +3485,8 @@ User-Agent: ${user_agent}</string>
     <addaction name="actionImport_BurpLog"/>
     <addaction name="actionImport_BurpState"/>
     <addaction name="actionImport_BurpXml"/>
+    <addaction name="actionImport_Burp_Vuln_XML"/>
+    <addaction name="actionImport_AppScan_XML"/>
     <addaction name="actionImport_WebScarab"/>
     <addaction name="actionImport_ParosMessages"/>
     <addaction name="actionRefresh_Responses"/>
@@ -3775,6 +3777,16 @@ User-Agent: ${user_agent}</string>
   <action name="actionImport_Settings">
    <property name="text">
     <string>Import Settings</string>
+   </property>
+  </action>
+  <action name="actionImport_Burp_Vuln_XML">
+   <property name="text">
+    <string>Import Burp Vuln XML</string>
+   </property>
+  </action>
+  <action name="actionImport_AppScan_XML">
+   <property name="text">
+    <string>Import AppScan XML</string>
    </property>
   </action>
  </widget>
