@@ -26,16 +26,16 @@ from PyQt4.QtCore import QObject, SIGNAL
 from .TesterWebPage import TesterWebPage
 
 class TesterPageFactory(QObject):
-    def __init__(self, framework, console, networkAccessManager = None, parent = None):
+    def __init__(self, framework, interactor, networkAccessManager = None, parent = None):
         QObject.__init__(self, parent)
         self.framework = framework
-        self.console = console
+        self.interactor = interactor
         if networkAccessManager is not None:
             self.networkAccessManager = networkAccessManager
         else:
             self.networkAccessManager = framework.getNetworkAccessManager()
 
     def new_page(self, parent = None):
-        webPage = TesterWebPage(self.framework, self.console, parent)
+        webPage = TesterWebPage(self.framework, self.interactor, parent)
         webPage.setNetworkAccessManager(self.networkAccessManager)
         return webPage

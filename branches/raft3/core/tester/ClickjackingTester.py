@@ -26,15 +26,17 @@ class ClickjackingTester():
     def __init__(self, framework):
         self.framework = framework
 
-
     def make_default_frame_html(self, url):
         html = StringIO()
         html.write('<html>\n')
         html.write('  <head>\n')
         html.write('    <title>Framed Content</title>\n')
+        html.write('    <script>window.onbeforeunload = function (e) {return "Clickjacking: Navigate Away";}</script>\n')
         html.write('  </head>\n')
         html.write('  <body>\n')
-        html.write('    <iframe src="%s"></iframe>\n' % (url))
+        html.write('    <h3 style="color: red">framed</h3><hr>\n')
+        html.write('    <iframe src="%s" height="200" width="600"></iframe>\n' % (url))
+        html.write('    <hr><h3 style="color: red">framed</h3>\n')
         html.write('  </body>\n')
         html.write('</html>\n')
 
