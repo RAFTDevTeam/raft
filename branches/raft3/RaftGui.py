@@ -183,28 +183,6 @@ class RaftMain(QMainWindow, RaftMain.Ui_MainWindow):
             qt_mac_set_native_menubar(False)
         self.setupUi(self)
 
-        if True:
-            self.bh_dialog = QDialog(self)
-            self.bh_layout = QVBoxLayout(self.bh_dialog)
-            self.bh_text = QLabel(self.bh_dialog)
-            self.bh_text.setText('''<html>
-    <body>
-    <h3>Howdy!</h3>
-    <p>Thanks for trying RAFT 3.</p>
-    <p>You'll want to know this is a special pre-release version for the Arsenal at Blackhat USA 2013.</p>
-    <p>Some of the features are not implemented, or have compatibility issues we are working to fix.</p>
-    <p>Before you start doing any real work, you'll want to get the latest version of the tool from:
-    <a href="http://code.google.com/p/raft/">http://code.google.com/p/raft/</a></p>
-    <p>Have Fun!</p>
-    </body></html>
-    ''')
-            self.bh_layout.addWidget(self.bh_text)
-            self.bh_dialog.setMinimumSize(480, 300)
-            self.bh_dialog.updateGeometry()
-            self.bh_dialog.show()
-            self.bh_dialog.raise_()
-            self.bh_dialog.exec_()
-
         # hide currently unimplemented features
         self.reqTabRawRequestTab.hide()
         self.reqTabRawRequestTab.setParent(None)
