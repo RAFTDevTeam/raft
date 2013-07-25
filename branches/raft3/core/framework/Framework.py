@@ -218,8 +218,14 @@ class Framework(QObject):
         if self._db is not None:
             callback()
 
+    def unsubscribe_raft_config_populated(self, callback):
+        QObject.disconnect(self, SIGNAL('raftConfigPopulated()'), callback)
+
     def subscribe_raft_config_updated(self, callback):
         QObject.connect(self, SIGNAL('raftConfigUpdated(QString, QVariant)'), callback, Qt.DirectConnection)
+
+    def unsubscribe_raft_config_updated(self, callback):
+        QObject.disconnect(self, SIGNAL('raftConfigUpdated(QString, QVariant)'), callback)
 
     def set_raft_config_value(self, name, value):
         if name in self._raft_config_cache:

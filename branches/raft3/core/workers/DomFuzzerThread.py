@@ -457,9 +457,10 @@ class DomFuzzerThread(QThread):
             if not fuzz_item:
                 self.framework.log_warning('missing fuzz_id [%s]' % fuzz_id)
             else:
-                flatten_url = str(fuzz_url.encode('ascii', 'ignore'))
+                flatten_url = fuzz_url
+                rendered_data = html.encode('utf-8', 'xmlcharrefreplace')
                 fuzz_results =  [None, fuzz_id, flatten_url, fuzz_item[DomFuzzerQueueTable.TARGET],
-                     fuzz_item[DomFuzzerQueueTable.PARAM], fuzz_item[DomFuzzerQueueTable.TEST], confidence, html]
+                     fuzz_item[DomFuzzerQueueTable.PARAM], fuzz_item[DomFuzzerQueueTable.TEST], confidence, rendered_data]
                 rowid = self.Data.add_dom_fuzzer_results_item(self.write_cursor, fuzz_results)
                 fuzz_results[0] = rowid
                 self.resultsDataModel.append_data([fuzz_results])

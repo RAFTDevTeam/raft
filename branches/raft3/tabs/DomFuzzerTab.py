@@ -115,7 +115,7 @@ class DomFuzzerTab(QObject):
         if index.isValid():
             currentItem = dataModel.data(index)
             if currentItem is not None:
-                url = str(currentItem)
+                url = currentItem
                 return url
         return None
 
@@ -125,7 +125,7 @@ class DomFuzzerTab(QObject):
         for index in self.resultsTreeViewSelectionModel.selectedRows():
             curUrl = self.fuzzer_results_index_to_url(dataModel, index)
             if curUrl:
-                url_list.append('%s' % (str(curUrl)))
+                url_list.append(curUrl)
 
         QApplication.clipboard().setText('\n'.join(url_list))
 
@@ -189,7 +189,7 @@ class DomFuzzerTab(QObject):
         if self.currentFuzzId is not None:
             mainFrame = self.domFuzzerWebView.page().mainFrame()
             dom = mainFrame.documentElement()
-            html = str(dom.toOuterXml().toUtf8()) # TODO: fix encoding issues
+            html = dom.toOuterXml() # TODO: decideo on str versus bytes?
             self.domFuzzerThread.fuzzItemFinished(self.currentFuzzId, self.currentFuzzUrl, html, self.callbackLogger.get_messages())
             self.currentFuzzId = None
 
@@ -211,8 +211,8 @@ class DomFuzzerTab(QObject):
         if results:
             resultsItems = [m or '' for m in results]
             self.miniResponseRenderWidget.populate_response_content(
-                bytes(resultsItems[DomFuzzerResultsTable.URL]),
-                '',
+                resultsItems[DomFuzzerResultsTable.URL],
+                b'',
                 bytes(resultsItems[DomFuzzerResultsTable.RENDERED_DATA]),
                 ''
                 )
