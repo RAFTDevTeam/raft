@@ -27,13 +27,20 @@
 #
 import sys
 
+__version__ = "3.0.1-pre"
+
+__all__ = ['__version__']
+
 def main():
 
     # for now, just to maintain compatibility
     gui = True
     if gui:
-        import RaftGui
-        RaftGui.main()
+        launch_gui()
+
+def launch_gui():
+    import RaftGui
+    RaftGui.main()
 
 if '__main__' == __name__:
     main()

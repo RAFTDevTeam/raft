@@ -24,6 +24,22 @@ import sys
 import os
 from cx_Freeze import setup, Executable
 
+# TODO: determine cleaner method for maintaining version
+from raft import __version__
+
+if os.path.exists('setup.iss'):
+    fh = open('setup.iss', 'r')
+    lines = fh.read().splitlines()
+    fh.close()
+    for i in range(0, len(lines)):
+        line = lines[i]
+        if line.startsith('#define MyAppVersion'):
+            lines[i] = '#define MyAppVersion "' + __version__ + '"'
+
+    fh = open('setup.iss', 'w')
+    fh.write('\n'.join(lines))
+    fh.close()
+
 includes = ['lxml.etree', 'lxml._elementpath', 'lxml.html', 'gzip', 'sip', 'PyQt4.QtWebKit', 'PyQt4.Qsci', 're']
 
 def gather_include_files(dirname):
@@ -127,7 +143,7 @@ exe = Executable(
 
 setup(
     name = 'RAFT',
-    version = '3.0.1', # TODO: determine method to expose version between setup and raft proper
+    version = __version__, # TODO: determine method to expose version between setup and raft proper
     description = 'RAFT - Response Analysis and Further Testing',
     options = {
         'build_exe': {

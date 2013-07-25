@@ -425,6 +425,8 @@ class Db:
                 dbversion = self.upgrade_to_2011_8_31_alpha(cursor)
             elif '2011.8.31-alpha' == dbversion:
                 dbversion = self.upgrade_to_2011_9_1_alpha(cursor)
+            elif '2011.9.1-alpha' == dbversion and '3.0.1-pre' == version:
+                dbversion = self.upgrade_to_3_0_1_pre(cursor)
             else:
                 raise Exception('Implement upgrade from %s to %s' % (dbversion, version))
 
@@ -1728,6 +1730,15 @@ class Db:
             if new_name != old_name:
                 cursor.execute("""INSERT INTO configuration (Component, ConfigName, ConfigValue) values (?, ?, ?)""", [component, new_name, old_value])
                 cursor.execute("""DELETE FROM configuration WHERE Component=? and ConfigName=?""", [component, old_name])
+        
+        cursor.execute("UPDATE raft SET Value=? WHERE Name=?", [version, 'VERSION'])
+        self.conn.commit()
+
+        return version
+
+    def upgrade_to_3_0_1_pre(self, cursor):
+
+        version = '3.0.1-pre'
         
         cursor.execute("UPDATE raft SET Value=? WHERE Name=?", [version, 'VERSION'])
         self.conn.commit()

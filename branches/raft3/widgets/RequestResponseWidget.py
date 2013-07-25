@@ -82,10 +82,12 @@ class RequestResponseWidget(QObject):
     def db_attach(self):
         self.Data = self.framework.getDB()
         self.cursor = self.Data.allocate_thread_cursor()
+        self.clear()
 
     def db_detach(self):
         self.close_cursor()
         self.Data = None
+        self.clear()
 
     def close_cursor(self):
         if self.cursor:
@@ -475,7 +477,7 @@ class RequestResponseWidget(QObject):
 
     def doGeneratedSourceApply(self):
         rr = self.requestResponse
-        if rr.responseUrl and 'html' == rr.baseType:
+        if rr and rr.responseUrl and 'html' == rr.baseType:
             self.generatedSourceWebView.fill_from_response(rr.responseUrl, rr.responseHeaders, rr.responseBody, rr.responseContentType)
             return True
         return False

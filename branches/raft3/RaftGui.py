@@ -8,7 +8,7 @@
 #          Justin Engler
 #          Seth Law
 #
-# Copyright (c) 2011-2012, RAFT Team
+# Copyright (c) 2011-2013, RAFT Team
 #
 # This file is part of RAFT.
 #
@@ -33,6 +33,9 @@ import cgi
 import re
 import pprint
 import traceback
+
+# TODO: determine cleaner method for maintaining version
+from raft import __version__
 
 #ToDo: Provide more detail in the try statements when modules are not found.
 try:
@@ -168,8 +171,6 @@ try:
     from PyQt4.QtGui import qt_mac_set_native_menubar
 except ImportError:
     MAC = False
-    
-__version__ = "2011.9.1-alpha"
     
 #ToDo: Create a global search through response content
 #ToDo: Auto-Highlight error conditions
