@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "RAFT"
-#define MyAppVersion "3.0.1"
+#define MyAppVersion "3.0.1-pre"
 #define MyAppPublisher "RAFT Team"
 #define MyAppURL "http://code.google.com/p/raft"
 #define MyAppExeName "raft.exe"
@@ -43,4 +43,3 @@ Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: 
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
-

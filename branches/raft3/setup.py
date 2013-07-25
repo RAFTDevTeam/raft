@@ -26,19 +26,21 @@ from cx_Freeze import setup, Executable
 
 # TODO: determine cleaner method for maintaining version
 from raft import __version__
+version = __version__
 
-if os.path.exists('setup.iss'):
-    fh = open('setup.iss', 'r')
-    lines = fh.read().splitlines()
-    fh.close()
-    for i in range(0, len(lines)):
-        line = lines[i]
-        if line.startsith('#define MyAppVersion'):
-            lines[i] = '#define MyAppVersion "' + __version__ + '"'
+if 'win32' == sys.platform:
+    if os.path.exists('setup.iss'):
+        fh = open('setup.iss', 'r')
+        lines = fh.read().splitlines()
+        fh.close()
+        for i in range(0, len(lines)):
+            line = lines[i]
+            if line.startswith('#define MyAppVersion'):
+                lines[i] = '#define MyAppVersion "' + __version__ + '"'
 
-    fh = open('setup.iss', 'w')
-    fh.write('\n'.join(lines))
-    fh.close()
+        fh = open('setup.iss', 'w')
+        fh.write('\n'.join(lines))
+        fh.close()
 
 includes = ['lxml.etree', 'lxml._elementpath', 'lxml.html', 'gzip', 'sip', 'PyQt4.QtWebKit', 'PyQt4.Qsci', 're']
 
@@ -75,8 +77,10 @@ if 'win32' == sys.platform:
     base = 'Win32GUI'
     targetName = 'raft.exe'
     include_msvcr = True
-
     raft_icon_target = raft_ico
+
+    if '-' in version:
+        version = version[0:version.find('-')] + '.0'
 
     # for MSI, need to add shortcut to program menu or desktop (http://stackoverflow.com/questions/15734703/use-cx-freeze-to-create-an-msi-that-adds-a-shortcut-to-the-desktop)
 
@@ -143,7 +147,7 @@ exe = Executable(
 
 setup(
     name = 'RAFT',
-    version = __version__, # TODO: determine method to expose version between setup and raft proper
+    version = version, # TODO: determine method to expose version between setup and raft proper
     description = 'RAFT - Response Analysis and Further Testing',
     options = {
         'build_exe': {
