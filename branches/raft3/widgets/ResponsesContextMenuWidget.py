@@ -56,6 +56,10 @@ class ResponsesContextMenuWidget(QObject):
         self.connect(self.treeView, SIGNAL("customContextMenuRequested(const QPoint&)"), self.responses_data_context_menu)
         self.menu = QMenu(self.treeView)
 
+        self.sendToBrowserAction = action = QAction("Open URL in Browser", self)
+        action.triggered.connect(self.open_response_url_in_browser)
+        self.menu.addAction(action)
+
         self.sendToRequesterAction = action = QAction("Send to Requester", self)
         action.triggered.connect(self.send_response_data_to_requester)
         self.menu.addAction(action)
@@ -226,6 +230,19 @@ class ResponsesContextMenuWidget(QObject):
                     fh.write(rr.responseBody)
                 finally:
                     fh.close()
+
+    def open_response_url_in_browser(self):
+        url_list = []
+        for index in self.treeViewSelectionModel.selectedRows():
+            url = interface.index_to_url(self.dataModel, index)
+            if url and url not in url_list:
+                url_list.append(url)
+
+        if 1 == len(url_list):
+            self.framework.open_url_in_browser(url_list[0])
+        else:
+            # TODO: support this via multiple tables
+            pass
 
     def send_response_data_to_requester(self):
         id_list = []
