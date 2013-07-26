@@ -26,15 +26,25 @@
 # along with RAFT.  If not, see <http://www.gnu.org/licenses/>.
 #
 import sys
+import os
 
 __version__ = "3.0.1-pre"
-
 __all__ = ['__version__']
 
 def main():
 
+    # TODO: for base Win32, no stdin/stdout
+
     # for now, just to maintain compatibility
     gui = True
+    for arg in sys.argv[1:]:
+        if arg == '-new' or arg.endswith('.raftdb'):
+            pass
+        else:
+            # unrecognized or cmd line
+            gui = False
+            break
+
     if gui:
         launch_gui()
     else:
