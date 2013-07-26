@@ -186,6 +186,8 @@ class RaftMain(QMainWindow, RaftMain.Ui_MainWindow):
         # hide currently unimplemented features
         self.reqTabRawRequestTab.hide()
         self.reqTabRawRequestTab.setParent(None)
+        self.wfUnusedSequenceTab.hide()
+        self.wfUnusedSequenceTab.setParent(None)
 
         # initialize framework
         self.framework = Framework(self)
