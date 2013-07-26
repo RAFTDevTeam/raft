@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'RaftMain.ui'
 #
-# Created: Thu Jul 25 13:05:34 2013
+# Created: Thu Jul 25 19:16:01 2013
 #      by: PyQt4 UI code generator 4.10.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -415,6 +415,9 @@ class Ui_MainWindow(object):
         self.wfStdPostBox.setEnabled(False)
         self.wfStdPostBox.setObjectName(_fromUtf8("wfStdPostBox"))
         self.horizontalLayout_21.addWidget(self.wfStdPostBox)
+        self.webFuzzerUseGlobalCookieJar = QtGui.QCheckBox(self.tab_19)
+        self.webFuzzerUseGlobalCookieJar.setObjectName(_fromUtf8("webFuzzerUseGlobalCookieJar"))
+        self.horizontalLayout_21.addWidget(self.webFuzzerUseGlobalCookieJar)
         self.verticalLayout_27.addLayout(self.horizontalLayout_21)
         self.horizontalLayout_15 = QtGui.QHBoxLayout()
         self.horizontalLayout_15.setContentsMargins(-1, 0, -1, -1)
@@ -1872,6 +1875,7 @@ class Ui_MainWindow(object):
         self.wfGenHostLabel.setText(_translate("MainWindow", "URL:", None))
         self.wfStdPreChk.setText(_translate("MainWindow", "Pre Sequence", None))
         self.wfStdPostChk.setText(_translate("MainWindow", "Post Sequence", None))
+        self.webFuzzerUseGlobalCookieJar.setText(_translate("MainWindow", "Global Cookie Jar?", None))
         self.wfStdAddButton.setText(_translate("MainWindow", "Add Marker", None))
         self.stdFuzzPayloadBox.setToolTip(_translate("MainWindow", "Choose a payload from the dropbown box", None))
         self.stdFuzzPayloadBox.setItemText(0, _translate("MainWindow", "payload_1", None))

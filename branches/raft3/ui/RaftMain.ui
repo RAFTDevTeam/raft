@@ -779,6 +779,13 @@ User-Agent: ${user_agent}</string>
                     </property>
                    </widget>
                   </item>
+                  <item alignment="Qt::AlignRight">
+                   <widget class="QCheckBox" name="webFuzzerUseGlobalCookieJar">
+                    <property name="text">
+                     <string>Global Cookie Jar?</string>
+                    </property>
+                   </widget>
+                  </item>
                  </layout>
                 </item>
                 <item>

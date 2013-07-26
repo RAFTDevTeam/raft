@@ -495,9 +495,7 @@ def randomize_alert(input):
             if ':' in line:
                 name, value = [v.strip() for v in line.split(':', 1)]
                 lname = name.lower()
-                if 'cookie' == lname:
-                    template.write('${global_cookie_jar}\n')
-                elif 'host' == lname:
+                if 'host' == lname:
                     if splitted.hostname and value == splitted.hostname:
                         template.write('Host: ${host}\n')
                         continue
@@ -659,7 +657,8 @@ def randomize_alert(input):
             templateText = template_io.getvalue()
             context = uuid.uuid4().hex
             # print('%s%s%s' % ('-'*32, request, '-'*32))
-            (method, url, headers, body, use_global_cookie_jar) = self.process_template(url, templateText, replacements)
+            use_global_cookie_jar = self.mainWindow.webFuzzerUseGlobalCookieJar.isChecked()
+            (method, url, headers, body) = self.process_template(url, templateText, replacements)
             
             if first:
                     self.mainWindow.wfStdStartButton.setText('Cancel')
@@ -723,7 +722,6 @@ def randomize_alert(input):
         # Start of old
         method, uri = '' ,''
         headers, body = '', ''
-        use_global_cookie_jar = False
 
         # TODO: this allows for missing entries -- is this good?
         func = lambda m: replacements.get(m.group(1))
@@ -757,9 +755,6 @@ def randomize_alert(input):
             if not line:
                 break
             if '$' in line:
-                if '${global_cookie_jar}' == line:
-                    use_global_cookie_jar = True
-                    continue
                 line = self.re_replacement.sub(func, line)
             if first:
                 m = self.re_request.match(line)
@@ -779,7 +774,7 @@ def randomize_alert(input):
 
         url = urlparse.urljoin(url, uri)
 
-        return (method, url, headers_dict, body, use_global_cookie_jar)
+        return (method, url, headers_dict, body)
         
     def fuzzer_history_clear_button_clicked(self):
         self.Data.clear_fuzzer_history(self.cursor)
