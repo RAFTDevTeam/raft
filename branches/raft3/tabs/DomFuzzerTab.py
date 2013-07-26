@@ -54,7 +54,7 @@ class DomFuzzerTab(QObject):
         self.mainWindow.domFuzzerStartButton.setEnabled(True)
         self.mainWindow.domFuzzerStopButton.setEnabled(False)
 
-        self.miniResponseRenderWidget = MiniResponseRenderWidget(self.framework, self.mainWindow.domFuzzerResultsTabWidget, self)
+        self.miniResponseRenderWidget = MiniResponseRenderWidget(self.framework, self.mainWindow.domFuzzerResultsTabWidget, False, self)
         self.setup_fuzz_window()
 
         self.Data = None
@@ -212,6 +212,8 @@ class DomFuzzerTab(QObject):
             resultsItems = [m or '' for m in results]
             self.miniResponseRenderWidget.populate_response_content(
                 resultsItems[DomFuzzerResultsTable.URL],
+                b'', # TODO: determine if it makes sense to expose these values
+                b'',
                 b'',
                 bytes(resultsItems[DomFuzzerResultsTable.RENDERED_DATA]),
                 ''

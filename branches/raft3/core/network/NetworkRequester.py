@@ -76,8 +76,10 @@ class NetworkRequester(QObject):
                 body = ''
             else:
                 device = None
-        elif method in ('GET', 'HEAD', 'DELETE'):
+
+        if method in ('GET', 'HEAD', 'DELETE'):
             # can't have body, because not supported by Qt network logic
+            body = None
             device = None
 
         if body is not None:

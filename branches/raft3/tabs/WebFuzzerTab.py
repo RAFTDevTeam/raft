@@ -97,7 +97,7 @@ class WebFuzzerTab(QObject):
         
         self.mainWindow.wfFunctionsDeleteButton.clicked.connect(self.del_function_file)
         
-        self.miniResponseRenderWidget = MiniResponseRenderWidget(self.framework, self.mainWindow.stdFuzzResultsTabWidget, self)
+        self.miniResponseRenderWidget = MiniResponseRenderWidget(self.framework, self.mainWindow.stdFuzzResultsTabWidget, True, self)
         
         self.re_request = re.compile(r'^(\S+)\s+((?:https?://(?:\S+\.)+\w+(?::\d+)?)?/.*)\s+HTTP/\d+\.\d+\s*$', re.I)
         self.re_request_cookie = re.compile(r'^Cookie:\s*(\S+)', re.I|re.M)
@@ -149,7 +149,9 @@ class WebFuzzerTab(QObject):
         self.mainWindow.fuzzerHistoryTreeView.setModel(self.fuzzerHistoryDataModel)
         self.mainWindow.fuzzerHistoryTreeView.doubleClicked.connect(self.fuzzer_history_item_double_clicked)
         self.mainWindow.fuzzerHistoryTreeView.clicked.connect(self.handle_fuzzer_history_clicked)
+        self.mainWindow.fuzzerHistoryTreeView.activated.connect(self.handle_fuzzer_history_clicked)
         self.responsesContextMenu = ResponsesContextMenuWidget(self.framework, self.fuzzerHistoryDataModel, self.mainWindow.fuzzerHistoryTreeView, self)
+        self.responsesContextMenu.set_currentChanged_callback(self.fill_fuzzer_history)
 
     def setup_functions_tab(self):
         self.functionsLayout = self.mainWindow.wfFunctionsEditPlaceholder.layout()
@@ -455,17 +457,22 @@ def randomize_alert(input):
 
     def handle_fuzzer_history_clicked(self):
         index = self.mainWindow.fuzzerHistoryTreeView.currentIndex()
+        self.fill_fuzzer_history(index)
+
+    def fill_fuzzer_history(self, index):
         Id = interface.index_to_id(self.fuzzerHistoryDataModel, index)
         if Id:
             row = self.Data.read_responses_by_id(self.cursor, Id)
             if not row:
                 return
-            responseItems = [m or '' for m in list(row)]
-            url = str(responseItems[ResponsesTable.URL])
-            reqHeaders = bytes(responseItems[ResponsesTable.RES_HEADERS])
-            reqData = bytes(responseItems[ResponsesTable.RES_DATA])
-            contentType = str(responseItems[ResponsesTable.RES_CONTENT_TYPE])
-            self.miniResponseRenderWidget.populate_response_content(url, reqHeaders, reqData, contentType)
+            responseItems = interface.data_row_to_response_items(row)
+            url = responseItems[ResponsesTable.URL]
+            reqHeaders = responseItems[ResponsesTable.REQ_HEADERS]
+            reqData = responseItems[ResponsesTable.REQ_DATA]
+            resHeaders = responseItems[ResponsesTable.RES_HEADERS]
+            resData = responseItems[ResponsesTable.RES_DATA]
+            contentType = responseItems[ResponsesTable.RES_CONTENT_TYPE]
+            self.miniResponseRenderWidget.populate_response_content(url, reqHeaders, reqData, resHeaders, resData, contentType)
         
     def webfuzzer_populate_response_id(self, Id):
         
@@ -473,12 +480,12 @@ def randomize_alert(input):
         if not row:
             return
 
-        responseItems = [m or '' for m in list(row)]
+        responseItems = interface.data_row_to_response_items(row)
 
-        url = str(responseItems[ResponsesTable.URL])
-        reqHeaders = str(responseItems[ResponsesTable.REQ_HEADERS])
-        reqData = str(responseItems[ResponsesTable.REQ_DATA])
-        method = str(responseItems[ResponsesTable.REQ_METHOD])
+        url = responseItems[ResponsesTable.URL]
+        reqHeaders = responseItems[ResponsesTable.REQ_HEADERS].decode('utf-8', 'ignore')
+        reqData = responseItems[ResponsesTable.REQ_DATA].decode('utf-8', 'ignore')
+        method = responseItems[ResponsesTable.REQ_METHOD]
         splitted = urlparse.urlsplit(url)
 
         useragent = self.framework.useragent()

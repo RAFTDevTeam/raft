@@ -108,7 +108,7 @@ class RequesterTab(QObject):
         self.sequence_runnerResponsesContextMenu = ResponsesContextMenuWidget(self.framework, self.sequenceRunnerDataModel, self.mainWindow.sequenceRunnerTreeView, self)
         self.sequence_runnerResponsesContextMenu.set_currentChanged_callback(self.fill_sequence_runner_request_response)
 
-        self.miniResponseRenderWidget = MiniResponseRenderWidget(self.framework, self.mainWindow.reqRespTabWidget, self)
+        self.miniResponseRenderWidget = MiniResponseRenderWidget(self.framework, self.mainWindow.reqRespTabWidget, True, self)
 
         self.scopeController = self.framework.getScopeController()
 
@@ -292,12 +292,14 @@ class RequesterTab(QObject):
                 self.Data.insert_requester_history(self.cursor, response_id)
                 self.requesterHistoryDataModel.append_data([response_item])
 
-                url = str(response_item[ResponsesTable.URL])
-                headers = bytes(response_item[ResponsesTable.RES_HEADERS])
-                body = bytes(response_item[ResponsesTable.RES_DATA])
-                contentType = str(response_item[ResponsesTable.RES_CONTENT_TYPE])
+                url = response_item[ResponsesTable.URL]
+                req_headers = response_item[ResponsesTable.REQ_HEADERS]
+                req_body = response_item[ResponsesTable.REQ_DATA]
+                res_headers = response_item[ResponsesTable.RES_HEADERS]
+                res_body = response_item[ResponsesTable.RES_DATA]
+                res_content_type = response_item[ResponsesTable.RES_CONTENT_TYPE]
 
-                self.miniResponseRenderWidget.populate_response_content(url, headers, body, contentType)
+                self.miniResponseRenderWidget.populate_response_content(url, req_headers, req_body, res_headers, res_body, res_content_type)
 
         self.mainWindow.requesterSendButton.setText('Send')
         self.pending_request = None
