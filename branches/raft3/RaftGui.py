@@ -114,6 +114,7 @@ from tabs import RequesterTab
 from tabs import WebFuzzerTab
 from tabs import DomFuzzerTab
 from tabs import CrawlerTab
+from tabs import EncoderTab
 from tabs import ScopingTab
 from tabs import TesterTab
 from tabs import LogTab
@@ -122,7 +123,6 @@ from tabs import LogTab
 from actions import importers
 from actions import request
 from actions import interface
-from actions import encoderlib
 from actions import SettingsFiles
 
 from core.database import database
@@ -234,11 +234,6 @@ class RaftMain(QMainWindow, RaftMain.Ui_MainWindow):
         self.actionSearch.triggered.connect(self.display_search)
         self.actionBrowser.triggered.connect(self.launch_browser)
         
-        self.encodeButton.clicked.connect(self.encode_data)
-        self.encodeWrapButton.clicked.connect(self.encode_wrap)
-        self.decodeButton.clicked.connect(self.decode_data)
-        self.decodeWrapButton.clicked.connect(self.decode_wrap)
-        
         # Create the actions for the buttons
         # self.connect(self.encodeButton, SIGNAL("clicked()"), self.encode_values)
         # self.connect(self.encodeWrapButton, SIGNAL("clicked()"), self.wrap_encode)
@@ -330,6 +325,7 @@ class RaftMain(QMainWindow, RaftMain.Ui_MainWindow):
         self.webfuzzerTab = WebFuzzerTab.WebFuzzerTab(self.framework, self)
         self.domFuzzerTab = DomFuzzerTab.DomFuzzerTab(self.framework, self)
         self.crawlerTab = CrawlerTab.CrawlerTab(self.framework, self)
+        self.encoderTab = EncoderTab.EncoderTab(self.framework, self)
         self.scopingTab = ScopingTab.ScopingTab(self.framework, self)
         self.testerTab = TesterTab.TesterTab(self.framework, self)
         self.logTab = LogTab.LogTab(self.framework, self)
@@ -718,42 +714,6 @@ class RaftMain(QMainWindow, RaftMain.Ui_MainWindow):
         else:
             return(None)
 
-    ####
-    # Decoder tool section
-    ####
-    
-    def encode_data(self):
-        """ Encode the specified value """
-        
-        encode_value = str(self.encodeEdit.toPlainText())
-        encode_method = self.encodingMethodCombo.currentText()
-        value = encoderlib.encode_values(encode_value, encode_method)
-        self.decodeEdit.setPlainText(value)
-        
-    def encode_wrap(self):
-        """ Wrap the specified values in the encode window """
-        
-        encode_value = str(self.encodeEdit.toPlainText())
-        wrap_value = self.encodingWrapCombo.currentText()
-        value = encoderlib.wrap_encode(encode_value, wrap_value)
-        self.encodeEdit.setPlainText(value)
-        
-    def decode_data(self):
-        """ Decode the specified value from the decoder interface """
-        
-        decode_value = str(self.decodeEdit.toPlainText())
-        decode_method = self.decodeMethodCombo.currentText()
-        value = encoderlib.decode_values(decode_value, decode_method)
-        self.encodeEdit.setPlainText(value)
-        
-    def decode_wrap(self):
-        """ Wrap the specified values in the decode window """
-        
-        decode_value = str(self.decodeEdit.toPlainText())
-        wrap_value = self.decodeWrapCombo.currentText()
-        value = encoderlib.wrap_decode(decode_value, wrap_value)
-        self.decodeEdit.setPlainText(value)
-                                                             
     def zoom_in(self):
         """ Zoom in on the items in the selected tab """
         self.framework.signal_zoom_in()
@@ -819,7 +779,7 @@ class RaftMain(QMainWindow, RaftMain.Ui_MainWindow):
 
     def reattach_encoder(self, code, index):
         self.tabMainEncoder.setParent(self.mainTabWidget)
-        self.mainTabWidget.addTab(self.tabMainEncoder, 'Encoder')
+        self.mainTabWidget.insertTab(index, self.tabMainEncoder, 'Encoder')
         
     def display_config(self):
         dialog = ConfigDialog(self.framework, self)

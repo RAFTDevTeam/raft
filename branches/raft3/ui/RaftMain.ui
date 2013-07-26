@@ -23,6 +23,18 @@
       <property name="enabled">
        <bool>true</bool>
       </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>600</width>
+        <height>0</height>
+       </size>
+      </property>
       <property name="currentIndex">
        <number>0</number>
       </property>
@@ -2029,352 +2041,397 @@ User-Agent: ${user_agent}</string>
        </layout>
       </widget>
       <widget class="QWidget" name="tabMainEncoder">
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
        <attribute name="title">
         <string>Encoder</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_19">
-        <item>
-         <widget class="QSplitter" name="splitter_3">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <widget class="QWidget" name="layoutWidget">
-           <layout class="QHBoxLayout" name="horizontalLayout_9">
-            <property name="sizeConstraint">
-             <enum>QLayout::SetDefaultConstraint</enum>
+       <widget class="QWidget" name="verticalLayoutWidget">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>1151</width>
+          <height>671</height>
+         </rect>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_66">
+         <item>
+          <widget class="QSplitter" name="splitter_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <widget class="QWidget" name="horizontalLayoutWidget">
+            <layout class="QHBoxLayout" name="horizontalLayout_9">
+             <item>
+              <widget class="QWidget" name="widget_4" native="true">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_19">
+                <item>
+                 <widget class="QFrame" name="frame_9">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="frameShape">
+                   <enum>QFrame::StyledPanel</enum>
+                  </property>
+                  <property name="frameShadow">
+                   <enum>QFrame::Raised</enum>
+                  </property>
+                  <layout class="QFormLayout" name="formLayout_5">
+                   <item row="0" column="1">
+                    <layout class="QVBoxLayout" name="verticalLayout_17">
+                     <property name="spacing">
+                      <number>6</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="encodingMethodLabel">
+                       <property name="text">
+                        <string>Select Encode Method</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QComboBox" name="encodingMethodCombo">
+                       <item>
+                        <property name="text">
+                         <string>URL</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Full URL</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Base64</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>HTML Entity</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Hex</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Hex Entity</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Hexadecimal Escape</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Octal Escape</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>MD5 Hash</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>SHA1 Hash</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>SQL CHAR String</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Oracle chr String</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Unicode %u00</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Escape HTML/XML</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Decimal</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Decimal Entity</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>ROT13</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>UTF-7</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>UTF-7 (Malformed)</string>
+                        </property>
+                       </item>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="encodeButton">
+                       <property name="text">
+                        <string>Encode</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="encodingWrapLabel">
+                       <property name="text">
+                        <string>Select Wrap Chars</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QComboBox" name="encodingWrapCombo">
+                       <item>
+                        <property name="text">
+                         <string>&lt;script&gt;&lt;/script&gt;</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>&lt;ScRiPt&gt;&lt;/ScRiPt&gt;</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>alert(...)</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>&quot;Javascript:...&quot;</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>&lt;img src=&quot;...&quot;</string>
+                        </property>
+                       </item>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="encodeWrapButton">
+                       <property name="text">
+                        <string>Wrap</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="encodeClearButton">
+                       <property name="text">
+                        <string>Clear</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QFrame" name="frame_14">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="frameShape">
+                   <enum>QFrame::StyledPanel</enum>
+                  </property>
+                  <property name="frameShadow">
+                   <enum>QFrame::Raised</enum>
+                  </property>
+                  <layout class="QFormLayout" name="formLayout_4">
+                   <item row="0" column="0">
+                    <layout class="QVBoxLayout" name="verticalLayout_18">
+                     <item>
+                      <widget class="QLabel" name="decodeMethodLabel">
+                       <property name="text">
+                        <string>Select Decode Method</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QComboBox" name="decodeMethodCombo">
+                       <item>
+                        <property name="text">
+                         <string>URL</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Full URL</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Base64</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Hex</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Hex Entity</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Hexadecimal Unescape</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Octal Unescape</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Unescape HTML/XML</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Unicode %u00</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>ROT13</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>UTF-7</string>
+                        </property>
+                       </item>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="decodeButton">
+                       <property name="text">
+                        <string>Decode</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="decodeWrapLabel">
+                       <property name="text">
+                        <string>Select Wrap Chars</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QComboBox" name="decodeWrapCombo">
+                       <item>
+                        <property name="text">
+                         <string>&lt;script&gt;&lt;/script&gt;</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>&lt;ScRiPt&gt;&lt;/ScRiPt&gt;</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>alert(...)</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>&quot;javascript:...&quot;</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>&lt;img src=&quot;...&quot;</string>
+                        </property>
+                       </item>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="decodeWrapButton">
+                       <property name="text">
+                        <string>Wrap</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="decodeClearButton">
+                       <property name="text">
+                        <string>Clear</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QTabWidget" name="encoderTabWidget">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
-            <property name="bottomMargin">
-             <number>0</number>
+            <property name="minimumSize">
+             <size>
+              <width>600</width>
+              <height>0</height>
+             </size>
             </property>
-            <item>
-             <layout class="QVBoxLayout" name="verticalLayout_17">
-              <property name="spacing">
-               <number>6</number>
-              </property>
-              <item>
-               <widget class="QLabel" name="encodingMethodLabel">
-                <property name="text">
-                 <string>Select Encode Method</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QComboBox" name="encodingMethodCombo">
-                <item>
-                 <property name="text">
-                  <string>URL</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Full URL</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Base64</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>HTML Entity</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Hex</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Hex Entity</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Hexadecimal Escape</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Octal Escape</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>MD5 Hash</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>SHA1 Hash</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>SQL CHAR String</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Oracle chr String</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Unicode %u00</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Escape HTML/XML</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Decimal</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Decimal Entity</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>ROT13</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>UTF-7</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>UTF-7 (Malformed)</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="encodeButton">
-                <property name="text">
-                 <string>Encode</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="encodingWrapLabel">
-                <property name="text">
-                 <string>Select Wrap Chars</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QComboBox" name="encodingWrapCombo">
-                <item>
-                 <property name="text">
-                  <string>&lt;script&gt;&lt;/script&gt;</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>&lt;ScRiPt&gt;&lt;/ScRiPt&gt;</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>alert(...)</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>&quot;Javascript:...&quot;</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>&lt;img src=&quot;...&quot;</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="encodeWrapButton">
-                <property name="text">
-                 <string>Wrap</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="encodeClearButton">
-                <property name="text">
-                 <string>Clear</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <widget class="Line" name="line">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QTextEdit" name="encodeEdit"/>
-            </item>
-           </layout>
+            <property name="currentIndex">
+             <number>-1</number>
+            </property>
+           </widget>
           </widget>
-          <widget class="QWidget" name="layoutWidget_2">
-           <layout class="QHBoxLayout" name="horizontalLayout_10">
-            <property name="sizeConstraint">
-             <enum>QLayout::SetDefaultConstraint</enum>
-            </property>
-            <item>
-             <layout class="QVBoxLayout" name="verticalLayout_18">
-              <item>
-               <widget class="QLabel" name="decodeMethodLabel">
-                <property name="text">
-                 <string>Select Decode Method</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QComboBox" name="decodeMethodCombo">
-                <item>
-                 <property name="text">
-                  <string>URL</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Full URL</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Base64</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Hex</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Hex Entity</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Hexadecimal Unescape</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Octal Unescape</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Unescape HTML/XML</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Unicode %u00</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>ROT13</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>UTF-7</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="decodeButton">
-                <property name="text">
-                 <string>Decode</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="decodeWrapLabel">
-                <property name="text">
-                 <string>Select Wrap Chars</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QComboBox" name="decodeWrapCombo">
-                <item>
-                 <property name="text">
-                  <string>&lt;script&gt;&lt;/script&gt;</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>&lt;ScRiPt&gt;&lt;/ScRiPt&gt;</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>alert(...)</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>&quot;javascript:...&quot;</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>&lt;img src=&quot;...&quot;</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="decodeWrapButton">
-                <property name="text">
-                 <string>Wrap</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="decodeClearButton">
-                <property name="text">
-                 <string>Clear</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <widget class="Line" name="line_2">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QTextEdit" name="decodeEdit"/>
-            </item>
-           </layout>
-          </widget>
-         </widget>
-        </item>
-       </layout>
+         </item>
+        </layout>
+       </widget>
       </widget>
       <widget class="QWidget" name="tabMainScoping">
        <property name="layoutDirection">
@@ -3844,38 +3901,6 @@ User-Agent: ${user_agent}</string>
     <hint type="destinationlabel">
      <x>347</x>
      <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>encodeClearButton</sender>
-   <signal>clicked()</signal>
-   <receiver>encodeEdit</receiver>
-   <slot>clear()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>140</x>
-     <y>329</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>451</x>
-     <y>216</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>decodeClearButton</sender>
-   <signal>clicked()</signal>
-   <receiver>decodeEdit</receiver>
-   <slot>clear()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>145</x>
-     <y>572</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>457</x>
-     <y>436</y>
     </hint>
    </hints>
   </connection>
