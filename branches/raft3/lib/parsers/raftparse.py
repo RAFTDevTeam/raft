@@ -125,13 +125,22 @@ class ParseAdapter:
                 self.response_body = b''
 
             self.extras = extras
+            self.content_length = len(self.response_body) # default
             if extras and isinstance(extras, dict):
-                self.content_length = extras.get('content_length')
+                if 'content_length' in extras:
+                    content_length = extras.get('content_length')
+                    if content_length:
+                        self.content_length = int(content_length)
+                
                 self.elapsed = extras.get('elapsed')
                 self.notes = extras.get('notes')
-                self.confirmed = extras.get('confirmed')
+                if 'confirmed' in extras:
+                    confirmed = extras['confirmed']
+                    try:
+                        self.confirmed = bool(confirmed)
+                    except ValueError:
+                        self.confirmed = confirmed.lower() in ('y', '1', 'true', 'yes')
             else:
-                self.content_length = ''
                 self.elapsed = ''
                 self.notes = ''
                 self.confirmed = ''

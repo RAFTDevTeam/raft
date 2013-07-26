@@ -24,6 +24,8 @@ import sys
 import argparse
 import os
 
+from core.database import database
+
 from lib.parsers.burpparse import burp_parse_log, burp_parse_state, burp_parse_xml, burp_parse_vuln_xml
 from lib.parsers.webscarabparse import webscarab_parse_conversation
 from lib.parsers.parosparse import paros_parse_message
@@ -46,6 +48,11 @@ class RaftCmdLine():
         }
     def __init__(self):
         self.scripts = {}
+        self.Data = None
+
+    def cleanup(self):
+        if self.Data:
+            self.Data.close()
 
     def process_args(self, args):
 
@@ -63,6 +70,9 @@ class RaftCmdLine():
                 sys.stderr.write('\nDB file [%s] does not exist\n' % (db_filename))
                 return 1
 
+            self.Data = database.Db(__version__, self.report_exception)
+            self.Data.connect(db_filename)
+
         # setup any capture filters
         self.capture_filter_scripts = []
         arg = getattr(args, 'capture_filter')
@@ -78,15 +88,37 @@ class RaftCmdLine():
                 self.process_capture_scripts.append(self.load_script_file(filearg))
 
         if do_import:
-            pass
+            self.run_process_loop(args, self.import_one_file)
         elif do_parse:
-            self.run_parse_process_loop(args)
+            self.run_process_loop(args, self.parse_one_file)
         else:
             sys.stderr.write('\nNo recognized options\n')
 
         return 0
 
-    def run_parse_process_loop(self, args):
+    def report_exception(self, error):
+        print(error)
+
+    def setup_script_initializers(self):
+        for key, script_env in self.scripts.items():
+            initializer = script_env['functions'].get('initialize')
+            if initializer and not script_env['initialized']:
+                initializer()
+                script_env['initialized'] = True
+
+    def reset_script_begin_end(self):
+        for key, script_env in self.scripts.items():
+            script_env['begin_called'] = False
+            script_env['end_called'] = False
+
+    def call_script_method_with_filename(self, script_env, method, filename):
+        method_func = script_env['functions'].get(method)
+        if method_func and not script_env[method + '_called']:
+            method_func(filename)
+            script_env[method + '_called'] = True
+
+    def run_process_loop(self, args, call_func):
+        self.setup_script_initializers()
         for name, func in self.FILE_PROCESSOR_DEFINTIONS.items():
             arg = getattr(args, name)
             if arg is None:
@@ -97,28 +129,73 @@ class RaftCmdLine():
                 elif os.path.exists(filearg):
                     file_list = [filearg]
                 for filename in file_list:
-                    self.parse_one_file(filename, func)
+                    call_func(filename, func, name)
 
-    def parse_one_file(self, filename, func):
+    def import_one_file(self, filename, func, funcname):
+        """ Import one file using specified parser function"""
+        adapter = ParseAdapter()
+        sys.stderr.write('importing [%s]\n' % (filename))
+        self.reset_script_begin_end()
+        filters = []
+        for script_env in self.capture_filter_scripts:
+            self.call_script_method_with_filename(script_env, 'begin', filename)
+            capture_filter = script_env['functions'].get('capture_filter')
+            if capture_filter:
+                filters.append(capture_filter)
+
+        count = 0
+        commit_threshold = 100
+        Data = self.Data
+        cursor = Data.allocate_thread_cursor()
+        try:
+            Data.set_insert_pragmas(cursor)
+            for result in func(filename):
+                capture = adapter.adapt(result)
+                skip = False
+                for capture_filter in filters:
+                    result = capture_filter(capture)
+                    if not result:
+                        skip = True
+                        break
+                if not skip:
+                    insertlist = [None, capture.url, capture.request_headers, capture.request_body, capture.response_headers, capture.response_body,
+                                  capture.status, capture.content_length, capture.elapsed, capture.datetime, capture.notes, None, capture.confirmed, 
+                                  capture.method, capture.hostip, capture.content_type, '%s-%s' % (funcname, capture.origin), capture.host]
+                    Data.insert_responses(cursor, insertlist, False)
+                    count += 1
+                    if (0 == (count % commit_threshold)):
+                        Data.commit()
+
+            if not (0 == (count % commit_threshold)):
+                Data.commit()
+
+            sys.stderr.write('Inserted [%d] records\n' % (count))
+
+        except Exception as error:
+            Data.rollback()
+            print(error)
+            # TODO: should continue(?)
+            raise error
+        finally:
+            Data.reset_pragmas(cursor)
+
+        for script_env in self.capture_filter_scripts:
+            self.call_script_method_with_filename(script_env, 'end', filename)
+
+    def parse_one_file(self, filename, func, funcname):
+        """ Parse one file using specified parser function"""
         adapter = ParseAdapter()
         sys.stderr.write('processing [%s]\n' % (filename))
+        self.reset_script_begin_end()
         filters = []
         processors = []
-        for key, script_env in self.scripts.items():
-            script_env['initialized'] = False
         for script_env in self.capture_filter_scripts:
-            initializer = script_env['functions'].get('initialize')
-            if initializer and not script_env['initialized']:
-                initializer(filename)
-                script_env['initialized'] = True
+            self.call_script_method_with_filename(script_env, 'begin', filename)
             capture_filter = script_env['functions'].get('capture_filter')
             if capture_filter:
                 filters.append(capture_filter)
         for script_env in self.process_capture_scripts:
-            initializer = script_env['functions'].get('initialize')
-            if initializer and not script_env['initialized']:
-                initializer(filename)
-                script_env['initialized'] = True
+            self.call_script_method_with_filename(script_env, 'begin', filename)
             process_capture = script_env['functions'].get('process_capture')
             if process_capture:
                 processors.append(process_capture)
@@ -139,6 +216,11 @@ class RaftCmdLine():
             print(error)
             # TODO: should continue(?)
             raise error
+
+        for script_env in self.capture_filter_scripts:
+            self.call_script_method_with_filename(script_env, 'end', filename)
+        for script_env in self.capture_filter_scripts:
+            self.call_script_method_with_filename(script_env, 'end', filename)
 
     def load_script_file(self, filename):
         if filename in self.scripts:
@@ -198,7 +280,10 @@ def main():
     args = parser.parse_args()
 
     raftCmdLine = RaftCmdLine()
-    raftCmdLine.process_args(args)
+    try:
+        raftCmdLine.process_args(args)
+    finally:
+        raftCmdLine.cleanup()
 
 if '__main__' == __name__:
     main()
