@@ -76,6 +76,7 @@ class TesterTab(QObject):
         self.mainWindow.testerClickjackingSimulateButton.clicked.connect(self.handle_testerClickjackingSimulateButton_clicked)
         self.mainWindow.testerClickjackingOpenInBrowserButton.clicked.connect(self.handle_testerClickjackingOpenInBrowserButton_clicked)
         self.mainWindow.testerClickjackingGenerateButton.clicked.connect(self.handle_testerClickjackingGenerateButton_clicked)
+        self.mainWindow.testerClickjackingEnableJavascript.clicked.connect(self.handle_testerClickjackingEnableJavascript_clicked)
 
         self.clickjackingRenderWebView = RenderingWebView(self.framework, self.pageFactory, self.mainWindow.testerClickjackingEmbeddedBrowserPlaceholder)
         self.clickjackingRenderWebView.loadFinished.connect(self.handle_clickjackingRenderWebView_loadFinished)
@@ -160,6 +161,7 @@ class TesterTab(QObject):
 
     def handle_testerClickjackingSimulateButton_clicked(self):
         self.mainWindow.testerClickjackingConsoleLogTextEdit.setText('Starting Clickjacking Simulation')
+        self.clickjackingRenderWebView.page().set_javascript_enabled(self.mainWindow.testerClickjackingEnableJavascript.isChecked())
         self._clickjacking_simulation_running = True
         url = self.mainWindow.testerClickjackingUrlEdit.text()
         # TODO: better way than to force unique URL to reload content ?
@@ -195,6 +197,9 @@ class TesterTab(QObject):
         else:
             self.mainWindow.testerClickjackingUrlEdit.setText(url)
 
+    def handle_testerClickjackingEnableJavascript_clicked(self):
+        self.clickjackingRenderWebView.page().set_javascript_enabled(self.mainWindow.testerClickjackingEnableJavascript.isChecked())
+
     def handle_clickjackingRenderWebView_titleChanged(self, title):
         self.clickjacking_console_log('info', 'Page title changed to [%s]' % (title))
 
@@ -202,8 +207,9 @@ class TesterTab(QObject):
         if not self._clickjacking_simulation_running:
             return True
         if 'Clickjacking: Navigate Away' == msg: # TODO: create a common location for this string
-            self.clickjacking_console_log('info', 'Simulating canceled navigation response to confirmation: %s' % (msg))
-            return False
+            if self.mainWindow.testerClickjackingIgnoreNavigationRequests.isChecked():
+                self.clickjacking_console_log('info', 'Simulating canceled navigation response to confirmation: %s' % (msg))
+                return False
         return True
 
     def clickjacking_console_log(self, logtype, logmessage):

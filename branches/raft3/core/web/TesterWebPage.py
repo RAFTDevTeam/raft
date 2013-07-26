@@ -37,12 +37,16 @@ class TesterWebPage(BaseWebPage):
         self.interactor = interactor
         self.setForwardUnsupportedContent(True)
 
+    def set_javascript_enabled(self, javascript_enabled):
+        settings = self.settings()
+        settings.setAttribute(QtWebKit.QWebSettings.JavascriptEnabled, javascript_enabled)
+
     def set_page_settings(self, settings):
         # common settings handled by base
-        settings.setAttribute(QtWebKit.QWebSettings.JavascriptCanOpenWindows, True)
+        settings.setAttribute(QtWebKit.QWebSettings.JavascriptCanOpenWindows, False)
             
     def javaScriptConsoleMessage(self, message, lineNumber, sourceID):
-        self.interactor('javaScriptConsoleMessage', (lineNumber, sourceID, message))
+        self.interactor.log('javaScriptConsoleMessage', (lineNumber, sourceID, message))
 
     def userAgentForUrl(self, url):
         return self.framework.useragent()
