@@ -381,17 +381,6 @@ class RequestResponseWidget(QObject):
         rr = self.requestResponse
         scriptsIO, commentsIO, linksIO, formsIO = StringIO(), StringIO(), StringIO(), StringIO()
         try:
-            # include any Location or Content-Location responses in links
-            # TODO: refactor the extracted content so it is universally available via RequestResponse object
-            # TODO: duplicate links may be output depending on redirect response content
-            for line in headers.splitlines():
-                if b':' in line:
-                    name, value = [m.strip() for m in line.split(b':', 1)]
-                    if name.lower() in (b'location', b'content-location'):
-                        link = value.decode('utf-8', 'ignore')
-                        url = urlparse.urljoin(url, link)
-                        linksIO.write('%s\n' % url)
-
             results = rr.results
             if 'html' == rr.baseType:
                 # Create content for parsing HTML

@@ -23,6 +23,7 @@
 # along with RAFT.  If not, see <http://www.gnu.org/licenses/>.
 #
 from utility import ContentHelper
+from urllib import parse as urlparse
 
 class RequestResponse(object):
     def __init__(self, framework):
@@ -40,6 +41,7 @@ class RequestResponse(object):
 
         ######
         self.Id = ''
+        self.responseUrl = ''
         self.requestHeaders = b''
         self.requestBody = b''
         self.requestHost = ''
@@ -73,6 +75,17 @@ class RequestResponse(object):
             # TODO: implement more types
             self._results = None
             pass
+
+        if self._results is not None:
+            # include any Location or Content-Location responses in links
+            for line in self.responseHeaders.splitlines():
+                if b':' in line:
+                    name, value = [m.strip() for m in line.split(b':', 1)]
+                    if name.lower() in (b'location', b'content-location'):
+                        link = value.decode('utf-8', 'ignore')
+                        url = urlparse.urljoin(self.responseUrl, link)
+                        if url not in self._results.links:
+                            self._results.links.append(url)
 
         return self._results
 
