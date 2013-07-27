@@ -24,12 +24,15 @@ from PyQt4.QtCore import Qt, QObject, SIGNAL, QDateTime, QSize
 from PyQt4.QtGui import *
 
 from actions import encoderlib
+from utility.HexDump import HexDump
 
 class EncoderTab(QObject):
     def __init__(self, framework, mainWindow):
         QObject.__init__(self, mainWindow)
         self.framework = framework
         self.mainWindow = mainWindow
+
+        self.hexDump = HexDump()
 
         self.mainWindow.encodeButton.clicked.connect(self.encode_data)
         self.mainWindow.encodeWrapButton.clicked.connect(self.encode_wrap)
