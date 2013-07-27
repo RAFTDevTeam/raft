@@ -143,7 +143,7 @@ class DomFuzzerTab(QObject):
 
     def set_fuzzer_thread(self, domFuzzerThread):
         self.domFuzzerThread = domFuzzerThread
-        QObject.connect(self, SIGNAL('fuzzItemAvailable(int, QString, QUrl)'), self.handle_fuzzItemAvailable)
+        QObject.connect(self, SIGNAL('fuzzItemAvailable(int, QByteArray, QUrl)'), self.handle_fuzzItemAvailable)
         QObject.connect(self, SIGNAL('fuzzRunFinished()'), self.handle_fuzzRunFinished)
         self.qtimer = QTimer()
         self.qtimer2 = QTimer()
@@ -155,13 +155,16 @@ class DomFuzzerTab(QObject):
         self.currentFuzzUrl = qurl.toEncoded().data().decode('utf-8')
         self.callbackLogger.clear_messages()
         self.qtimer.start(3000) # 3 seconds to finish
-        self.domFuzzerWebView.setHtml(htmlContent, qurl)
+        self.domFuzzerWebView.setContent(htmlContent, '', qurl)
 
     def handle_webView_loadStarted(self):
         print('loading started')
 
     def handle_webView_loadFinished(self, ok):
-        print(('handle_webView_loadFinished', ok))
+        url = self.domFuzzerWebView.url().toString()
+        print(('handle_webView_loadFinished', ok, url))
+        if url == 'about:blank':
+            return
         if self.qtimer.isActive():
             self.qtimer.stop()
         if self.qtimer2.isActive():
@@ -191,6 +194,7 @@ class DomFuzzerTab(QObject):
             dom = mainFrame.documentElement()
             html = dom.toOuterXml() # TODO: decideo on str versus bytes?
             self.domFuzzerThread.fuzzItemFinished(self.currentFuzzId, self.currentFuzzUrl, html, self.callbackLogger.get_messages())
+            self.domFuzzerWebView.setUrl(QUrl('about:blank'))
             self.currentFuzzId = None
 
     def handle_fuzzRunFinished(self):

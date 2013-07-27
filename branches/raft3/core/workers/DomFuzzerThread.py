@@ -27,6 +27,8 @@ from urllib import parse as urlparse
 from io import StringIO
 from collections import deque
 
+from actions import interface
+
 class DomFuzzerThread(QThread):
 
     UNIQUE_MARKER_BASE = '\'-(/b41ns5xg,)'
@@ -183,7 +185,7 @@ class DomFuzzerThread(QThread):
         if self.keep_fuzzing:
             fuzz_item = self.get_next_fuzz_item()
             if fuzz_item:
-                QObject.emit(self.fuzz_callback, SIGNAL('fuzzItemAvailable(int, QString, QUrl)'), fuzz_item[0], fuzz_item[1], fuzz_item[2])
+                QObject.emit(self.fuzz_callback, SIGNAL('fuzzItemAvailable(int, QByteArray, QUrl)'), fuzz_item[0], fuzz_item[1], fuzz_item[2])
             else:
                 self.processed_urls = {}
                 QObject.emit(self.fuzz_callback, SIGNAL('fuzzRunFinished()'))
@@ -207,10 +209,10 @@ class DomFuzzerThread(QThread):
                 self.framework.log_warning('missing response id: %s' % (response_id))
                 return
 
-            responseItems = [m or '' for m in row]
+            responseItems = interface.data_row_to_response_items(row)
             target_url = self.compute_url_from_payload(data_item)
             qurl = QUrl.fromEncoded(target_url)
-            dataContent = str(responseItems[ResponsesTable.RES_DATA])
+            dataContent = responseItems[ResponsesTable.RES_DATA]
 
             # TODO: store reference
             fuzz_item = (fuzz_id, dataContent, qurl)
@@ -233,11 +235,11 @@ class DomFuzzerThread(QThread):
         if not row:
             self.framework.log_warning('missing response id: %s' % (response_id))
             return
-        responseItems = [m or '' for m in row]
+        responseItems = interface.data_row_to_response_items(row)
 
-        url = str(responseItems[ResponsesTable.URL])
-        contentType = str(responseItems[ResponsesTable.RES_CONTENT_TYPE])
-        responseBody = str(responseItems[ResponsesTable.RES_DATA])
+        url = responseItems[ResponsesTable.URL]
+        contentType = responseItems[ResponsesTable.RES_CONTENT_TYPE]
+        responseBody = responseItems[ResponsesTable.RES_DATA]
 
         if url in self.processed_urls:
             self.framework.log_warning('skipping already scanned url [%s] for now' % (url))
@@ -247,7 +249,7 @@ class DomFuzzerThread(QThread):
 
         # TODO: need better content type
         if 'html' not in contentType:
-            if '<html' not in responseBody.lower():
+            if b'<html' not in responseBody.lower():
                 # non-html not supported
                 self.framework.log_warning('skipping not HTML request for [%s]: %s' % (response_id, url))
                 return 
