@@ -89,6 +89,10 @@ class ScopeController(QObject):
         return inscope
 
     def apply_scoping_rules(self, url, referer):
+        if isinstance(url, bytes):
+            url = str(url, 'utf-8', 'ignore')
+        if isinstance(referer, bytes):
+            referer = str(referer, 'utf-8', 'ignore')
         splitted = urlparse.urlsplit(url)
         matched_exclusion = False
         matched_inclusion = False
@@ -145,7 +149,7 @@ class ScopeController(QObject):
             return False
         else:
             if referer:
-                splitted2 = urlparse.urlsplit(str(referer))
+                splitted2 = urlparse.urlsplit(referer)
                 if splitted2.hostname != splitted.hostname:
                     return False
             return True
