@@ -201,7 +201,8 @@ class ResponsesContextMenuWidget(QObject):
                 for index in self.treeViewSelectionModel.selectedRows():
                     Id = interface.index_to_id(self.dataModel, index)
                     if Id:
-                        capture = RaftDbCapture(self.framework, Data, cursor, Id)
+                        capture = RaftDbCapture()
+                        capture.populate_by_id(self.framework, Data, cursor, Id)
                         fh.write(adapter.format_as_xml(capture).encode('utf-8'))
                 fh.write(b'</raft>')
                 fh.close()

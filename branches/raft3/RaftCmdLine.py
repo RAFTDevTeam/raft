@@ -23,8 +23,11 @@
 import sys
 import argparse
 import os
+import bz2
+import lzma
 
 from core.database import database
+from core.data.RaftDbCapture import RaftDbCapture
 
 from lib.parsers.burpparse import burp_parse_log, burp_parse_state, burp_parse_xml, burp_parse_vuln_xml
 from lib.parsers.webscarabparse import webscarab_parse_conversation
@@ -58,6 +61,7 @@ class RaftCmdLine():
 
         do_create = getattr(args, 'create')
         do_import = getattr(args, 'import')
+        do_export = getattr(args, 'export')
         do_parse = getattr(args, 'parse')
 
         # was DB file specified?
@@ -72,6 +76,10 @@ class RaftCmdLine():
 
             self.Data = database.Db(__version__, self.report_exception)
             self.Data.connect(db_filename)
+        else:
+            if db_export or db_import:
+                sys.stderr.write('\nDB file is required\n' % (db_filename))
+                return 1
 
         # setup any capture filters
         self.capture_filter_scripts = []
@@ -87,7 +95,19 @@ class RaftCmdLine():
             for filearg in arg:
                 self.process_capture_scripts.append(self.load_script_file(filearg))
 
-        if do_import:
+        if do_export:
+            filename = getattr(args, 'output_file')
+            if filename.endswith('.xml.xz'):
+                fh = lzma.LZMAFile(filename, 'w')
+            elif filename.endswith('.xml.bz2'):
+                fh = bz2.BZ2File(filename, 'w')
+            elif filename.endswith('.xml'):
+                fh = open(filename, 'wb')
+            else:
+                sys.stderr.write('\nUnsupported output file type [%s]\n' % (filename))
+                return 1
+            self.export_to_raft_capture(filename, fh)
+        elif do_import:
             self.run_process_loop(args, self.import_one_file)
         elif do_parse:
             self.run_process_loop(args, self.parse_one_file)
@@ -130,6 +150,52 @@ class RaftCmdLine():
                     file_list = [filearg]
                 for filename in file_list:
                     call_func(filename, func, name)
+
+    def export_to_raft_capture(self, filename, fhandle):
+        """ Export to RAFT capture format """
+        sys.stderr.write('exporting to [%s]\n' % (filename))
+        self.reset_script_begin_end()
+        self.setup_script_initializers()
+        filters = []
+        for script_env in self.capture_filter_scripts:
+            self.call_script_method_with_filename(script_env, 'begin', filename)
+            capture_filter = script_env['functions'].get('capture_filter')
+            if capture_filter:
+                filters.append(capture_filter)
+
+        adapter = ParseAdapter()
+        count = 0
+        Data = self.Data
+        cursor = Data.allocate_thread_cursor()
+        try:
+            fhandle.write(b'<raft version="1.0">\n')
+            for row in Data.read_all_responses(cursor):
+                capture = RaftDbCapture()
+                capture.populate_by_dbrow(row)
+
+                skip = False
+                for capture_filter in filters:
+                    result = capture_filter(capture)
+                    if not result:
+                        skip = True
+                        break
+
+                if not skip:
+                    fhandle.write(adapter.format_as_xml(capture).encode('utf-8'))
+                    count += 1
+
+            fhandle.write(b'</raft>')
+            fhandle.close()
+
+            sys.stderr.write('Exported [%d] records\n' % (count))
+
+        finally:
+            cursor.close()
+            Data.release_thread_cursor(cursor)
+            Data, cursor = None, None
+
+        for script_env in self.capture_filter_scripts:
+            self.call_script_method_with_filename(script_env, 'end', filename)
 
     def import_one_file(self, filename, func, funcname):
         """ Import one file using specified parser function"""
@@ -178,6 +244,9 @@ class RaftCmdLine():
             raise error
         finally:
             Data.reset_pragmas(cursor)
+            cursor.close()
+            Data.release_thread_cursor(cursor)
+            Data, cursor = None, None
 
         for script_env in self.capture_filter_scripts:
             self.call_script_method_with_filename(script_env, 'end', filename)
@@ -259,13 +328,15 @@ class RaftCmdLine():
         return script_env
 
 def main():
-    sys.stdout.write('\nRaftCmdLine - version: %s\n' %  (__version__))
+    sys.stderr.write('\nRaftCmdLine - version: %s\n' %  (__version__))
 
     parser = argparse.ArgumentParser(description='Run RAFT processing from command line')
     parser.add_argument('--db', nargs='?', help='Specify a RAFT database file')
     parser.add_argument('--create', action='store_const', const=True, default=False, help='Create the database (if needed)')
     parser.add_argument('--import', action='store_const', const=True, default=False, help='Import list of files into database')
+    parser.add_argument('--export', action='store_const', const=True, default=False, help='Export the RAFT database into a RAFT XML capture file')
     parser.add_argument('--parse', action='store_const', const=True, default=False, help='Parse list of files and run processing')
+    parser.add_argument('--output-file', nargs='?', help='Output file to write results into')
     parser.add_argument('--capture-filter', nargs='*', help='A Python file with a function or single class containing: "capture_filter"')
     parser.add_argument('--process-capture', nargs='*', help='A Python file with a function or single class containing: "process_capture"')
     parser.add_argument('--raft-capture-xml', nargs='*', help='A list of RAFT xml captgure files')
@@ -280,10 +351,13 @@ def main():
     args = parser.parse_args()
 
     raftCmdLine = RaftCmdLine()
+    rc = -1
     try:
-        raftCmdLine.process_args(args)
+        rc = raftCmdLine.process_args(args)
     finally:
         raftCmdLine.cleanup()
+
+    sys.exit(rc)
 
 if '__main__' == __name__:
     main()
