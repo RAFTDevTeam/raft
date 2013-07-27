@@ -287,9 +287,9 @@ class DomFuzzerThread(QThread):
                 test = data_item[DomFuzzerQueueTable.TEST]
 
                 # TODO: remove this
-                if 'fragment' == target or '#' == url[-1]:
-                    dup_rows.append(data_item)
-                    continue
+#                 if 'fragment' == target or '#' == url[-1]:
+#                     dup_rows.append(data_item)
+#                     continue
 
                 splitted = urlparse.urlsplit(url)
                 if 'url' == target:
