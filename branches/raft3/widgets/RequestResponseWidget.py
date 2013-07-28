@@ -31,6 +31,7 @@ from urllib import parse as urlparse
 import traceback
 
 from utility import ContentHelper
+from utility.HexDump import HexDump
 
 from core.web.RenderingWebView import RenderingWebView
 from core.web.StandardPageFactory import StandardPageFactory
@@ -51,6 +52,7 @@ class RequestResponseWidget(QObject):
 
         self.contentExtractor = self.framework.getContentExtractor()
         self.htmlExtractor = self.contentExtractor.getExtractor('html')
+        self.hexDumper = HexDump()
 
         self.contentTypeMapping = {
             # TODO: complete
@@ -120,6 +122,10 @@ class RequestResponseWidget(QObject):
         self.responseView.setObjectName(tabwidget.objectName()+'Response')
         self.tabwidget.addTab(self.responseView, 'Response')
 
+        self.hexBody = QWidget(tabwidget)
+        self.hexBody.setObjectName(tabwidget.objectName()+'HexBody')
+        self.hexBodyIndex = self.tabwidget.addTab(self.hexBody, 'Hex Body')
+
         self.scriptsView = QWidget(tabwidget)
         self.scriptsView.setObjectName(tabwidget.objectName()+'Scripts')
         self.scriptsTabIndex = self.tabwidget.addTab(self.scriptsView, 'Scripts')
@@ -163,6 +169,14 @@ class RequestResponseWidget(QObject):
         self.setScintillaProperties(self.responseScintilla)
         self.vlayout1.addWidget(self.responseScintilla)
         self.tab_item_widgets.append(self.responseScintilla)
+
+        self.vlayout2a = QVBoxLayout(self.hexBody)
+        self.hexBodyScintilla = Qsci.QsciScintilla(self.hexBody)
+        self.hexBodyFont = QFont('Courier New', 14)
+        self.hexBodyFont.setStyleHint(QFont.TypeWriter)
+        self.hexBodyScintilla.setFont(self.hexBodyFont)
+        self.vlayout2a.addWidget(self.hexBodyScintilla)
+        self.tab_item_widgets.append(self.hexBodyScintilla)
 
         self.vlayout2 = QVBoxLayout(self.scriptsView)
         self.scriptsScintilla = Qsci.QsciScintilla(self.scriptsView)
@@ -327,6 +341,7 @@ class RequestResponseWidget(QObject):
         self.requestResponse = None
         self.requestScintilla.setText('')
         self.responseScintilla.setText('')
+        self.hexBodyScintilla.setText('')
         self.scriptsScintilla.setText('')
         self.commentsScintilla.setText('')
         self.linksScintilla.setText('')
@@ -373,6 +388,7 @@ class RequestResponseWidget(QObject):
 
         self.attachLexer(self.responseScintilla, rr.responseContentType, rr.responseBody)
         self.responseScintilla.setText(ContentHelper.convertBytesToDisplayText(rr.rawResponse))
+        self.hexBodyScintilla.setText(self.hexDumper.dump(rr.responseBody))
         self.contentResults = self.generateExtractorResults(rr.responseHeaders, rr.responseBody, rr.responseUrl, rr.charset)
         self.notesTextEdit.setText(rr.notes)
         self.handle_tab_currentChanged(self.tabwidget.currentIndex())

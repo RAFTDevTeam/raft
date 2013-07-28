@@ -26,7 +26,7 @@ import re
 class HexDump():
     def __init__(self):
         self.re_hex_items = re.compile(r'([0-9A-Fa-f]{2})')
-        self.re_hex_block = re.compile(r'^[0-9A-Fa-f]{8} \| (.*?) \| .*')
+        self.re_hex_block = re.compile(r'^(?:[0-9A-Fa-f]{8} \| )?([0-9A-Fa-f ]*?)(?: \| .*)?$')
 
     def dump(self, data):
         """ Convert bytes to a hex dump format block """
@@ -77,5 +77,3 @@ if '__main__' == __name__:
 
     print(h1)
     print(h2)
-
-    

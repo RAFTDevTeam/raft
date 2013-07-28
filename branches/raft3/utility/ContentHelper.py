@@ -22,6 +22,15 @@
 #
 
 import codecs
+BOM_MAPPINGS = (
+    (codecs.BOM_UTF32_BE,'utf-32-be'),
+    (codecs.BOM_UTF32_LE,'utf-32-le'),
+    (codecs.BOM_UTF16_BE,'utf-16-be'),
+    (codecs.BOM_UTF16_LE,'utf-16-le'),
+    (codecs.BOM_UTF32,'utf-32'), # TODO:
+    (codecs.BOM_UTF16,'utf-16'), # TODO: 
+    (codecs.BOM_UTF8,'utf-8'),
+    )
 
 def getContentType(contentType, data = ''):
     # TODO: implement
@@ -60,12 +69,14 @@ def decodeBody(data, charset):
     try:
         bodyText = None
         try:
-            if data.startswith(codecs.BOM_UTF16):
-                bodyText = data.decode('utf-16')
-            elif data.startswith(codecs.BOM_UTF8):
-                bodyText = data[len(codecs.BOM_UTF8):].decode('utf-8')
-            else:
-                bodyText = data.decode(charset)
+            for bom, encoding in BOM_MAPPINGS:
+                if data.startswith(bom): 
+                    temp = data[len(bom):]
+                    if temp.startswith(bom): # can happen
+                        temp = temp[len(bom):]
+                    bodyText = temp.decode(encoding, 'ignore') # TODO: is ignore best approach, or allow to error?
+                    break
+
         except UnicodeDecodeError:
             pass
         except LookupError:

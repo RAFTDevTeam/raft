@@ -27,6 +27,17 @@ from urllib import parse as urlparse
 import urllib.request, urllib.error, urllib.parse
 import hashlib
 import re
+import codecs
+
+BOM_MAPPINGS = (
+    (codecs.BOM_UTF32_BE,'utf-32-be'),
+    (codecs.BOM_UTF32_LE,'utf-32-le'),
+    (codecs.BOM_UTF16_BE,'utf-16-be'),
+    (codecs.BOM_UTF16_LE,'utf-16-le'),
+    (codecs.BOM_UTF32,'utf-32'), # TODO:
+    (codecs.BOM_UTF16,'utf-16'), # TODO: 
+    (codecs.BOM_UTF8,'utf-8'),
+    )
 
 class HtmlInput():
     def __init__(self):
@@ -749,6 +760,17 @@ class HtmlExtractor(BaseExtractor):
             results = HtmlParseResults(baseurl, encoding)
 
         if html_bytes is not None:
+            # TODO: refactor
+            # TODO: is it best to normalize to UTF-8 or work from original?
+            for bom, encoding in BOM_MAPPINGS:
+                if html_bytes.startswith(bom): 
+                    temp = html_bytes[len(bom):]
+                    if temp.startswith(bom):
+                        temp = temp[len(bom):]
+                    bodyText = temp.decode(encoding, 'ignore')
+                    html_bytes = bodyText.encode('utf-8', 'ignore')
+                    break
+
             html = html_bytes.strip()
             if len(html_bytes) > 0:
                 htmlbuf = BytesIO(html_bytes)
