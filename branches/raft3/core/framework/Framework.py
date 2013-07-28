@@ -165,6 +165,9 @@ class Framework(QObject):
     def subscribe_zoom_in(self, callback):
         QObject.connect(self, SIGNAL('zoomIn()'), callback, Qt.DirectConnection) 
 
+    def unsubscribe_zoom_in(self, callback):
+        QObject.disconnect(self, SIGNAL('zoomIn()'), callback) 
+
     def get_zoom_size(self):
         return self.zoom_size
 
@@ -174,6 +177,9 @@ class Framework(QObject):
 
     def subscribe_zoom_out(self, callback):
         QObject.connect(self, SIGNAL('zoomOut()'), callback, Qt.DirectConnection) 
+
+    def unsubscribe_zoom_out(self, callback):
+        QObject.disconnect(self, SIGNAL('zoomOut()'), callback) 
 
     def signal_zoom_out(self):
         self.zoom_size -= 1

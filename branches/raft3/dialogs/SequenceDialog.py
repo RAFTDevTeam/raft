@@ -52,8 +52,11 @@ class SequenceDialog(QDialog, SequenceDialog.Ui_seqBuildDialog):
     def __init__(self, framework, parent=None):
         super(SequenceDialog, self).__init__(parent)
         self.setupUi(self)
-        
+
         self.framework = framework
+        QObject.connect(self, SIGNAL('destroyed(QObject*)'), self._destroyed)
+
+        self.scintillaWidgets = set() # store scintilla widget reference to handle zoom in/zoom out
 
         # TODO: move to framework constants
         self.known_media_types = ('text/css', 'application/javascript', 'text/javascript', 'image/gif', 'image/png', 'image/jpeg', 'image/bmp')
@@ -127,6 +130,13 @@ class SequenceDialog(QDialog, SequenceDialog.Ui_seqBuildDialog):
         self.Data = None
         self.cursor = None
         self.framework.subscribe_database_events(self.db_attach, self.db_detach)
+
+        self.framework.subscribe_zoom_in(self.zoom_in_scintilla)
+        self.framework.subscribe_zoom_out(self.zoom_out_scintilla)
+
+    def _destroyed(self):
+        self.framework.unsubscribe_zoom_in(self.zoom_in_scintilla)
+        self.framework.unsubscribe_zoom_out(self.zoom_out_scintilla)
 
     def display_confirm_dialog(self, message):
         response = QMessageBox.question(self, 'Confirm', message, QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
@@ -382,12 +392,19 @@ class SequenceDialog(QDialog, SequenceDialog.Ui_seqBuildDialog):
         scintillaWidget.zoomTo(self.framework.get_zoom_size())
         # TOOD: set based on line numbers (size is in pixels)
         scintillaWidget.setMarginWidth(1, '1000')
-        self.framework.subscribe_zoom_in(lambda: scintillaWidget.zoomIn())
-        self.framework.subscribe_zoom_out(lambda: scintillaWidget.zoomOut())
+        self.scintillaWidgets.add(scintillaWidget)
         if 'html' == lexerType:
             lexerInstance = Qsci.QsciLexerHTML(scintillaWidget)
             lexerInstance.setFont(self.framework.get_font())
             scintillaWidget.setLexer(lexerInstance)
+
+    def zoom_in_scintilla(self):
+        for scintillaWidget in self.scintillaWidgets:
+            scintillaWidget.zoomIn()
+
+    def zoom_out_scintilla(self):
+        for scintillaWidget in self.scintillaWidgets:
+            scintillaWidget.zoomOut()
 
     def handle_startRecording_clicked(self):
         self.sequenceStepsTreeWidget.clear()

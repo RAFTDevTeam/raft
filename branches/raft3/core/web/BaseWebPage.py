@@ -28,8 +28,8 @@ from PyQt4.QtCore import *
 class BaseWebPage(QtWebKit.QWebPage):
     def __init__(self, framework, parent = None):
         QtWebKit.QWebPage.__init__(self, parent)
-        QObject.connect(self, SIGNAL('destroyed(QObject*)'), self._destroyed)
         self.__framework = framework
+        QObject.connect(self, SIGNAL('destroyed(QObject*)'), self._destroyed)
         self.__framework.subscribe_raft_config_populated(self.__raft_config_populated)
         self.__framework.subscribe_raft_config_updated(self.__raft_config_updated)
 

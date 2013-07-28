@@ -54,9 +54,12 @@ class TesterTab(QObject):
     def __init__(self, framework, mainWindow):
         QObject.__init__(self, mainWindow)
         self.framework = framework
+        QObject.connect(self, SIGNAL('destroyed(QObject*)'), self._destroyed)
         self.mainWindow = mainWindow
         self.cjInteractor = TesterTab.ClickJackingInteractor(self)
         self.cjTester = ClickjackingTester(self.framework)
+
+        self.scintillaWidgets = set() # store scintilla widget reference to handle zoom in/zoom out
 
 #        self.networkAccessManager = StandardNetworkAccessManager(self.framework, self.framework.get_global_cookie_jar())
         self.pageFactory = TesterPageFactory(self.framework, self.cjInteractor, None, self)
@@ -82,6 +85,13 @@ class TesterTab(QObject):
         self.clickjackingRenderWebView.loadFinished.connect(self.handle_clickjackingRenderWebView_loadFinished)
         self.clickjackingRenderWebView.urlChanged.connect(self.handle_clickjackingRenderWebView_urlChanged)
         self.clickjackingRenderWebView.titleChanged.connect(self.handle_clickjackingRenderWebView_titleChanged)
+
+        self.framework.subscribe_zoom_in(self.zoom_in_scintilla)
+        self.framework.subscribe_zoom_out(self.zoom_out_scintilla)
+
+    def _destroyed(self):
+        self.framework.unsubscribe_zoom_in(self.zoom_in_scintilla)
+        self.framework.unsubscribe_zoom_out(self.zoom_out_scintilla)
 
     def db_attach(self):
         self.Data = self.framework.getDB()
@@ -235,6 +245,13 @@ class TesterTab(QObject):
         lexerInstance = Qsci.QsciLexerHTML(scintillaWidget)
         lexerInstance.setFont(self.framework.get_font())
         scintillaWidget.setLexer(lexerInstance)
-        self.framework.subscribe_zoom_in(lambda: scintillaWidget.zoomIn())
-        self.framework.subscribe_zoom_out(lambda: scintillaWidget.zoomOut())
+        self.scintillaWidgets.add(scintillaWidget)
+
+    def zoom_in_scintilla(self):
+        for scintillaWidget in self.scintillaWidgets:
+            scintillaWidget.zoomIn()
+
+    def zoom_out_scintilla(self):
+        for scintillaWidget in self.scintillaWidgets:
+            scintillaWidget.zoomOut()
 

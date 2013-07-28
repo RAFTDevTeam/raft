@@ -41,14 +41,17 @@ from core.database.constants import ResponsesTable
 
 class RequestResponseWidget(QObject):
     def __init__(self, framework, tabwidget, searchControlPlaceholder, parent = None):
-
         QObject.__init__(self, parent)
 
         self.framework = framework
+        QObject.connect(self, SIGNAL('destroyed(QObject*)'), self._destroyed)
+
         self.standardPageFactory = StandardPageFactory(self.framework, None, self)
         self.headlessPageFactory = HeadlessPageFactory(self.framework, None, self)
 
         self.qlock = QMutex()
+
+        self.scintillaWidgets = set() # store scintilla widget reference to handle zoom in/zoom out
 
         self.contentExtractor = self.framework.getContentExtractor()
         self.htmlExtractor = self.contentExtractor.getExtractor('html')
@@ -80,6 +83,13 @@ class RequestResponseWidget(QObject):
         self.cursor = None
         self.requestResponse = None
         self.framework.subscribe_database_events(self.db_attach, self.db_detach)
+
+        self.framework.subscribe_zoom_in(self.zoom_in_scintilla)
+        self.framework.subscribe_zoom_out(self.zoom_out_scintilla)
+
+    def _destroyed(self):
+        self.framework.unsubscribe_zoom_in(self.zoom_in_scintilla)
+        self.framework.unsubscribe_zoom_out(self.zoom_out_scintilla)
 
     def db_attach(self):
         self.Data = self.framework.getDB()
@@ -237,9 +247,16 @@ class RequestResponseWidget(QObject):
         # TOOD: set based on line numbers (size is in pixels)
         scintillaWidget.setMarginWidth(1, '1000')
         self.attachLexer(scintillaWidget, contentType)
-        self.framework.subscribe_zoom_in(lambda: scintillaWidget.zoomIn())
-        self.framework.subscribe_zoom_out(lambda: scintillaWidget.zoomOut())
-        
+        self.scintillaWidgets.add(scintillaWidget)
+
+    def zoom_in_scintilla(self):
+        for scintillaWidget in self.scintillaWidgets:
+            scintillaWidget.zoomIn()
+
+    def zoom_out_scintilla(self):
+        for scintillaWidget in self.scintillaWidgets:
+            scintillaWidget.zoomOut()
+
     def makeSearchWidget(self, parentWidget, tooltip = 'Search the value'):
         # TODO: these should be store in a class variable list to so that they can be cleared...
         self.searchWidget = QWidget(parentWidget)

@@ -32,11 +32,9 @@ class MiniResponseRenderWidget(QObject):
     def __init__(self, framework, tabWidget, showRequest, parent = None):
         QObject.__init__(self, parent)
         self.framework = framework
+        QObject.connect(self, SIGNAL('destroyed(QObject*)'), self._destroyed)
         self.tabWidget = tabWidget
         self.showRequest = showRequest
-
-        self.framework.subscribe_zoom_in(self.zoom_in_scintilla)
-        self.framework.subscribe_zoom_out(self.zoom_out_scintilla)
 
         if self.showRequest:
             self.reqReqEdit_Tab = QWidget(self.tabWidget)
@@ -80,6 +78,13 @@ class MiniResponseRenderWidget(QObject):
         self.request_url = None
 
         self.tabWidget.currentChanged.connect(self.do_render_apply)
+
+        self.framework.subscribe_zoom_in(self.zoom_in_scintilla)
+        self.framework.subscribe_zoom_out(self.zoom_out_scintilla)
+
+    def _destroyed(self):
+        self.framework.unsubscribe_zoom_in(self.zoom_in_scintilla)
+        self.framework.unsubscribe_zoom_out(self.zoom_out_scintilla)
 
     def fill_from_response(self, url, headers, body, content_type = ''):
         self.reqRenderView.fill_from_response(url, headers, body, content_type)
