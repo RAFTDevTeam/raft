@@ -487,11 +487,14 @@ def randomize_alert(input):
         reqData = responseItems[ResponsesTable.REQ_DATA].decode('utf-8', 'ignore')
         method = responseItems[ResponsesTable.REQ_METHOD]
         splitted = urlparse.urlsplit(url)
+        
+        # Create a new parsed object removing the scheme and netloc
+        req_loc = ("", "", splitted.path, splitted.query, splitted.fragment)
 
         useragent = self.framework.useragent()
         has_cookie = False
         template = StringIO()
-        template.write('${method} ${request_uri} HTTP/1.1\n')
+        template.write('${method} ${request_uri}%s HTTP/1.1\n' % urlparse.urlunsplit(req_loc))
         first = True
         for line in reqHeaders.splitlines():
             if not line:
