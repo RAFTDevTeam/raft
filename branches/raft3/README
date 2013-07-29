@@ -20,7 +20,7 @@ To run RAFT, you will need several software packages.
 
 For example, on Ubuntu 13.04 it is generally enough to use apt-get:
 
-   sudo apt-get install python3-qt4 python3-pyqt4.qsci python3-lxml
+   sudo apt-get install python3-pyqt4 python3-pyqt4.qsci python3-lxml
    
 On Mac OS X, the following ports are available:
 
