@@ -34,7 +34,7 @@ class ScriptEnv():
         else:
             self.global_ns = global_ns
         if local_ns is None:
-            self.local_ns = {}
+            self.local_ns = self.global_ns
         else:
             self.local_ns = local_ns
 

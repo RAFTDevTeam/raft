@@ -182,9 +182,7 @@ class RequestResponseWidget(QObject):
 
         self.vlayout2a = QVBoxLayout(self.hexBody)
         self.hexBodyScintilla = Qsci.QsciScintilla(self.hexBody)
-        self.hexBodyFont = QFont('Courier New', 14)
-        self.hexBodyFont.setStyleHint(QFont.TypeWriter)
-        self.hexBodyScintilla.setFont(self.hexBodyFont)
+        self.hexBodyScintilla.setFont(self.framework.get_monospace_font())
         self.vlayout2a.addWidget(self.hexBodyScintilla)
         self.tab_item_widgets.append(self.hexBodyScintilla)
 

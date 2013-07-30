@@ -45,9 +45,27 @@ class QuickAnalysisTab(QObject):
         self.mainWindow.quickAnalysisRunAnalysis.clicked.connect(self.handle_quickAnalysisRunAnalysis_clicked)
         self.mainWindow.quickAnalysisClearResults.clicked.connect(self.handle_quickAnalysisClearResults_clicked)
 
-        # TODO: get python formatting working
         ScintillaHelpers.SetScintillaProperties(self.framework, self.mainWindow.quickAnalysisCodeEntry, 'python')
         self.mainWindow.quickAnalysisCodeEntry.setAutoIndent(True)
+
+        self.Data = None
+        self.cursor = None
+        self.framework.subscribe_database_events(self.db_attach, self.db_detach)
+
+    def db_attach(self):
+        self.Data = self.framework.getDB()
+        self.cursor = self.Data.allocate_thread_cursor()
+        self.fill_edits()
+
+    def db_detach(self):
+        self.close_cursor()
+        self.Data = None
+
+    def fill_edits(self):
+        self.mainWindow.quickAnalysisCodeEntry.setText(self.framework.get_raft_config_value('QuickAnalysis.CodeEntry.Python'))
+
+    def save_configuration(self):
+        self.framework.set_raft_config_value('QuickAnalysis.CodeEntry.Python', self.mainWindow.quickAnalysisCodeEntry.text())
 
     def set_quick_analysis_thread(self, quickAnalysisThread):
         QObject.connect(self, SIGNAL('runQuickAnalysisFinished(QString)'), self.handle_quickAnalysisFinished)
@@ -57,7 +75,6 @@ class QuickAnalysisTab(QObject):
 
     def handle_quickAnalysisLoadFromFile_clicked(self):
         filename = QFileDialog.getOpenFileName(None, 'Open Python Script File', '', 'Python file (*.py)')
-
         if filename and os.path.exists(filename):
             fh = open(filename, 'r')
             python_code = fh.read()
@@ -68,11 +85,12 @@ class QuickAnalysisTab(QObject):
         python_code = self.mainWindow.quickAnalysisCodeEntry.text()
         filename = QFileDialog.getSaveFileName(None, 'Save to file', '', '')
         if filename:
-            fh = open(filename, 'w')
-            fh.write(python_code)
+            fh = open(filename, 'wb')
+            fh.write(python_code.encode('utf-8'))
             fh.close()
 
     def handle_quickAnalysisRunAnalysis_clicked(self):
+        self.save_configuration()
         python_code = self.mainWindow.quickAnalysisCodeEntry.text()
         self.mainWindow.quickAnalysisThread.runQuickAnalysis(python_code, self)
 

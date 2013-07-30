@@ -99,7 +99,9 @@ class QuickAnalysisThread(QThread):
                 if begin_method:
                     begin_method()
 
-                process_request_method = script_env.functions['process_request']
+                process_request_method = script_env.functions.get('process_request')
+                if not process_request_method:
+                    raise Exception('The "process_request" method is not implemented and is required.')
                 factory = RequestResponseFactory.RequestResponseFactory(self.framework, None)
                 for row in self.Data.read_all_responses(self.read_cursor):
                     try:

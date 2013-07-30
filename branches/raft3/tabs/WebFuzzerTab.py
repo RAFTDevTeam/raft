@@ -34,6 +34,7 @@ import json
 import os
 
 from actions import interface
+from utility import ScintillaHelpers
 
 from dialogs.RequestResponseDetailDialog import RequestResponseDetailDialog
 
@@ -158,18 +159,12 @@ class WebFuzzerTab(QObject):
         if not self.functionsLayout:
             self.functionsLayout = QVBoxLayout(self.mainWindow.wfFunctionsEditPlaceholder)
         self.functionsEditScintilla = Qsci.QsciScintilla(self.mainWindow.wfFunctionsEditPlaceholder)
-        lexerInstance = Qsci.QsciLexerPython(self.functionsEditScintilla)
-        self.functionsEditScintilla.setLexer(lexerInstance)
-        self.functionsEditScintilla.setFont(self.framework.get_font())
-        self.functionsEditScintilla.setWrapMode(1)
-        self.functionsEditScintilla.setMarginWidth(1, '1000')
+
+        ScintillaHelpers.SetScintillaProperties(self.framework, self.functionsEditScintilla, 'python')
         self.functionsEditScintilla.setAutoIndent(True)
         self.functionsLayout.addWidget(self.functionsEditScintilla)
-        self.functionsEditScintilla.zoomTo(self.framework.get_zoom_size()+5) # TODO: hack
         self.framework.subscribe_zoom_in(self.edit_function_zoom_in)
         self.framework.subscribe_zoom_out(self.edit_function_zoom_out)
-        
-        
 
     def edit_function_zoom_in(self):
         self.functionsEditScintilla.zoomIn()

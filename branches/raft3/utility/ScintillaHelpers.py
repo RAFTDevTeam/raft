@@ -22,18 +22,23 @@
 from PyQt4 import Qsci
 
 def SetScintillaProperties(framework, scintillaWidget, contentType = 'html'):
-    scintillaWidget.setFont(framework.get_font())
-    scintillaWidget.setWrapMode(1)
-    scintillaWidget.zoomTo(framework.get_zoom_size())
-    # TOOD: set based on line numbers (size is in pixels)
-    scintillaWidget.setMarginWidth(1, '1000')
+    font = framework.get_font()
     if 'html' == contentType:
         lexerInstance = Qsci.QsciLexerHTML(scintillaWidget)
     elif 'javascript' == contentType:
         lexerInstance = Qsci.QsciLexerJavaScript(scintillaWidget)
     elif 'python' == contentType:
         lexerInstance = Qsci.QsciLexerPython(scintillaWidget)
+        font = framework.get_python_code_font()
+    elif 'hex' == contentType:
+        font = framework.get_monospace_font()
     else:
         lexerInstance = Qsci.QsciLexer(scintillaWidget)
-    lexerInstance.setFont(framework.get_font())
+
+    scintillaWidget.setFont(font)
+    scintillaWidget.setWrapMode(1)
+    scintillaWidget.zoomTo(framework.get_zoom_size())
+    # TOOD: set based on line numbers (size is in pixels)
+    scintillaWidget.setMarginWidth(1, '1000')
+    lexerInstance.setFont(font)
     scintillaWidget.setLexer(lexerInstance)

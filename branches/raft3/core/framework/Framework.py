@@ -48,6 +48,12 @@ class Framework(QObject):
         self._requestResponseFactory = None
         self.zoom_size = 0
         self.base_font = QFont()
+        self.monospace_font = QFont('Courier New')
+        self.monospace_font.setFixedPitch(True)
+        self.monospace_font.setStyleHint(QFont.TypeWriter)
+        self.python_code_font = QFont()
+        pointSize = self.monospace_font.pointSize()
+        self.python_code_font.setPointSize(pointSize)
         self.home_dir = QDir.toNativeSeparators(QDir.homePath())
         self.raft_dir = self.create_raft_directory(self.home_dir, '.raft')
         self.user_db_dir = self.create_raft_directory(self.raft_dir, 'db')
@@ -187,6 +193,12 @@ class Framework(QObject):
 
     def get_font(self):
         return self.base_font
+
+    def get_monospace_font(self):
+        return self.monospace_font
+
+    def get_python_code_font(self):
+        return self.python_code_font
 
     def subscribe_responses_cleared(self, callback):
         QObject.connect(self, SIGNAL('responsesCleared()'), callback, Qt.DirectConnection)
