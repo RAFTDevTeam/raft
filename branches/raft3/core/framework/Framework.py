@@ -51,8 +51,12 @@ class Framework(QObject):
         self.monospace_font = QFont('Courier New')
         self.monospace_font.setFixedPitch(True)
         self.monospace_font.setStyleHint(QFont.TypeWriter)
-        self.python_code_font = QFont()
         pointSize = self.monospace_font.pointSize()
+        basePointSize = self.base_font.pointSize()
+        if pointSize <= basePointSize:
+            pointSize = basePointSize + 2
+            self.monospace_font.setPointSize(pointSize)
+        self.python_code_font = QFont()
         self.python_code_font.setPointSize(pointSize)
         self.home_dir = QDir.toNativeSeparators(QDir.homePath())
         self.raft_dir = self.create_raft_directory(self.home_dir, '.raft')

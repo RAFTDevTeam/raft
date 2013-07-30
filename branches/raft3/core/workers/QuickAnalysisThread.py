@@ -69,7 +69,6 @@ class QuickAnalysisThread(QThread):
     def runQuickAnalysis(self, python_code, callback_object):
         self.python_code = python_code
         self.callback_object = callback_object
-        print('run called')
         QTimer.singleShot(50, self, SIGNAL('do_runQuickAnalysis()'))
 
     def handle_quit(self):
@@ -81,14 +80,22 @@ class QuickAnalysisThread(QThread):
         self.framework.debug_log('QuickAnalysisThread started...')
         self.framework.subscribe_database_events(self.db_attach, self.db_detach)
 
+    def append_results(self, results_io, res):
+        if isinstance(res, bytes):
+            res = str(res, 'utf-8', 'ignore')
+        if res.endswith('\n'):
+            results_io.write(res + '\n')
+        else:
+            results_io.write(res + '\n\n')
+        
     def handle_runQuickAnalysis(self):
         results = ''
-        stdout_io = StringIO()
+        results_io = StringIO()
         if not self.qlock.tryLock():
             self.framework.debug_log('failed to acquire lock for quick analysis')
         else:
             original_stdout = sys.stdout
-            sys.stdout = stdout_io
+            sys.stdout = results_io
             try:
                 python_code = str(self.python_code)
                 scriptLoader = ScriptLoader()
@@ -97,7 +104,9 @@ class QuickAnalysisThread(QThread):
                  
                 begin_method = script_env.functions.get('begin')
                 if begin_method:
-                    begin_method()
+                    res = begin_method()
+                    if res:
+                        self.append_results(results_io, res)
 
                 process_request_method = script_env.functions.get('process_request')
                 if not process_request_method:
@@ -106,13 +115,17 @@ class QuickAnalysisThread(QThread):
                 for row in self.Data.read_all_responses(self.read_cursor):
                     try:
                         rr = factory.fill_by_row(row)
-                        process_request_method(rr)
+                        res = process_request_method(rr)
+                        if res:
+                            self.append_results(results_io, res)
                     except Exception as e:
                         results += '\nEncountered processing error: %s' % (e)
 
                 end_method = script_env.functions.get('end')
                 if end_method:
-                    end_method()
+                    res = end_method()
+                    if res:
+                        self.append_results(results_io, res)
                 
             except Exception as error:
                 self.framework.report_exception(error)
@@ -124,7 +137,7 @@ class QuickAnalysisThread(QThread):
         if self.callback_object:
             if results:
                 results += '\n'
-            results += stdout_io.getvalue()
+            results += results_io.getvalue()
             self.callback_object.emit(SIGNAL('runQuickAnalysisFinished(QString)'), results)
         
         
