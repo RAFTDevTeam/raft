@@ -63,44 +63,45 @@ class RequestResponseFactory(QObject):
             self.cursor = None
 
     def fill(self, Id):
-        rr = RequestResponse(self.framework)
-        if not Id:
-            return rr
-        
-        rr.responseId = Id
-
         self.qlock.lock()
         try:
             row = self.Data.read_responses_by_id(self.cursor, Id)
             if not row:
-                return False
+                return None
 
-            responseItems = interface.data_row_to_response_items(row)
-
-            rr.Id = Id
-            rr.responseUrl = responseItems[ResponsesTable.URL]
-            rr.requestHeaders = responseItems[ResponsesTable.REQ_HEADERS]
-            rr.requestBody = responseItems[ResponsesTable.REQ_DATA]
-            rr.responseHeaders = responseItems[ResponsesTable.RES_HEADERS]
-            rr.responseBody = responseItems[ResponsesTable.RES_DATA]
-            rr.responseContentType = responseItems[ResponsesTable.RES_CONTENT_TYPE]
-            rr.requestHost = responseItems[ResponsesTable.REQ_HOST]
-            rr.responseStatus = responseItems[ResponsesTable.STATUS]
-            rr.responseHash = responseItems[ResponsesTable.RES_DATA_HASHVAL]
-            rr.requestHash = responseItems[ResponsesTable.REQ_DATA_HASHVAL]
-            rr.requestTime = responseItems[ResponsesTable.REQTIME]
-            rr.requestDate = responseItems[ResponsesTable.REQDATE]
-            rr.notes = responseItems[ResponsesTable.NOTES]
-            rr.confirmed = responseItems[ResponsesTable.CONFIRMED]
-
-            if not rr.responseContentType:
-                # TODO: fix this to use better algorithm
-                rr.responseContentType = 'text/html'
-
-            rr.contentType, rr.charset = self.contentExtractor.parseContentType(rr.responseContentType)
-            rr.baseType = self.contentExtractor.getBaseType(rr.contentType)
+            rr = self.fill_by_row(row)
 
         finally:
             self.qlock.unlock()
+
+        return rr
+
+    def fill_by_row(self, row):
+
+        responseItems = interface.data_row_to_response_items(row)
+
+        rr = RequestResponse(self.framework)
+        rr.Id = responseItems[ResponsesTable.ID]
+        rr.responseUrl = responseItems[ResponsesTable.URL]
+        rr.requestHeaders = responseItems[ResponsesTable.REQ_HEADERS]
+        rr.requestBody = responseItems[ResponsesTable.REQ_DATA]
+        rr.responseHeaders = responseItems[ResponsesTable.RES_HEADERS]
+        rr.responseBody = responseItems[ResponsesTable.RES_DATA]
+        rr.responseContentType = responseItems[ResponsesTable.RES_CONTENT_TYPE]
+        rr.requestHost = responseItems[ResponsesTable.REQ_HOST]
+        rr.responseStatus = responseItems[ResponsesTable.STATUS]
+        rr.responseHash = responseItems[ResponsesTable.RES_DATA_HASHVAL]
+        rr.requestHash = responseItems[ResponsesTable.REQ_DATA_HASHVAL]
+        rr.requestTime = responseItems[ResponsesTable.REQTIME]
+        rr.requestDate = responseItems[ResponsesTable.REQDATE]
+        rr.notes = responseItems[ResponsesTable.NOTES]
+        rr.confirmed = responseItems[ResponsesTable.CONFIRMED]
+
+        if not rr.responseContentType:
+            # TODO: fix this to use better algorithm
+            rr.responseContentType = 'text/html'
+
+        rr.contentType, rr.charset = self.contentExtractor.parseContentType(rr.responseContentType)
+        rr.baseType = self.contentExtractor.getBaseType(rr.contentType)
 
         return rr

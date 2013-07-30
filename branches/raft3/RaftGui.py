@@ -118,6 +118,7 @@ from tabs import EncoderTab
 from tabs import ScopingTab
 from tabs import TesterTab
 from tabs import LogTab
+from tabs import QuickAnalysisTab
 
 # Import actions
 from actions import importers
@@ -165,6 +166,7 @@ from core.workers import ImporterThread
 from core.workers import AnalyzerThread
 from core.workers import DomFuzzerThread
 from core.workers import SpiderThread
+from core.workers import QuickAnalysisThread
 
 MAC = True
 try:
@@ -331,6 +333,7 @@ class RaftMain(QMainWindow, RaftMain.Ui_MainWindow):
         self.scopingTab = ScopingTab.ScopingTab(self.framework, self)
         self.testerTab = TesterTab.TesterTab(self.framework, self)
         self.logTab = LogTab.LogTab(self.framework, self)
+        self.quickAnalysisTab = QuickAnalysisTab.QuickAnalysisTab(self.framework, self)
 
         # sitemap
         self.siteMapRequestResponse = RequestResponseWidget(self.framework, self.sitemapTabPlaceholder, self.sitemapSearchControlPlaceholder, self)
@@ -398,6 +401,11 @@ class RaftMain(QMainWindow, RaftMain.Ui_MainWindow):
         self.spiderThread = SpiderThread.SpiderThread(self.framework, self.spiderQueueDataModel, self.spiderPendingResponsesDataModel, self.spiderPendingAnalysisDataModel, self.spiderInternalStateDataModel, self)
         self.spiderThread.start(QThread.LowestPriority)
         self.crawlerTab.set_spider_thread(self.spiderThread)
+
+        # quick analysis thread
+        self.quickAnalysisThread = QuickAnalysisThread.QuickAnalysisThread(self.framework, self)
+        self.quickAnalysisThread.start(QThread.LowestPriority)
+        self.quickAnalysisTab.set_quick_analysis_thread(self.quickAnalysisThread)
 
         # handlers
         self.framework.register_browser_openers(self.open_url_in_browser, self.open_content_in_browser)

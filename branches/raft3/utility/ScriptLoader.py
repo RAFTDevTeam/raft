@@ -21,6 +21,8 @@
 # along with RAFT.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import sys
+
 class ScriptEnv():
     def __init__(self, global_ns = None, local_ns = None):
         self.valid = True
