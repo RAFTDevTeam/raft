@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'RaftMain.ui'
 #
-# Created: Tue Jul 30 02:19:24 2013
+# Created: Tue Jul 30 11:33:04 2013
 #      by: PyQt4 UI code generator 4.10.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -901,10 +901,6 @@ class Ui_MainWindow(object):
         self.testerCSRFURLEdit = QtGui.QLineEdit(self.testerCSRFTab)
         self.testerCSRFURLEdit.setObjectName(_fromUtf8("testerCSRFURLEdit"))
         self.horizontalLayout_6.addWidget(self.testerCSRFURLEdit)
-        self.testerFormGen = QtGui.QRadioButton(self.testerCSRFTab)
-        self.testerFormGen.setChecked(True)
-        self.testerFormGen.setObjectName(_fromUtf8("testerFormGen"))
-        self.horizontalLayout_6.addWidget(self.testerFormGen)
         self.testerImgGen = QtGui.QRadioButton(self.testerCSRFTab)
         self.testerImgGen.setObjectName(_fromUtf8("testerImgGen"))
         self.horizontalLayout_6.addWidget(self.testerImgGen)
@@ -1821,7 +1817,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.addLayout(self.horizontalLayout_4)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1202, 20))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1202, 22))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
@@ -2112,8 +2108,6 @@ class Ui_MainWindow(object):
         self.domFuzzerTabWidget.setTabText(self.domFuzzerTabWidget.indexOf(self.domFuzzerFuzzWindowTab), _translate("MainWindow", "Fuzz Window", None))
         self.mainTabWidget.setTabText(self.mainTabWidget.indexOf(self.tabMainDOMFuzzer), _translate("MainWindow", "DOM Fuzzer", None))
         self.label_21.setText(_translate("MainWindow", "URL: ", None))
-        self.testerFormGen.setToolTip(_translate("MainWindow", "Generate CSRF Form", None))
-        self.testerFormGen.setText(_translate("MainWindow", "Form", None))
         self.testerImgGen.setToolTip(_translate("MainWindow", "Generate CSRF Image Tag", None))
         self.testerImgGen.setText(_translate("MainWindow", "Image", None))
         self.testerRegenBtn.setToolTip(_translate("MainWindow", "Regenerate CSRF payload based on selection", None))

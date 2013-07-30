@@ -1753,19 +1753,6 @@ User-Agent: ${user_agent}</string>
                <widget class="QLineEdit" name="testerCSRFURLEdit"/>
               </item>
               <item>
-               <widget class="QRadioButton" name="testerFormGen">
-                <property name="toolTip">
-                 <string>Generate CSRF Form</string>
-                </property>
-                <property name="text">
-                 <string>Form</string>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
                <widget class="QRadioButton" name="testerImgGen">
                 <property name="toolTip">
                  <string>Generate CSRF Image Tag</string>
@@ -3798,7 +3785,7 @@ User-Agent: ${user_agent}</string>
      <x>0</x>
      <y>0</y>
      <width>1202</width>
-     <height>20</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -4130,6 +4117,7 @@ User-Agent: ${user_agent}</string>
    <class>QsciScintilla</class>
    <extends>QFrame</extends>
    <header>Qsci/qsciscintilla.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

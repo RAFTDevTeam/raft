@@ -138,8 +138,7 @@ class TesterTab(QObject):
         self.mainWindow.csrfReqEdit.setPlainText(data)
 
     def regen_csrf(self):
-        if self.mainWindow.testerFormGen.isChecked():
-            print("Form")
+        # Regenerate CSRF playload based on selection
         if self.mainWindow.testerImgGen.isChecked():
             url = self.mainWindow.testerCSRFURLEdit.text()
             htmlresult = CSRFTester.generate_csrf_img(url, self.mainWindow.csrfGenEdit.text())
