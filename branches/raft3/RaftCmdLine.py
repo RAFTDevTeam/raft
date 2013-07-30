@@ -29,6 +29,8 @@ import lzma
 from core.database import database
 from core.data.RaftDbCapture import RaftDbCapture
 
+from utility.ScriptLoader import ScriptLoader
+
 from lib.parsers.burpparse import burp_parse_log, burp_parse_state, burp_parse_xml, burp_parse_vuln_xml
 from lib.parsers.webscarabparse import webscarab_parse_conversation
 from lib.parsers.parosparse import paros_parse_message
@@ -51,6 +53,7 @@ class RaftCmdLine():
         }
     def __init__(self):
         self.scripts = {}
+        self.scriptLoader = ScriptLoader()
         self.Data = None
 
     def cleanup(self):
@@ -70,14 +73,18 @@ class RaftCmdLine():
             if not db_filename.endswith('.raftdb'):
                 db_filename += '.raftdb'
 
-            if not os.path.exists(db_filename) and not do_create:
-                sys.stderr.write('\nDB file [%s] does not exist\n' % (db_filename))
-                return 1
+            if not os.path.exists(db_filename):
+                if not do_create:
+                    sys.stderr.write('\nDB file [%s] does not exist\n' % (db_filename))
+                    return 1
+                else:
+                    sys.stderr.write('\nWill create database: %s\n' %(db_filename))
 
             self.Data = database.Db(__version__, self.report_exception)
             self.Data.connect(db_filename)
+            sys.stderr.write('\nAttaching database: %s\n' %(db_filename))
         else:
-            if db_export or db_import:
+            if do_export or do_import:
                 sys.stderr.write('\nDB file is required\n' % (db_filename))
                 return 1
 
@@ -121,7 +128,7 @@ class RaftCmdLine():
 
     def setup_script_initializers(self):
         for key, script_env in self.scripts.items():
-            initializer = script_env['functions'].get('initialize')
+            initializer = script_env.functions.get('initialize')
             if initializer and not script_env['initialized']:
                 initializer()
                 script_env['initialized'] = True
@@ -132,7 +139,7 @@ class RaftCmdLine():
             script_env['end_called'] = False
 
     def call_script_method_with_filename(self, script_env, method, filename):
-        method_func = script_env['functions'].get(method)
+        method_func = script_env.functions.get(method)
         if method_func and not script_env[method + '_called']:
             method_func(filename)
             script_env[method + '_called'] = True
@@ -153,13 +160,13 @@ class RaftCmdLine():
 
     def export_to_raft_capture(self, filename, fhandle):
         """ Export to RAFT capture format """
-        sys.stderr.write('exporting to [%s]\n' % (filename))
+        sys.stderr.write('\nExporting to [%s]\n' % (filename))
         self.reset_script_begin_end()
         self.setup_script_initializers()
         filters = []
         for script_env in self.capture_filter_scripts:
             self.call_script_method_with_filename(script_env, 'begin', filename)
-            capture_filter = script_env['functions'].get('capture_filter')
+            capture_filter = script_env.functions.get('capture_filter')
             if capture_filter:
                 filters.append(capture_filter)
 
@@ -187,7 +194,7 @@ class RaftCmdLine():
             fhandle.write(b'</raft>')
             fhandle.close()
 
-            sys.stderr.write('Exported [%d] records\n' % (count))
+            sys.stderr.write('\nExported [%d] records\n' % (count))
 
         finally:
             cursor.close()
@@ -200,12 +207,12 @@ class RaftCmdLine():
     def import_one_file(self, filename, func, funcname):
         """ Import one file using specified parser function"""
         adapter = ParseAdapter()
-        sys.stderr.write('importing [%s]\n' % (filename))
+        sys.stderr.write('\nImporting [%s]\n' % (filename))
         self.reset_script_begin_end()
         filters = []
         for script_env in self.capture_filter_scripts:
             self.call_script_method_with_filename(script_env, 'begin', filename)
-            capture_filter = script_env['functions'].get('capture_filter')
+            capture_filter = script_env.functions.get('capture_filter')
             if capture_filter:
                 filters.append(capture_filter)
 
@@ -235,7 +242,7 @@ class RaftCmdLine():
             if not (0 == (count % commit_threshold)):
                 Data.commit()
 
-            sys.stderr.write('Inserted [%d] records\n' % (count))
+            sys.stderr.write('\nInserted [%d] records\n' % (count))
 
         except Exception as error:
             Data.rollback()
@@ -254,18 +261,18 @@ class RaftCmdLine():
     def parse_one_file(self, filename, func, funcname):
         """ Parse one file using specified parser function"""
         adapter = ParseAdapter()
-        sys.stderr.write('processing [%s]\n' % (filename))
+        sys.stderr.write('\nProcessing [%s]\n' % (filename))
         self.reset_script_begin_end()
         filters = []
         processors = []
         for script_env in self.capture_filter_scripts:
             self.call_script_method_with_filename(script_env, 'begin', filename)
-            capture_filter = script_env['functions'].get('capture_filter')
+            capture_filter = script_env.functions.get('capture_filter')
             if capture_filter:
                 filters.append(capture_filter)
         for script_env in self.process_capture_scripts:
             self.call_script_method_with_filename(script_env, 'begin', filename)
-            process_capture = script_env['functions'].get('process_capture')
+            process_capture = script_env.functions.get('process_capture')
             if process_capture:
                 processors.append(process_capture)
         try:
@@ -294,36 +301,8 @@ class RaftCmdLine():
     def load_script_file(self, filename):
         if filename in self.scripts:
             return self.scripts[filename]
-        python_code = open(filename, 'rb').read()
-        script_env = {
-            'filename' : filename,
-            'valid' : True,
-            'initialized' : False,
-            'instance': False,
-            'functions' : {},
-            'global_ns' : {},
-            'local_ns' : {}
-            }
-        try:
-            compiled = compile(python_code, '<string>', 'exec')
-            exec(compiled, script_env['global_ns'], script_env['local_ns'])
-            for key in script_env['local_ns']:
-                value = script_env['local_ns'][key]
-                if str(type(value)) == "<class 'type'>":
-                    instance = value()
-                    script_env['instance'] = instance
-                    for item in dir(instance):
-                        if not item.startswith('_'):
-                            itemvalue = getattr(instance, item)
-                            if str(type(itemvalue)) == "<class 'method'>":
-                                script_env['functions'][item] = itemvalue
-                elif str(type(value)) == "<class 'function'>":
-                    script_env['functions'][key] = value
-
-        except Exception as error:
-            print(error)
-            raise
-
+        script_env = self.scriptLoader.load_from_file(filename)
+        script_env['initialized'] = False
         self.scripts[filename] = script_env
         return script_env
 
