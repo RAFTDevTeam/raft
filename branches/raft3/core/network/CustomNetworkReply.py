@@ -38,7 +38,7 @@ class CustomNetworkReply(QtNetwork.QNetworkReply):
         for line in rawHeaders.splitlines():
             if b':' in line:
                 name, value = line.split(b':', 1)
-                self.setRawHeader(name, value)
+                self.setRawHeader(name.rstrip(), value.strip())
 
         QTimer.singleShot(0, self, SIGNAL("metaDataChanged()"))
         QTimer.singleShot(0, self, SIGNAL("readyRead()"))
