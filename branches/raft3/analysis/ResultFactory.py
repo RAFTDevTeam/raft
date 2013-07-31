@@ -33,7 +33,8 @@ class ResultFactory(object):
     
     def loadClassByName(self,fqcn):
         module,dot,classname = fqcn.rpartition('.')
-        loadedmodule=__import__(module,globals(),locals(),[classname,], -1)
+        #print("module: "+module)
+        loadedmodule=__import__(module,globals(),locals(),[classname,], 0)
         loadedclass=getattr(loadedmodule,classname)
         #print "factory says:",loadedclass
         return loadedclass

@@ -157,11 +157,11 @@ class AnalyzerThread(QThread):
                     
                     
                     #If there were results for this page, add them to the DB
-                    if transaction.responseId in tempanalysisresults.pages:
+                    if transaction.Id in tempanalysisresults.pages:
                         pageresultset=self.Data.analysis_add_resultset(self.cursor, analyzer.analyzerinstanceid,
-                                                                       transaction.responseId,False,transaction.responseUrl,
-                                                                       self.result_type_to_string(tempanalysisresults.pages[transaction.responseId]))
-                        for result in tempanalysisresults.pages[transaction.responseId].results:
+                                                                       transaction.Id,False,transaction.responseUrl,
+                                                                       self.result_type_to_string(tempanalysisresults.pages[transaction.Id]))
+                        for result in tempanalysisresults.pages[transaction.Id].results:
                             self.Data.analysis_add_singleresult(self.cursor, 
                                                                 pageresultset,
                                                                 result.severity,
@@ -172,11 +172,11 @@ class AnalyzerThread(QThread):
                                                                 str(result.data),
                                                                 result.span,
                                                                 self.result_type_to_string(result))
-                        for key,value in list(tempanalysisresults.pages[transaction.responseId].stats.items()):
+                        for key,value in list(tempanalysisresults.pages[transaction.Id].stats.items()):
                             self.Data.analysis_add_stat(self.cursor, pageresultset, key, value)
                 except Exception as e:
                     # TODO: add real debugging support
-                    self.framework.debug_log('Transaction ID: ' + str(transaction.responseId))
+                    self.framework.debug_log('Transaction ID: ' + str(transaction.Id))
                     self.framework.report_exception(e)
                     
         #Post Analysis

@@ -617,7 +617,7 @@ class RaftMain(QMainWindow, RaftMain.Ui_MainWindow):
         
             
     def analysistree_handle_expand(self, index):
-        item=self.mainAnalysisTreeWidget.itemFromIndex(index)
+        item=self.mainAnalysisTreeView.itemFromIndex(index)
         item.wasexpanded=True
         self.analysistree_load_grandchildren(item)
                 
