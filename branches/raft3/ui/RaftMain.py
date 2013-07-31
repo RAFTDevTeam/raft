@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'RaftMain.ui'
 #
-# Created: Tue Jul 30 20:31:07 2013
+# Created: Tue Jul 30 21:24:51 2013
 #      by: PyQt4 UI code generator 4.10.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(1202, 875)
+        MainWindow.resize(1202, 852)
         MainWindow.setStyleSheet(_fromUtf8(""))
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
@@ -512,7 +512,7 @@ class Ui_MainWindow(object):
         self.label_24.setMinimumSize(QtCore.QSize(60, 0))
         self.label_24.setObjectName(_fromUtf8("label_24"))
         self.verticalLayout_67.addWidget(self.label_24)
-        self.wfDataDictionaryDataTable = QtGui.QTableView(self.wfDataDictionaryFrame)
+        self.wfDataDictionaryDataTable = QtGui.QTableWidget(self.wfDataDictionaryFrame)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -520,6 +520,8 @@ class Ui_MainWindow(object):
         self.wfDataDictionaryDataTable.setSizePolicy(sizePolicy)
         self.wfDataDictionaryDataTable.setMinimumSize(QtCore.QSize(120, 0))
         self.wfDataDictionaryDataTable.setObjectName(_fromUtf8("wfDataDictionaryDataTable"))
+        self.wfDataDictionaryDataTable.setColumnCount(0)
+        self.wfDataDictionaryDataTable.setRowCount(0)
         self.verticalLayout_67.addWidget(self.wfDataDictionaryDataTable)
         self.horizontalLayout_41 = QtGui.QHBoxLayout()
         self.horizontalLayout_41.setObjectName(_fromUtf8("horizontalLayout_41"))

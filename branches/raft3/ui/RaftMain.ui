@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1202</width>
-    <height>875</height>
+    <height>852</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -999,7 +999,7 @@ User-Agent: ${user_agent}</string>
                       </widget>
                      </item>
                      <item>
-                      <widget class="QTableView" name="wfDataDictionaryDataTable">
+                      <widget class="QTableWidget" name="wfDataDictionaryDataTable">
                        <property name="sizePolicy">
                         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
                          <horstretch>0</horstretch>

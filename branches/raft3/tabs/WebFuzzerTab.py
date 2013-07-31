@@ -90,6 +90,7 @@ class WebFuzzerTab(QObject):
         # self.mainWindow.webFuzzTab.currentChanged.connect(self.fill_payloads)
         self.mainWindow.wfStdAddButton.clicked.connect(self.insert_payload_marker)
         self.mainWindow.wfStdStartButton.clicked.connect(self.start_fuzzing_clicked)
+        self.mainWindow.wfDataDictonaryAddButton.clicked.connect(self.handle_wfDataDictonaryAddButton_clicked)
         
         self.framework.subscribe_populate_webfuzzer_response_id(self.webfuzzer_populate_response_id)
         self.framework.subscribe_sequences_changed(self.fill_sequences)
@@ -103,7 +104,6 @@ class WebFuzzerTab(QObject):
         self.re_request = re.compile(r'^(\S+)\s+((?:https?://(?:\S+\.)+\w+(?::\d+)?)?/.*)\s+HTTP/\d+\.\d+\s*$', re.I)
         self.re_request_cookie = re.compile(r'^Cookie:\s*(\S+)', re.I|re.M)
         self.re_replacement = re.compile(r'\$\{(\w+)\}')
-
 
         self.setup_fuzzer_tab()
 
@@ -121,11 +121,12 @@ class WebFuzzerTab(QObject):
         # Fill the functions combo box on init
         self.fill_function_combo_box()
 
+        self.mainWindow.wfDataDictionaryDataTable.setColumnCount(2)
+        self.mainWindow.wfDataDictionaryDataTable.setHorizontalHeaderLabels(['Replacement', 'Value'])
+
         self.Data = None
         self.cursor = None
         self.framework.subscribe_database_events(self.db_attach, self.db_detach)
-        
-        
 
     def db_attach(self):
         self.Data = self.framework.getDB()
@@ -315,7 +316,7 @@ class WebFuzzerTab(QObject):
         response = ConfirmDialog.display_confirm_dialog(self.mainWindow, message)
         
         if response == True:
-            os.remove(path + "/" + filename)
+            os.remove(os.path.join(path,filename))
             
             self.fill_function_combo_box()
                     
@@ -373,8 +374,7 @@ class WebFuzzerTab(QObject):
         return payload_mapping
 
     def create_functions(self):
-        self.global_ns = {}
-        self.local_ns = None
+        self.global_ns = self.local_ns = {} 
         functions = [
 '''
 import urllib.parse
@@ -484,7 +484,7 @@ def randomize_alert(input):
         splitted = urlparse.urlsplit(url)
         
         # Create a new parsed object removing the scheme and netloc
-        req_loc = ("", "", splitted.path, splitted.query, splitted.fragment)
+        req_loc = ("", "", "", splitted.query, splitted.fragment)
 
         useragent = self.framework.useragent()
         has_cookie = False
@@ -522,10 +522,25 @@ def randomize_alert(input):
         
         index = self.mainWindow.stdFuzzPayloadBox.currentIndex()
         curPayload = str(self.mainWindow.stdFuzzPayloadBox.itemText(index))
-        
+        currentText = self.mainWindow.wfStdEdit.textCursor().selectedText()
+
+        self.store_in_data_dictionary(curPayload, currentText)
+
         self.mainWindow.wfStdEdit.textCursor().insertHtml("<font color='red'>${%s}</font>" % curPayload)
 
         self.save_configuration_values()
+
+    def store_in_data_dictionary(self, replacement, value):
+        tableWidget = self.mainWindow.wfDataDictionaryDataTable
+        row = tableWidget.rowCount()
+        tableWidget.insertRow(row)
+        tableWidget.setItem(row, 0, QTableWidgetItem(replacement))
+        tableWidget.setItem(row, 1, QTableWidgetItem(value))
+
+    def handle_wfDataDictonaryAddButton_clicked(self):
+        name = self.mainWindow.wfDataDictionaryDataName.text()
+        value = self.mainWindow.wfDataDictionaryDataValue.text()
+        self.store_in_data_dictionary(name, value)
 
     def save_configuration_values(self):
         self.save_standard_configuration()

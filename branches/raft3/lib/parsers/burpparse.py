@@ -71,8 +71,8 @@ class BurpUtil():
                 break
         return content_type
 
-    def parse_method(self, request):
-        method = b''
+    def parse_method_url(self, request):
+        method, url = b'', b''
 
         # get method from request header
         headers = request[0]
@@ -82,8 +82,9 @@ class BurpUtil():
             m = self.re_request.search(line)
             if m:
                 method = m.group(1)
+                url = m.group(2)
 
-        return method
+        return method, url
 
     def parse_status_content_type_datetime(self, response):
         status, content_type, datetime = b'', b'', b''
@@ -1365,7 +1366,11 @@ class burp_parse_vuln_xml():
         request = self.util.split_request_block(cur['request'])
         response = self.util.split_response_block(cur['response'])
 
-        method = str(self.util.parse_method(request), 'ascii', 'ignore')
+        method, req_url  = self.util.parse_method_url(request)
+        method = str(method, 'ascii', 'ignore')
+        if req_url:
+            url_path = str(req_url, 'utf-8', 'ignore')
+            url = urlparse.urljoin(host, url_path)
         status, content_type, datetime = self.util.parse_status_content_type_datetime(response)
         try:
             status = int(str(status, 'ascii', 'ignore'))
