@@ -28,7 +28,7 @@
 import sys
 import os
 
-__version__ = "3.0.1-pre"
+__version__ = "3.0.1"
 __all__ = ['__version__']
 
 def main():
