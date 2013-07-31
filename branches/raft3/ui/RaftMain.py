@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'RaftMain.ui'
 #
-# Created: Tue Jul 30 11:33:04 2013
+# Created: Tue Jul 30 20:31:07 2013
 #      by: PyQt4 UI code generator 4.10.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -902,6 +902,7 @@ class Ui_MainWindow(object):
         self.testerCSRFURLEdit.setObjectName(_fromUtf8("testerCSRFURLEdit"))
         self.horizontalLayout_6.addWidget(self.testerCSRFURLEdit)
         self.testerImgGen = QtGui.QRadioButton(self.testerCSRFTab)
+        self.testerImgGen.setChecked(True)
         self.testerImgGen.setObjectName(_fromUtf8("testerImgGen"))
         self.horizontalLayout_6.addWidget(self.testerImgGen)
         self.testerRegenBtn = QtGui.QPushButton(self.testerCSRFTab)

@@ -1760,6 +1760,9 @@ User-Agent: ${user_agent}</string>
                 <property name="text">
                  <string>Image</string>
                 </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item>

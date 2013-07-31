@@ -123,15 +123,24 @@ class TesterTab(QObject):
         
         data = reqHeaders + "\n" + reqData
         
-        # Check to ensure that either a GET or a POST is being used.
-        check = re.compile("^(GET|POST)", re.I)
-        result = check.match(reqHeaders)
-        if not result:
+        # Check to ensure that either a GET or a POST is being used and pass that along to the function
+        # check = re.compile("^(GET|POST)", re.I)
+        # result = check.match(reqHeaders)
+        # if not result:
+        #    return()
+        
+        GET = re.compile("^GET", re.I)
+        POST = re.compile("^POST", re.I)
+        
+        if GET.match(reqHeaders):
+            htmlresult = CSRFTester.generate_csrf_html(url, reqData, "get")
+        elif POST.match(reqHeaders):
+            htmlresult = CSRFTester.generate_csrf_html(url, reqData, "post")
+        else:
             return()
         
-        # htmlresult = CSRFTester.generate_csrf_html(self, url, reqHeaders, reqData)
         
-        htmlresult = CSRFTester.generate_csrf_html(url, reqData)
+        # htmlresult = CSRFTester.generate_csrf_html(url, reqData)
         
         self.mainWindow.testerCSRFURLEdit.setText(url)
         self.mainWindow.csrfGenEdit.setText(htmlresult)
