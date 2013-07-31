@@ -58,7 +58,6 @@ class Payloads(object):
     
     def read_function(self, function_file):
         
-        #ToDo: Check to make sure this properly displays Python files
         f = open(os.path.join(self.functions_dir, function_file), "rb")
         vals = list()
         
@@ -68,6 +67,17 @@ class Payloads(object):
         f.close()
         
         return vals
+    
+    def save_function(self, function_file, content):
+        
+        print(function_file)
+        f = open(os.path.join(self.functions_dir, function_file), "wb")
+        
+        f.write(content.encode("utf8"))
+        f.close()
+        
+        
+    
         
     
     

@@ -99,6 +99,7 @@ class WebFuzzerTab(QObject):
         
         self.mainWindow.wfFunctionsComboBox.activated.connect(self.fill_function_edit)
         
+        self.mainWindow.wfFunctionsSaveButton.clicked.connect(self.save_function_file)
         self.mainWindow.wfFunctionsDeleteButton.clicked.connect(self.del_function_file)
         
         self.miniResponseRenderWidget = MiniResponseRenderWidget(self.framework, self.mainWindow.stdFuzzResultsTabWidget, True, self)
@@ -307,6 +308,14 @@ class WebFuzzerTab(QObject):
         
         for line in func:
             self.functionsEditScintilla.append(line.decode("utf8"))
+            
+    def save_function_file(self):
+        
+        function_file = self.mainWindow.wfFunctionsComboBox.currentText()
+        content = self.functionsEditScintilla.text()
+        
+        self.Attacks.save_function(function_file, content)
+    
             
     def del_function_file(self):
         
