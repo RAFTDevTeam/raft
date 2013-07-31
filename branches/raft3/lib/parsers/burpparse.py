@@ -34,6 +34,7 @@ class BurpUtil():
         self.re_content_type = re.compile(br'^Content-Type:\s*([-_+0-9a-z.]+/[-_+0-9a-z.]+(?:\s*;\s*\S+=\S+)*)\s*$', re.I)
         self.re_request = re.compile(br'^(\S+)\s+((?:https?://(?:\S+\.)+\w+(?::\d+)?)?/.*)\s+HTTP/\d+\.\d+\s*$', re.I)
         self.re_response = re.compile(br'^HTTP/\d+\.\d+\s+(\d{3}).*\s*$', re.M)
+        self.re_date = re.compile(br'^Date:\s*(\w+,.*\w+)\s*$', re.I)
 
     def split_request_block(self, request):
         request_headers, request_body = self.split_block(request)
@@ -69,6 +70,43 @@ class BurpUtil():
                 content_type = m.group(1)
                 break
         return content_type
+
+    def parse_method(self, request):
+        method = b''
+
+        # get method from request header
+        headers = request[0]
+        n = headers.find(b'\n')
+        if n != -1:
+            line = headers[0:n]
+            m = self.re_request.search(line)
+            if m:
+                method = m.group(1)
+
+        return method
+
+    def parse_status_content_type_datetime(self, response):
+        status, content_type, datetime = b'', b'', b''
+        # get status and content_type from response headers
+        if response and response[0]:
+            headers = response[0]
+            first = True
+            for line in headers.splitlines():
+                if first:
+                    first = False
+                    m = self.re_response.match(line)
+                    if m:
+                        status = m.group(1)
+                else:
+                    m = self.re_content_type.match(line)
+                    if m:
+                        content_type = m.group(1)
+                    else:
+                        m = self.re_date.match(line)
+                        if m:
+                            datetime = m.group(1)
+        
+        return (status, content_type, datetime)
 
 class burp_parse_state():
     """ Parses Burp saved state file into request and result data """
@@ -1130,6 +1168,8 @@ class burp_parse_xml():
             status = int(cur['status'])
         except ValueError:
             pass
+        except TypeError:
+            pass
         url = cur['url']
         datetime = cur['time']
         method = cur['method']
@@ -1320,21 +1360,21 @@ class burp_parse_vuln_xml():
         host = cur['host']
         clean_host = self.re_clean_host.sub('', host)
         hostip = cur['hostip']
-        status = ''
-        try:
-            status = '' # TODO:
-        except ValueError:
-            pass
         url_path = cur['path'] or cur['location']
         url = urlparse.urljoin(host, url_path)
-        datetime = '' # TODO:
-        method = '' # TODO:
         request = self.util.split_request_block(cur['request'])
         response = self.util.split_response_block(cur['response'])
-        if response and response[0]:
-            content_type = self.util.get_content_type(response[0])
-        else:
-            content_type = ''
+
+        method = str(self.util.parse_method(request), 'ascii', 'ignore')
+        status, content_type, datetime = self.util.parse_status_content_type_datetime(response)
+        try:
+            status = int(str(status, 'ascii', 'ignore'))
+        except ValueError:
+            pass
+        except TypeError:
+            pass
+        content_type = str(content_type, 'utf-8', 'ignore')
+        datetime = str(datetime, 'utf-8', 'ignore')
 
         # TODO: integrate vuln info
         notes_io = StringIO()
@@ -1448,7 +1488,7 @@ if '__main__' == __name__:
         elif 'vulnxml' == mode:
             count = 0
             for result in burp_parse_vuln_xml(burpfile):
-#                print(result)
+                print(result)
                 count += 1
             print('processed %d records' % (count))
         elif 'dumpstate' == mode:
