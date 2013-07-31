@@ -134,6 +134,7 @@ class WebFuzzerTab(QObject):
         self.fill_fuzzers()
         self.fill_standard_edits()
         self.fill_config_edits()
+        self.restore_data_dictionary()
 
     def db_detach(self):
         self.close_cursor()
@@ -468,8 +469,10 @@ def randomize_alert(input):
             resData = responseItems[ResponsesTable.RES_DATA]
             contentType = responseItems[ResponsesTable.RES_CONTENT_TYPE]
             self.miniResponseRenderWidget.populate_response_content(url, reqHeaders, reqData, resHeaders, resData, contentType)
-        
+
     def webfuzzer_populate_response_id(self, Id):
+
+        self.clear_data_dictionary()
         
         row = self.Data.read_responses_by_id(self.cursor, Id)
         if not row:
@@ -484,6 +487,7 @@ def randomize_alert(input):
         splitted = urlparse.urlsplit(url)
         
         # Create a new parsed object removing the scheme and netloc
+        base_url = urlparse.urlunsplit((splitted[0], splitted[1], splitted[2], '', ''))
         req_loc = ("", "", "", splitted.query, splitted.fragment)
 
         useragent = self.framework.useragent()
@@ -514,7 +518,7 @@ def randomize_alert(input):
         template.write(reqData)
 
         self.set_combo_box_text(self.mainWindow.stdFuzzerReqMethod, method.upper())
-        self.mainWindow.wfStdUrlEdit.setText(url)
+        self.mainWindow.wfStdUrlEdit.setText(base_url)
         self.mainWindow.wfStdEdit.setPlainText(template.getvalue())
         
     def insert_payload_marker(self):
@@ -523,19 +527,51 @@ def randomize_alert(input):
         index = self.mainWindow.stdFuzzPayloadBox.currentIndex()
         curPayload = str(self.mainWindow.stdFuzzPayloadBox.itemText(index))
         currentText = self.mainWindow.wfStdEdit.textCursor().selectedText()
-
+        
         self.store_in_data_dictionary(curPayload, currentText)
-
         self.mainWindow.wfStdEdit.textCursor().insertHtml("<font color='red'>${%s}</font>" % curPayload)
-
         self.save_configuration_values()
 
+    def clear_data_dictionary(self):
+        tableWidget = self.mainWindow.wfDataDictionaryDataTable
+        while tableWidget.rowCount() > 0:
+            tableWidget.removeRow(0)
+        self.save_data_dictionary_to_config()
+
     def store_in_data_dictionary(self, replacement, value):
+        # TODO: currently logic allows for duplicate values to appear
         tableWidget = self.mainWindow.wfDataDictionaryDataTable
         row = tableWidget.rowCount()
         tableWidget.insertRow(row)
         tableWidget.setItem(row, 0, QTableWidgetItem(replacement))
         tableWidget.setItem(row, 1, QTableWidgetItem(value))
+        self.save_data_dictionary_to_config()
+
+    def save_data_dictionary_to_config(self):
+        ddict = self.get_values_from_data_dictionary()
+        dd_data = json.dumps(ddict)
+        self.framework.set_raft_config_value('WebFuzzer.Standard.DataDictionary', dd_data)
+
+    def restore_data_dictionary(self):
+        dd_data = self.framework.get_raft_config_value('WebFuzzer.Standard.DataDictionary', '')
+        if dd_data:
+            tableWidget = self.mainWindow.wfDataDictionaryDataTable
+            obj = json.loads(dd_data)
+            for name, value in obj.items():
+                row = tableWidget.rowCount()
+                tableWidget.insertRow(row)
+                tableWidget.setItem(row, 0, QTableWidgetItem(name))
+                tableWidget.setItem(row, 1, QTableWidgetItem(value))
+        
+    def get_values_from_data_dictionary(self):
+        tableWidget = self.mainWindow.wfDataDictionaryDataTable
+        ddict = {}
+        for rindex in range(0, tableWidget.rowCount()):
+            name = tableWidget.item(rindex, 0).text()
+            value = tableWidget.item(rindex, 1).text()
+            ddict[name] = value
+
+        return ddict
 
     def handle_wfDataDictonaryAddButton_clicked(self):
         name = self.mainWindow.wfDataDictionaryDataName.text()
@@ -733,7 +769,7 @@ def randomize_alert(input):
         replacements['path'] = splitted.path or ''
         replacements['query'] = splitted.query or ''
         replacements['fragment'] = splitted.fragment or ''
-        replacements['request_uri'] = urlparse.urlunsplit(('', '', splitted.path, splitted.query, ''))
+        replacements['request_uri'] = url
         replacements['user_agent'] = self.framework.useragent()
         return replacements
 
