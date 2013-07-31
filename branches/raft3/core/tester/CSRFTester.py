@@ -70,13 +70,12 @@ def generate_csrf_form(url, reqData):
         E.BODY(
             E.FORM(%s
                    E.INPUT(type="submit", value="submit"),
-                   action="%s")
+                   action="%s", method="post")
             
                )
     )""" % (inputs, url)
     
     #Ensure the object is properly converted and decoded prior to being returned
-    # return(lxml.html.tostring(eval(HTML), pretty_print=True).decode("utf8"))
     return lxml.html.tostring(eval(HTML), pretty_print=True).decode("utf8") 
 
 def generate_csrf_img(url, html):
