@@ -53,6 +53,8 @@ from dialogs import ConfirmDialog
 from core.fuzzer.TemplateDefinition import TemplateDefinition
 from core.fuzzer.TemplateItem import TemplateItem
 
+from utility.ScriptLoader import ScriptLoader
+
 class WebFuzzerTab(QObject):
     def __init__(self, framework, mainWindow):
         QObject.__init__(self, mainWindow)
@@ -366,12 +368,15 @@ class WebFuzzerTab(QObject):
             for offset in (1, 4, 7):
                 if config_item[offset+1].isChecked():
                     payload_type = config_item[offset]
-                    if payload_type == "fuzz":
-                        payload_mapping[payload_item] = (payload_type, str(config_item[offset+2].currentText()))
+#                    print((payload_type, offset))
+                    if payload_type == "dynamic":
+                        payload_mapping[payload_item] = (payload_type, str(config_item[offset+2].text()), config_item[3].currentText())
+                    elif payload_type == "fuzz":
+                        payload_mapping[payload_item] = (payload_type, str(config_item[offset+2].currentText()), '')
                     else:
-                        payload_mapping[payload_item] = (payload_type, str(config_item[offset+2].text()))
+                        payload_mapping[payload_item] = (payload_type, str(config_item[offset+2].text()), '')
                     break
-        
+
         return payload_mapping
 
     def create_functions(self):
@@ -417,16 +422,16 @@ def randomize_alert(input):
         
     def handle_payload_toggled(self):
         self.mainWindow.wfPay1PayloadBox.setEnabled(self.mainWindow.wfPay1FuzzRadio.isChecked() or self.mainWindow.wfPay1DynamicRadio.isChecked())
-        self.mainWindow.wfPay1StaticEdit.setEnabled(self.mainWindow.wfPay1StaticRadio.isChecked()) 
+        self.mainWindow.wfPay1StaticEdit.setEnabled(self.mainWindow.wfPay1StaticRadio.isChecked() or self.mainWindow.wfPay1DynamicRadio.isChecked())
         # self.mainWindow.wfPay1PayloadBox.setEnabled(self.mainWindow.wfPay1DynamicRadio.isChecked()) or self.fill_payload_combo_box_function(self.mainWindow.wfPay1PayloadBox)
         self.mainWindow.wfPay2PayloadBox.setEnabled(self.mainWindow.wfPay2FuzzRadio.isChecked() or self.mainWindow.wfPay2DynamicRadio.isChecked())
-        self.mainWindow.wfPay2StaticEdit.setEnabled(self.mainWindow.wfPay2StaticRadio.isChecked()) 
+        self.mainWindow.wfPay2StaticEdit.setEnabled(self.mainWindow.wfPay2StaticRadio.isChecked() or self.mainWindow.wfPay2DynamicRadio.isChecked()) 
         self.mainWindow.wfPay3PayloadBox.setEnabled(self.mainWindow.wfPay3FuzzRadio.isChecked() or self.mainWindow.wfPay3DynamicRadio.isChecked())
-        self.mainWindow.wfPay3StaticEdit.setEnabled(self.mainWindow.wfPay3StaticRadio.isChecked()) 
+        self.mainWindow.wfPay3StaticEdit.setEnabled(self.mainWindow.wfPay3StaticRadio.isChecked() or self.mainWindow.wfPay3DynamicRadio.isChecked()) 
         self.mainWindow.wfPay4PayloadBox.setEnabled(self.mainWindow.wfPay4FuzzRadio.isChecked() or self.mainWindow.wfPay4DynamicRadio.isChecked())
-        self.mainWindow.wfPay4StaticEdit.setEnabled(self.mainWindow.wfPay4StaticRadio.isChecked()) 
+        self.mainWindow.wfPay4StaticEdit.setEnabled(self.mainWindow.wfPay4StaticRadio.isChecked() or self.mainWindow.wfPay4DynamicRadio.isChecked()) 
         self.mainWindow.wfPay5PayloadBox.setEnabled(self.mainWindow.wfPay5FuzzRadio.isChecked() or self.mainWindow.wfPay5DynamicRadio.isChecked())
-        self.mainWindow.wfPay5StaticEdit.setEnabled(self.mainWindow.wfPay5StaticRadio.isChecked()) 
+        self.mainWindow.wfPay5StaticEdit.setEnabled(self.mainWindow.wfPay5StaticRadio.isChecked() or self.mainWindow.wfPay5DynamicRadio.isChecked()) 
         
         # Determine if fuzz or dynamic is selected and change combo box items
         if self.mainWindow.wfPay1FuzzRadio.isChecked():
@@ -643,7 +648,7 @@ def randomize_alert(input):
         
         # Fuzzing stuff
         payload_mapping = self.create_payload_map()
-
+#        print(payload_mapping)
         self.create_functions()
         
         template_definition = TemplateDefinition(templateText)
@@ -651,18 +656,26 @@ def randomize_alert(input):
         template_items = template_definition.template_items
 ###        print(template_items)
         parameter_names = template_definition.parameter_names
-                
+
+        self.global_ns = self.local_ns = {}
+        scriptLoader = ScriptLoader()
+
         errors = []
         fuzz_payloads = {}
         for name, payload_info in payload_mapping.items():
             if name in parameter_names:
-                payload_type, payload_value = payload_info
+                payload_type, payload_value, payload_file = payload_info
                 if 'fuzz' == payload_type:
                     filename = payload_value
                     values = self.Attacks.read_data(filename)
                     fuzz_payloads[name] = values
                 elif 'dynamic' == payload_type:
+                    target = payload_file
+                    # TODO: should this come from saved file or current Scintilla values (?)
+                    script_env = scriptLoader.load_from_file(os.path.join(self.functions_dir, target), self.global_ns, self.local_ns)
                     expression = payload_value
+                    if not expression.endswith('()'):
+                        expression += '()'
                     eval_result = eval(expression, self.global_ns, self.local_ns)
                     fuzz_payloads[name] = [str(v) for v in eval_result]
                 elif 'static' == payload_type:
@@ -678,7 +691,7 @@ def randomize_alert(input):
         
         for name, payload_info in payload_mapping.items():
             if name in parameter_names:
-                payload_type, payload_value = payload_info
+                payload_type, payload_value, payload_file = payload_info
                 if 'static' == payload_type:
                     # static payload value
                     payloads = [payload_value]
