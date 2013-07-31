@@ -227,7 +227,7 @@ class CrawlerTab(QObject):
         else:
             referer = self.currentSpiderUrl
         dom = frame.documentElement()
-        html = str(dom.toOuterXml().toUtf8()) # TODO: fix encoding issues
+        html = dom.toOuterXml()
         url = frame.url().toEncoded().data().decode('utf-8')
         self.spiderThread.process_page_html_content(html, url, self.currentDepth)
 

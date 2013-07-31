@@ -95,6 +95,9 @@ class DomFuzzerTab(QObject):
         treeView.setSelectionModel(self.resultsTreeViewSelectionModel)
 
         treeView.clicked.connect(self.handle_resultsTreeView_clicked)
+        
+#        self.resultsTreeViewSelectionModel.selectionChanged.connect(self.handle_selectionChanged)
+        self.resultsTreeViewSelectionModel.currentChanged.connect(self.handle_currentChanged)
 
         treeView.setContextMenuPolicy(Qt.CustomContextMenu)
         self.connect(treeView, SIGNAL("customContextMenuRequested(const QPoint&)"), self.fuzzer_results_context_menu)
@@ -158,11 +161,12 @@ class DomFuzzerTab(QObject):
         self.domFuzzerWebView.setContent(htmlContent, '', qurl)
 
     def handle_webView_loadStarted(self):
-        print('loading started')
+        # print('loading started')
+        pass
 
     def handle_webView_loadFinished(self, ok):
         url = self.domFuzzerWebView.url().toString()
-        print(('handle_webView_loadFinished', ok, url))
+#        print(('handle_webView_loadFinished', ok, url))
         if url == 'about:blank':
             return
         if self.qtimer.isActive():
@@ -177,7 +181,7 @@ class DomFuzzerTab(QObject):
     def handle_load_timeout(self):
         if self.qtimer.isActive():
             self.qtimer.stop()
-        print('forcbily stopping page')
+#        print('forcbily stopping page')
         self.domFuzzerWebView.stop()
         self.fuzzItemCompleted(False)
 
@@ -192,7 +196,7 @@ class DomFuzzerTab(QObject):
         if self.currentFuzzId is not None:
             mainFrame = self.domFuzzerWebView.page().mainFrame()
             dom = mainFrame.documentElement()
-            html = dom.toOuterXml() # TODO: decideo on str versus bytes?
+            html = dom.toOuterXml()
             self.domFuzzerThread.fuzzItemFinished(self.currentFuzzId, self.currentFuzzUrl, html, self.callbackLogger.get_messages())
             self.domFuzzerWebView.setUrl(QUrl('about:blank'))
             self.currentFuzzId = None
@@ -203,6 +207,12 @@ class DomFuzzerTab(QObject):
 
     def handle_resultsTreeView_clicked(self):
         index = self.mainWindow.domFuzzerResultsTreeView.currentIndex()
+        self.fill_results_view(index)
+
+    def handle_currentChanged(self, index):
+        self.fill_results_view(index)
+
+    def fill_results_view(self, index):
         index = self.mainWindow.domFuzzerResultsDataModel.index(index.row(), DomFuzzerResultsTable.ID)
         if index.isValid():
             currentItem = self.mainWindow.domFuzzerResultsDataModel.data(index)
@@ -222,4 +232,5 @@ class DomFuzzerTab(QObject):
                 bytes(resultsItems[DomFuzzerResultsTable.RENDERED_DATA]),
                 ''
                 )
+
                 

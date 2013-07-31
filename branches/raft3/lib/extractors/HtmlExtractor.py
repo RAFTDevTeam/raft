@@ -761,15 +761,18 @@ class HtmlExtractor(BaseExtractor):
 
         if html_bytes is not None:
             # TODO: refactor
-            # TODO: is it best to normalize to UTF-8 or work from original?
-            for bom, encoding in BOM_MAPPINGS:
-                if html_bytes.startswith(bom): 
-                    temp = html_bytes[len(bom):]
-                    if temp.startswith(bom):
-                        temp = temp[len(bom):]
-                    bodyText = temp.decode(encoding, 'ignore')
-                    html_bytes = bodyText.encode('utf-8', 'ignore')
-                    break
+            if not isinstance(html_bytes, bytes):
+                html_bytes = html_bytes.encode('utf-8', 'ignore')
+            else:
+                # TODO: is it best to normalize to UTF-8 or work from original?
+                for bom, encoding in BOM_MAPPINGS:
+                    if html_bytes.startswith(bom): 
+                        temp = html_bytes[len(bom):]
+                        if temp.startswith(bom):
+                            temp = temp[len(bom):]
+                        bodyText = temp.decode(encoding, 'ignore')
+                        html_bytes = bodyText.encode('utf-8', 'ignore')
+                        break
 
             html = html_bytes.strip()
             if len(html_bytes) > 0:

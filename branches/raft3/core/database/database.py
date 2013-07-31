@@ -1563,7 +1563,11 @@ class Db:
         self.qlock.lock()
         try:
             duplist = insertlist[:]
-            duplist[SpiderPendingAnalysisTable.CONTENT] = Compressed(str(duplist[SpiderPendingAnalysisTable.CONTENT]))
+            if isinstance(duplist[SpiderPendingAnalysisTable.CONTENT], bytes):
+                item_bytes = duplist[SpiderPendingAnalysisTable.CONTENT]
+            else:
+                item_bytes = str(duplist[SpiderPendingAnalysisTable.CONTENT]).encode('utf-8', 'ignore')
+            duplist[SpiderPendingAnalysisTable.CONTENT] = Compressed(item_bytes)
             cursor.execute("""INSERT INTO spider_pending_analysis (Id, Analysis_Type, Content, Url, Depth) VALUES (?,?,?,?,?)""", duplist)
 
             cursor.execute("SELECT last_insert_rowid()")
