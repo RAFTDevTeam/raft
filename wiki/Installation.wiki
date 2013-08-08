@@ -69,6 +69,9 @@ If everything installed properly you should just be able to run RAFT from the di
 python3.3 raft.py
 </code>
 
+== OUTDATED INFO BELOW ==
+Will be updated soon.
+
 == <font color="blue">Linux</font> ==
 === Ubuntu ===
 RAFT has been tested on Ubuntu 11.04 (Natty) and 10.04 (Lucid).
