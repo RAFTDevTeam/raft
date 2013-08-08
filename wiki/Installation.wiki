@@ -2,23 +2,24 @@
 
 = Installation =
 
-RAFT is written in Python and PyQT. This is done so that the application can be multiplatform. RAFT is a Python 2.x application, Python 3.x is not supported at this time. 
+RAFT is written in Python and PyQT. This is done so that the application can be multi-platform. The current version of RAFT has been ported to Python 3.3.
 
-You must use a version of Python that is greater than 2.6.5. Other versions may work, but are untested.
+You must use a version of Python that is greater than Python 3.3. Other versions may work, but are untested.
 
 === Dependencies === 
 
 RAFT requires Python 2.6.5 and above. Python 3 is not supported.
 <pre>
-lxml
-PyQT
-QScintilla
+ - Python 3.3 or later
+ - PyQT4
+ - QScintilla2
+ - lxml
 </pre>
 
 == <font color="blue">OSX</font> ==
 *Note* We still do not have an installable binary available for Mac OSX. It will be necessary to download the source and use your installed environment. 
 
-Versions of OSX that are supported are 10.6 (Snow Leopard) and 10.7 (Lion). Other versions should work, but are just untested.
+Versions of OSX that are supported are 10.6 (Snow Leopard), 10.7 (Lion), and 10.8 (Mountain Lion). Other versions may work, but are just untested.
 
 The absolute quickest and easiest way to get RAFT up and running on the Mac is to use {{{MacPorts}}} http://macports.org to install a new Python environment as well as all of the dependencies. This will change once we have a stand alone application but will still be necessary to run the SVN version of RAFT. 
 
@@ -35,25 +36,28 @@ sudo port install <package_name>
 
 Install the following packages with {{{MacPorts}}}
 <pre>
-python26 or python27
-qscintilla
-qt4-mac
+- python33
+- qt4-mac
+- py33-pyqt4
+- py33-qscintilla
+- py33-pip
 </pre>
-Depending on which version of Python you installed use the prefix py26 or py27 to the following packages. The following assumes you installed python26. If you installed python27 just substitute it in front of the following packages.
-<pre>
-py26-pyqt4
-py26-qscintilla
-py26-lxml
-</pre>
+
+Then install lxml using pip
+
+<code>
+sudo pip-3.3 install lxml
+</code>
+
 You will have to wait until everything is compiled and installed. Feel free to grab a cup of coffee because it's going to be a while.
 
 You have the option to use the python_select command to make the macports version of Python the default for the system. This isn't necessary unless it is a preference of yours. All this means is that you need to specify which version of Python you would like to use at the command line. For instance instead of running
 <code>
-python raft.pyw
+python raft.py
 </code>
 You would have to run this instead
 <code>
-python2.6 raft.pyw
+python3.3 raft.py
 </code>
 Not making the MacPorts version your default version allows the version of Python that came with your system to be called as normal for other applications that may require it.
 
@@ -62,7 +66,7 @@ Not making the MacPorts version your default version allows the version of Pytho
 If everything installed properly you should just be able to run RAFT from the directory by using your installed version of python. The following assumes Python 2.6 was used from MacPorts.
 
 <code>
-python2.6 raft.pyw
+python3.3 raft.py
 </code>
 
 == <font color="blue">Linux</font> ==
