@@ -2,9 +2,9 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "RAFT"
-#define MyAppVersion "3.0.1-pre"
-#define MyAppPublisher "RAFT Team"
-#define MyAppURL "http://code.google.com/p/raft"
+#define MyAppVersion "3.0.2"
+#define MyAppPublisher "RAFT Dev Team"
+#define MyAppURL "https://github.com/raftdevteam/raft"
 #define MyAppExeName "raft.exe"
 
 [Setup]
@@ -33,8 +33,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: ".\build\exe.win32-3.3\raft.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\build\exe.win32-3.3\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: ".\build\exe.win32-3.4\raft.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\build\exe.win32-3.4\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

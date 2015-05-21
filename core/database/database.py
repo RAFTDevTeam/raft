@@ -429,6 +429,8 @@ class Db:
                 dbversion = self.upgrade_to_3_0_1_pre(cursor)
             elif '3.0.1-pre' == dbversion and '3.0.1' == version:
                 dbversion = self.upgrade_to_3_0_1(cursor)
+            elif '3.0.1' == dbversion and '3.0.2' == version:
+                dbversion = self.upgrade_to_3_0_2(cursor)
             else:
                 raise Exception('Implement upgrade from %s to %s' % (dbversion, version))
 
@@ -1760,3 +1762,13 @@ class Db:
         self.conn.commit()
 
         return version
+
+    def upgrade_to_3_0_2(self, cursor):
+
+        version = '3.0.2'
+        
+        cursor.execute("UPDATE raft SET Value=? WHERE Name=?", [version, 'VERSION'])
+        self.conn.commit()
+
+        return version
+    
