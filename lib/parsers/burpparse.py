@@ -149,6 +149,8 @@ class burp_parse_state():
     S_END_REPEATER = 61
     S_BEGIN_REQUEST_PANEL = 70
     S_END_REQUEST_PANEL = 71
+    S_BEGIN_IID = 80
+    S_END_IID = 81
    
     T_INT32 = 0
     T_INT64 = 1
@@ -252,7 +254,7 @@ class burp_parse_state():
         result = self.__read_next()
         if tagname:
             if self.T_TAG != result[0] or tagname != result[1]:
-                self.logger.error('failed on tag read; read: [%d,%s], expected: [%s]' % (result, tagname))
+                self.logger.error('failed on tag read; read: [%d,%s], expected: [%s]' % (result[0], result[1], tagname))
                 raise Exception
         else:
             if self.T_TAG != result[0]:
@@ -295,6 +297,10 @@ class burp_parse_state():
         version = self.__read_node_int(b'version')
         self.logger.debug('read burp state version: %d', version)
 
+    def __process_iid(self):
+        iid = self.__read_string()
+        self.logger.debug('read burp state iid: %d', iid)
+
     def __make_url(self, scheme, host, port, path):
         # TODO: consider replacing with urlunsplit
         url = scheme + b'://' + host
@@ -313,6 +319,7 @@ class burp_parse_state():
         return url
 
     def __process_url(self):
+        host = b''
         port = 80
         https = False
         scheme = b'http'
@@ -343,7 +350,10 @@ class burp_parse_state():
 
             nextdata = self.__read_next()
 
-        url = self.__make_url(scheme, host, port, path)
+        if host:
+            url = self.__make_url(scheme, host, port, path)
+        else:
+            url, host = None, None
         return (url, host)
 
     def __read_datetime(self):
@@ -630,6 +640,12 @@ class burp_parse_state():
                     self.state = self.S_BEGIN_CONFIG
                 elif b'<state>' == nexttag:
                     self.state = self.S_BEGIN_STATE
+                elif b'<iid>' == nexttag:
+                    self.__process_iid()
+                    self.__read_until_tag(b'</iid>')
+                elif b'<csk>' == nexttag:
+                    # skip
+                    self.__read_until_tag(b'</csk>')
                 else:
                     raise Exception('unhandled tag in %s state: %s' % (self.state, nexttag.decode('utf-8')))
             elif self.state in (self.S_BEGIN_STATE, self.S_END_TARGET, self.S_END_PROXY, self.S_END_SCANNER, self.S_END_REPEATER):
@@ -686,6 +702,10 @@ class burp_parse_state():
                     self.__read_until_tag(b'</asi>')
                 elif b'<has>' == nexttag:
                     self.__read_until_tag(b'</has>')
+                elif b'<oiid>' == nexttag: # TODO: unknown
+                    self.__read_until_tag(b'</oiid>')
+                elif b'<prid>' == nexttag: # TODO: unknown
+                    self.__read_until_tag(b'</prid>')
                 elif b'</scanner>' == nexttag:
                     self.state = self.S_END_SCANNER
                 else:
@@ -1282,9 +1302,12 @@ class burp_parse_vuln_xml():
     S_ISSUES = 2
     S_ISSUE = 3
     S_REQUESTRESPONSE = 4
+    S_ISSUE = 3
+    S_ISSUE_DETAIL_ITEMS = 5
 
     S_ISSUE_XML_ELEMENT = 101
     S_REQUESTRESPONSE_XML_ELEMENT = 102
+    S_ISSUE_DETAIL_ITEM_XML_ELEMENT = 103
             
     def __init__(self, burpfile):
 
@@ -1324,7 +1347,10 @@ class burp_parse_vuln_xml():
                 ('start', 'confidence', self.issue_xml_element_start),
                 ('start', 'issueBackground', self.issue_xml_element_start),
                 ('start', 'remediationBackground', self.issue_xml_element_start),
+                ('start', 'references', self.issue_xml_element_start),
+                ('start', 'vulnerabilityClassifications', self.issue_xml_element_start),
                 ('start', 'issueDetail', self.issue_xml_element_start),
+                ('start', 'issueDetailItems', self.issue_detail_items_start),
                 ('start', 'remediationDetail', self.issue_xml_element_start),
                 ('start', 'requestresponse', self.requestresponse_start),
                 ('end', 'issue', self.issue_end),
@@ -1346,8 +1372,17 @@ class burp_parse_vuln_xml():
                 ('end', 'confidence', self.xml_element_end),
                 ('end', 'issueBackground', self.xml_element_end),
                 ('end', 'remediationBackground', self.xml_element_end),
+                ('end', 'references', self.xml_element_end),
+                ('end', 'vulnerabilityClassifications', self.xml_element_end),
                 ('end', 'issueDetail', self.xml_element_end),
                 ('end', 'remediationDetail', self.xml_element_end),
+                ),
+            self.S_ISSUE_DETAIL_ITEMS : (
+                ('start', 'issueDetailItem', self.issue_detail_item_xml_element_start),
+                ('end', 'issueDetailItems', self.issue_detail_items_end),
+                ),
+            self.S_ISSUE_DETAIL_ITEM_XML_ELEMENT : (
+                ('end', 'issueDetailItem', self.issue_detail_item_xml_element_end),
                 ),
             self.S_REQUESTRESPONSE_XML_ELEMENT : (
                 ('end', 'request', self.xml_element_end_base64),
@@ -1367,14 +1402,17 @@ class burp_parse_vuln_xml():
                 ('confidence', ''),
                 ('issueBackground', ''),
                 ('remediationBackground', ''),
+                ('references', ''),
+                ('vulnerabilityClassifications', ''),
                 ('issueDetail', ''),
+                ('issueDetailItems', None),
                 ('remediationDetail', ''),
                 ('request', b''),
                 ('response', b''),
                 ('responseRedirected', ''),
             )
 
-        self.notes_values = ('name', 'severity', 'confidence', 'issueBackground', 'remediationBackground', 'issueDetail', 'remediationDetail')
+        self.notes_values = ('name', 'severity', 'confidence', 'issueBackground', 'remediationBackground', 'issueDetail', 'remediationDetail', 'location', 'references', 'vulnerabilityClassifications')
 
     def make_results(self):
         cur = self.current
@@ -1422,6 +1460,24 @@ class burp_parse_vuln_xml():
         for n, v in self.default_values:
             self.current[n] = v
         self.states.append(self.S_ISSUE)
+
+    def issue_detail_items_start(self, elem):
+        self.current['issueDetailItems'] = []
+        self.states.append(self.S_ISSUE_DETAIL_ITEMS)
+
+    def issue_detail_items_end(self, elem):
+        elem.clear()
+        self.states.pop()
+
+    def issue_detail_item_xml_element_start(self, elem):
+        self.states.append(self.S_ISSUE_DETAIL_ITEM_XML_ELEMENT)
+
+    def issue_detail_item_xml_element_end(self, elem):
+        if elem.text is None:
+            pass
+        else:
+            self.current['issueDetailItems'].append(self.re_encoded.sub(self.decode_entity, elem.text))
+        self.states.pop()
 
     def issue_end(self, elem):
         elem.clear()
