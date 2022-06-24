@@ -33,8 +33,8 @@ import sys
 class BurpUtil():
     def __init__(self):
         self.re_content_type = re.compile(br'^Content-Type:\s*([-_+0-9a-z.]+/[-_+0-9a-z.]+(?:\s*;\s*\S+=\S+)*)\s*$', re.I)
-        self.re_request = re.compile(br'^(\S+)\s+((?:https?://(?:\S+\.)+\w+(?::\d+)?)?/.*)\s+HTTP/\d+\.\d+\s*$', re.I)
-        self.re_response = re.compile(br'^HTTP/\d+\.\d+\s+(\d{3}).*\s*$', re.M)
+        self.re_request = re.compile(br'^(\S+)\s+((?:https?://(?:\S+\.)+\w+(?::\d+)?)?/.*)\s+HTTP/\d+(?:\.\d+)?\s*$', re.I)
+        self.re_response = re.compile(br'^HTTP/\d+(?:\.\d+)?\s+(\d{3}).*\s*$', re.M)
         self.re_date = re.compile(br'^Date:\s*(\w+,.*\w+)\s*$', re.I)
 
     def split_request_block(self, request):
@@ -771,7 +771,7 @@ class burp_parse_log():
         self.logger.info('Parsing Burp log file: %s' % (burpfile))
         self.util = BurpUtil()
 
-        self.re_burp = re.compile(br'^(\d{1,2}:\d{1,2}:\d{1,2}\s+(?:AM|PM))\s+(https?://(?:\S+\.)*\w+:\d+)(?:\s+\[((?:\d{1,3}\.){3}\d{1,3})\])?\s*$', re.I)
+        self.re_burp = re.compile(br'^(\d{1,2}:\d{1,2}:\d{1,2}\s+(?:AM|PM))\s+(https?://(?:\S+\.)*\w+:\d+)(?:\s+\[((?:\d{1,3}\.){3}\d{1,3})?\])?\s*$', re.I)
         self.re_content_length = re.compile(br'^Content-Length:\s*(\d+)\s*$', re.I)
         self.re_chunked = re.compile(br'^Transfer-Encoding:\s*chunked\s*$', re.I)
         self.re_chunked_length = re.compile(b'^[a-f0-9]+$', re.I)
@@ -798,15 +798,19 @@ class burp_parse_log():
         return self
 
     def __synthesize_url(self, hosturl, requrl):
-        p1 = urlparse.urlsplit(hosturl)
-        p2 = urlparse.urlsplit(requrl)
+        p1 = urlparse.urlsplit(hosturl.decode('ascii','backslashreplace').encode('ascii'))
+        try:
+            p2 = urlparse.urlsplit(requrl.decode('ascii','backslashreplace').encode('ascii'))
+        except ValueError as ve:
+            sys.stderr.write('error [%s] for [%s]\n' % (ve, requrl))
+            p2 = None
 
-        if p2.scheme:
+        if p2 and p2.scheme:
             scheme = p2.scheme
         else:
             scheme = p1.scheme
         
-        if p2.netloc:
+        if p2 and p2.netloc:
             netloc = p2.netloc
             host = p2.hostname
         else:
@@ -818,11 +822,15 @@ class burp_parse_log():
             netloc = netloc.replace(b':80',b'')
         elif b'https' == scheme:
             netloc = netloc.replace(b':443',b'')
-        
-        url = scheme + b'://' + netloc + p2.path
-        if p2.query:
+
+        if p2:
+            url = scheme + b'://' + netloc + p2.path
+        else:
+            url = scheme + b'://' + netloc + requrl
+            
+        if p2 and p2.query:
             url += b'?' + p2.query
-        if p2.fragment:
+        if p2 and p2.fragment:
             url += b'#' + p2.fragment
 
         return url, host
@@ -892,15 +900,18 @@ class burp_parse_log():
 
     def __read_chunked(self, line):
         data = b''
-        while line:
-            length = int(line, 16)
-            if 0 == length:
-                break
-            data += self.file.read(length)
-            line = self.__read_line().rstrip()
+        try:
+            while line:
+                length = int(line, 16)
+                if 0 == length:
+                    break
+                data += self.file.read(length)
+                line = self.__read_line().rstrip()
 
-        line = self.__read_line().rstrip()
-        if 0 != len(line):
+            line = self.__read_line().rstrip()
+            if 0 != len(line):
+                pass
+        except ValueError:
             self.logger.warning('failed to read chunked data: %s' % (line))
 
         return data
@@ -1123,10 +1134,11 @@ class burp_parse_xml():
 
         self.source = burp_parse_xml.BurpBrokenXml(burpfile)
 
+
         # TODO: lazy ...
         from lxml import etree
         # http://effbot.org/zone/element-iterparse.htm#incremental-parsing
-        self.context = etree.iterparse(self.source, events=('start', 'end'))
+        self.context = etree.iterparse(self.source, events=('start', 'end'), huge_tree = True)
         self.iterator = iter(self.context)
         self.root = None
 
@@ -1265,7 +1277,7 @@ class burp_parse_xml():
         else:
             self.current[elem.tag] = bytes(self.re_encoded.sub(self.decode_entity, elem.text), 'utf-8') # TODO: or ascii?
         self.states.pop()
-            
+
     def __iter__(self):
         return self
 
@@ -1304,10 +1316,17 @@ class burp_parse_vuln_xml():
     S_REQUESTRESPONSE = 4
     S_ISSUE = 3
     S_ISSUE_DETAIL_ITEMS = 5
+    S_COLLABORATOREVENT = 6
+    S_INFILTRATOREVENT = 7
+    S_STATICANALYSIS = 8
+    S_DYNAMICANALYSIS = 9
 
     S_ISSUE_XML_ELEMENT = 101
     S_REQUESTRESPONSE_XML_ELEMENT = 102
     S_ISSUE_DETAIL_ITEM_XML_ELEMENT = 103
+
+    S_UNHANDLED_ELEMENT = 200
+    S_UNHANDLED_ITEM = 201
             
     def __init__(self, burpfile):
 
@@ -1353,6 +1372,10 @@ class burp_parse_vuln_xml():
                 ('start', 'issueDetailItems', self.issue_detail_items_start),
                 ('start', 'remediationDetail', self.issue_xml_element_start),
                 ('start', 'requestresponse', self.requestresponse_start),
+                ('start', 'collaboratorEvent', self.unhandled_element_start),
+                ('start', 'infiltratorEvent', self.unhandled_element_start),
+                ('start', 'staticAnalysis', self.unhandled_element_start),
+                ('start', 'dynamicAnalysis', self.unhandled_element_start),
                 ('end', 'issue', self.issue_end),
                 ),
             self.S_REQUESTRESPONSE : (
@@ -1388,6 +1411,14 @@ class burp_parse_vuln_xml():
                 ('end', 'request', self.xml_element_end_base64),
                 ('end', 'response', self.xml_element_end_base64),
                 ('end', 'responseRedirected', self.xml_element_end),
+                ),
+            self.S_UNHANDLED_ELEMENT : (
+                ('start', '*', self.unhandled_item_start),
+                ('end', '*', self.unhandled_element_end),
+                ),
+            self.S_UNHANDLED_ITEM : (
+                ('start', '*', self.unhandled_item_start),
+                ('end', '*', self.unhandled_item_end),
                 ),
             }
         self.default_values = (
@@ -1446,7 +1477,7 @@ class burp_parse_vuln_xml():
             if cur[note_item]:
                 notes_io.write('%s: %s\n\n' % (note_item, cur[note_item]))
         
-        return ('VULNXML', clean_host, hostip, url, status, datetime, request, response, method, content_type, {'notes':notes_io.getvalue()})
+        return ('VULNXML', clean_host, hostip, url, status, datetime, request, response, method, content_type, {'notes':notes_io.getvalue(), 'unhandled':self.unhandled})
 
     def issues_start(self, elem):
         self.root = elem
@@ -1459,6 +1490,7 @@ class burp_parse_vuln_xml():
         self.current = {}
         for n, v in self.default_values:
             self.current[n] = v
+        self.unhandled = {}
         self.states.append(self.S_ISSUE)
 
     def issue_detail_items_start(self, elem):
@@ -1517,6 +1549,24 @@ class burp_parse_vuln_xml():
             self.current[elem.tag] = bytes(self.re_encoded.sub(self.decode_entity, elem.text), 'utf-8') # TODO: or ascii?
         self.states.pop()
 
+    def unhandled_element_start(self, elem):
+        self.current_unhandled = elem.tag
+        self.unhandled[elem.tag] = {}
+        self.states.append(self.S_UNHANDLED_ELEMENT)
+        
+    def unhandled_element_end(self, elem):
+        self.states.pop()
+
+    def unhandled_item_start(self, elem):
+        self.states.append(self.S_UNHANDLED_ITEM)
+        
+    def unhandled_item_end(self, elem):
+        if elem.text is None:
+            self.unhandled[self.current_unhandled][elem.tag] =  ''
+        else:
+            self.unhandled[self.current_unhandled][elem.tag] = self.re_encoded.sub(self.decode_entity, elem.text)
+        self.states.pop()
+        
     def __iter__(self):
         return self
 
@@ -1529,7 +1579,7 @@ class burp_parse_vuln_xml():
                 state = self.states[-1]
                 transitions = self.state_table[state]
                 for transition in transitions:
-                    if transition[0] == event and transition[1] == tag:
+                    if transition[0] == event and (transition[1] == tag or transition[1] == '*'):
                         func = transition[2]
                         results = func(elem)
                         if results:
