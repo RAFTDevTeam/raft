@@ -30,7 +30,7 @@ class ScriptEnv():
         self.functions = {}
         self._properties = {}
         if global_ns is None:
-            self.global_ns = {}
+            self.global_ns = { '__name__' : __name__ }
         else:
             self.global_ns = global_ns
         if local_ns is None:
